@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AlePulse.Api/AlePulse.Api.csproj" />
+    <Project Path="src/AlePulse.Application/AlePulse.Application.csproj" />
+    <Project Path="src/AlePulse.Domain/AlePulse.Domain.csproj" />
+    <Project Path="src/AlePulse.Infrastructure/AlePulse.Infrastructure.csproj" />
+    <Project Path="src/AlePulse.Mobile/AlePulse.Mobile.csproj" />
+    <Project Path="src/AlePulse.Shared/AlePulse.Shared.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AlePulse.Api.Tests/AlePulse.Api.Tests.csproj" />
+    <Project Path="tests/AlePulse.Application.Tests/AlePulse.Application.Tests.csproj" />
+    <Project Path="tests/AlePulse.Domain.Tests/AlePulse.Domain.Tests.csproj" />
+  </Folder>
+</Solution>
