@@ -1,5 +1,6 @@
 ﻿using AlePulse.Application.DTOs;
 using AlePulse.Application.Interfaces;
+using AlePulse.Application.Services;
 using AlePulse.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,10 +11,12 @@ namespace AlePulse.Api.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
+    private readonly IAuthService _authService;
 
-    public UsersController(IUserRepository userRepository)
+    public UsersController(IUserRepository userRepository, IAuthService authService)
     {
         _userRepository = userRepository;
+        _authService = authService;
     }
 
     [HttpGet("{id}")]
@@ -24,26 +27,35 @@ public class UsersController : ControllerBase
         return Ok(user);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateUserDto dto)
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] CreateUserDto dto)
     {
-        // Verifica se o e-mail já existe
         var existingUser = await _userRepository.GetByEmailAsync(dto.Email);
         if (existingUser != null)
             return Conflict("E-mail já cadastrado.");
 
-        // Cria a entidade (depois aplicaremos hash de senha)
         var user = new User
         {
             Name = dto.Name,
             Email = dto.Email,
-            PasswordHash = dto.Password
+            // Agora a senha é criptografada antes de ir para o banco!
+            PasswordHash = _authService.HashPassword(dto.Password)
         };
 
         await _userRepository.AddAsync(user);
         await _userRepository.SaveChangesAsync();
 
-        // Retorna 201 Created com a rota do novo usuário
         return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginDto dto)
+    {
+        var user = await _userRepository.GetByEmailAsync(dto.Email);
+        if (user == null || !_authService.VerifyPassword(dto.Password, user.PasswordHash))
+            return Unauthorized("E-mail ou senha inválidos.");
+
+        var token = _authService.GenerateJwtToken(user);
+        return Ok(new { token });
     }
 }
