@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AlePulse.Mobile.Views.HomePage"
+             BackgroundColor="#121212"
+             Title="Início">
+
+    <Grid RowDefinitions="Auto, *, Auto" Padding="20">
+
+        <!-- Cabeçalho -->
+        <VerticalStackLayout Grid.Row="0" Spacing="5" Margin="0,20,0,30">
+            <Label Text="BEM-VINDO AO"
+                   FontSize="14"
+                   TextColor="#E0E0E0"
+                   HorizontalOptions="Center" />
+            <Label Text="ALEPULSE"
+                   FontSize="36"
+                   FontAttributes="Bold"
+                   TextColor="#FF6A00"
+                   HorizontalOptions="Center" />
+        </VerticalStackLayout>
+
+        <!-- Área Central (Placeholder para os Treinos) -->
+        <Border Grid.Row="1"
+                BackgroundColor="#1E1E1E"
+                Stroke="#2B2B2B"
+                Padding="20">
+
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="15" />
+            </Border.StrokeShape>
+
+            <VerticalStackLayout Spacing="15" HorizontalOptions="Center" VerticalOptions="Center">
+                <Label Text="Nenhum treino ativo no momento."
+                       TextColor="#888888"
+                       FontSize="18"
+                       HorizontalOptions="Center" />
+                <Button Text="CRIAR NOVO TREINO"
+                        BackgroundColor="#FF6A00"
+                        TextColor="#FFFFFF"
+                        FontAttributes="Bold"
+                        CornerRadius="10"
+                        HeightRequest="50" />
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Rodapé com Botão Sair -->
+        <Button Grid.Row="2"
+                Text="SAIR DA CONTA"
+                BackgroundColor="#2B2B2B"
+                TextColor="#FFFFFF"
+                CornerRadius="10"
+                HeightRequest="50"
+                Margin="0,20,0,0"
+                Clicked="OnLogoutClicked" />
+
+    </Grid>
+</ContentPage>

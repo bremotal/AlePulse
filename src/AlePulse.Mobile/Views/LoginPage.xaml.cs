@@ -22,13 +22,11 @@ public partial class LoginPage : ContentPage
 
         if (!string.IsNullOrEmpty(token))
         {
-            // Login deu certo! (Método atualizado para o .NET 10)
-            await DisplayAlertAsync("Sucesso", "Login realizado com sucesso!", "OK");
-
-            // No futuro, navegar para a tela principal (Home)
+            // Login deu certo! Navega para a Home
+            Application.Current!.MainPage = new HomePage();
         }
         else
-        {
+              {
             ErrorLabel.Text = "E-mail ou senha inválidos.";
             ErrorLabel.IsVisible = true;
         }
