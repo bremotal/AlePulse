@@ -1,25 +1,29 @@
 ﻿using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace AlePulse.Mobile.Services;
 
-public class ApiService
+public static class ApiService
 {
-    private readonly HttpClient _client;
+    private static readonly HttpClient _client;
 
-    public ApiService()
+    static ApiService()
     {
-        // ATENÇÃO: Troque a porta abaixo pela porta HTTP que a sua API está usando!
-        // Olhe no terminal do Visual Studio qual é a porta (ex: http://localhost:5204)
         var baseUrl = DeviceInfo.Platform == DevicePlatform.Android
-            ? "http://10.0.2.2:5204" // 10.0.2.2 é como o emulador Android acessa o localhost do PC
+            ? "http://10.0.2.2:5204"
             : "http://localhost:5204";
 
         _client = new HttpClient { BaseAddress = new Uri(baseUrl) };
     }
 
-    public async Task<string?> LoginAsync(string email, string password)
+    public static void SetToken(string token)
+    {
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    }
+
+    public static async Task<string?> LoginAsync(string email, string password)
     {
         var response = await _client.PostAsJsonAsync("/api/Users/login", new { email, password });
 
@@ -30,9 +34,15 @@ public class ApiService
         }
         return null;
     }
+
+    public static async Task<bool> CreateWorkoutAsync(string name, string description)
+    {
+        var newWorkout = new { name, description };
+        var response = await _client.PostAsJsonAsync("/api/Workouts", newWorkout);
+        return response.IsSuccessStatusCode;
+    }
 }
 
-// Classe auxiliar para ler o JSON do token
 public class LoginResponse
 {
     public string? Token { get; set; }

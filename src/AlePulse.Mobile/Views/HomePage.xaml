@@ -35,12 +35,15 @@
                        TextColor="#888888"
                        FontSize="18"
                        HorizontalOptions="Center" />
+
+                <!-- Botão de criar treino (Único e com o evento de clique) -->
                 <Button Text="CRIAR NOVO TREINO"
                         BackgroundColor="#FF6A00"
                         TextColor="#FFFFFF"
                         FontAttributes="Bold"
                         CornerRadius="10"
-                        HeightRequest="50" />
+                        HeightRequest="50"
+                        Clicked="OnCreateWorkoutClicked" />
             </VerticalStackLayout>
         </Border>
 

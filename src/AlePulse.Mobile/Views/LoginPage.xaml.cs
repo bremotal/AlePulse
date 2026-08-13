@@ -4,12 +4,9 @@ namespace AlePulse.Mobile.Views;
 
 public partial class LoginPage : ContentPage
 {
-    private readonly ApiService _apiService;
-
     public LoginPage()
     {
         InitializeComponent();
-        _apiService = new ApiService();
     }
 
     private async void OnLoginClicked(object sender, EventArgs e)
@@ -18,15 +15,18 @@ public partial class LoginPage : ContentPage
         LoginButton.Text = "ENTRANDO...";
         LoginButton.IsEnabled = false;
 
-        var token = await _apiService.LoginAsync(EmailEntry.Text, PasswordEntry.Text);
+        var token = await ApiService.LoginAsync(EmailEntry.Text, PasswordEntry.Text);
 
         if (!string.IsNullOrEmpty(token))
         {
-            // Login deu certo! Navega para a Home
+            // Guarda o token no ApiService para usar nas próximas requisições
+            ApiService.SetToken(token);
+
+            // Navega para a Home
             Application.Current!.MainPage = new HomePage();
         }
         else
-              {
+        {
             ErrorLabel.Text = "E-mail ou senha inválidos.";
             ErrorLabel.IsVisible = true;
         }
