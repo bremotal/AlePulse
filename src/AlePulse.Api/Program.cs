@@ -19,9 +19,15 @@ builder.Services.AddDbContext<AlePulseDbContext>(options =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IWorkoutRepository, WorkoutRepository>(); // Adicione esta linha
 
 // 3. Registra os Controllers
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Ignora os loops de referência infinita nas respostas da API
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
 
 // 4. Configuração do Swagger UI com JWT
 builder.Services.AddEndpointsApiExplorer();
