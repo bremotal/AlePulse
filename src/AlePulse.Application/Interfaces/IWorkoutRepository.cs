@@ -12,4 +12,7 @@ public interface IWorkoutRepository
     Task AddAsync(Workout workout);
     Task AddExerciseAsync(WorkoutExercise exercise);
     Task SaveChangesAsync();
+    Task DeleteAsync(Workout workout);
+    Task DeleteExerciseFromWorkoutAsync(WorkoutExercise exercise);
+
 }

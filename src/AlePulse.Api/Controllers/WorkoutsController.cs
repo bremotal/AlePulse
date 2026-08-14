@@ -82,4 +82,33 @@ public class WorkoutsController : ControllerBase
 
         return Ok(workoutExercise);
     }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var workout = await _workoutRepository.GetByIdAsync(id);
+        if (workout == null || workout.UserId != GetUserId())
+            return NotFound();
+
+        await _workoutRepository.DeleteAsync(workout);
+        await _workoutRepository.SaveChangesAsync();
+
+        return NoContent();
+    }
+    [HttpDelete("{workoutId}/exercises/{exerciseId}")]
+    public async Task<IActionResult> DeleteExercise(Guid workoutId, Guid exerciseId)
+    {
+        var workout = await _workoutRepository.GetByIdAsync(workoutId);
+        if (workout == null || workout.UserId != GetUserId())
+            return NotFound("Treino não encontrado.");
+
+        // Procura o exercício dentro da ficha de treino
+        var exerciseToRemove = workout.Exercises.FirstOrDefault(e => e.Id == exerciseId);
+        if (exerciseToRemove == null)
+            return NotFound("Exercício não encontrado neste treino.");
+
+        await _workoutRepository.DeleteExerciseFromWorkoutAsync(exerciseToRemove);
+        await _workoutRepository.SaveChangesAsync();
+
+        return NoContent();
+    }
 }

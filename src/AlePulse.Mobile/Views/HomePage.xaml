@@ -5,10 +5,10 @@
              BackgroundColor="#121212"
              Title="Início">
 
-    <Grid RowDefinitions="Auto, *, Auto" Padding="20">
+    <Grid RowDefinitions="Auto, Auto, *, Auto" Padding="20">
 
         <!-- Cabeçalho -->
-        <VerticalStackLayout Grid.Row="0" Spacing="5" Margin="0,20,0,30">
+        <VerticalStackLayout Grid.Row="0" Spacing="5" Margin="0,20,0,10" HorizontalOptions="Center">
             <Label Text="BEM-VINDO AO"
                    FontSize="14"
                    TextColor="#E0E0E0"
@@ -20,41 +20,69 @@
                    HorizontalOptions="Center" />
         </VerticalStackLayout>
 
-        <!-- Área Central (Placeholder para os Treinos) -->
-        <Border Grid.Row="1"
-                BackgroundColor="#1E1E1E"
-                Stroke="#2B2B2B"
-                Padding="20">
+        <!-- Botão Fixo de Criar Treino -->
+        <Button Grid.Row="1"
+                Text="+ CRIAR NOVO TREINO"
+                BackgroundColor="#FF6A00"
+                TextColor="#FFFFFF"
+                FontAttributes="Bold"
+                CornerRadius="10"
+                HeightRequest="45"
+                Margin="0,0,0,15"
+                Clicked="OnCreateWorkoutClicked" />
 
-            <Border.StrokeShape>
-                <RoundRectangle CornerRadius="15" />
-            </Border.StrokeShape>
+        <!-- Lista de Treinos -->
+        <CollectionView x:Name="WorkoutsList" Grid.Row="2" BackgroundColor="Transparent">
 
-            <VerticalStackLayout Spacing="15" HorizontalOptions="Center" VerticalOptions="Center">
-                <Label Text="Nenhum treino ativo no momento."
-                       TextColor="#888888"
-                       FontSize="18"
-                       HorizontalOptions="Center" />
+            <!-- O que mostrar quando a lista estiver vazia -->
+            <CollectionView.EmptyView>
+                <VerticalStackLayout Spacing="15" HorizontalOptions="Center" VerticalOptions="Center" Margin="0,50,0,0">
+                    <Label Text="Nenhum treino ativo no momento."
+                           TextColor="#888888"
+                           FontSize="18"
+                           HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
 
-                <!-- Botão de criar treino (Único e com o evento de clique) -->
-                <Button Text="CRIAR NOVO TREINO"
-                        BackgroundColor="#FF6A00"
-                        TextColor="#FFFFFF"
-                        FontAttributes="Bold"
-                        CornerRadius="10"
-                        HeightRequest="50"
-                        Clicked="OnCreateWorkoutClicked" />
-            </VerticalStackLayout>
-        </Border>
+            <!-- Modelo de cada item da lista -->
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border BackgroundColor="#1E1E1E" Stroke="#2B2B2B" Margin="0,0,0,15" Padding="15">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnWorkoutTapped" />
+                        </Border.GestureRecognizers>
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="15" />
+                        </Border.StrokeShape>
+                        <Grid ColumnDefinitions="*, Auto">
+                            <VerticalStackLayout Grid.Column="0" Spacing="5">
+                                <Label Text="{Binding Name}" TextColor="#FFFFFF" FontSize="20" FontAttributes="Bold" />
+                                <Label Text="{Binding Description}" TextColor="#888888" FontSize="14" />
+                            </VerticalStackLayout>
+
+                            <!-- Botão de Excluir Treino -->
+                            <Button Grid.Column="1"
+                                    Text="🗑️"
+                                    BackgroundColor="Transparent"
+                                    TextColor="Red"
+                                    FontSize="20"
+                                    WidthRequest="50"
+                                    HeightRequest="50"
+                                    Clicked="OnDeleteWorkoutClicked" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
 
         <!-- Rodapé com Botão Sair -->
-        <Button Grid.Row="2"
+        <Button Grid.Row="3"
                 Text="SAIR DA CONTA"
                 BackgroundColor="#2B2B2B"
                 TextColor="#FFFFFF"
                 CornerRadius="10"
                 HeightRequest="50"
-                Margin="0,20,0,0"
+                Margin="0,10,0,0"
                 Clicked="OnLogoutClicked" />
 
     </Grid>

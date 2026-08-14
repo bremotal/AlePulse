@@ -1,3 +1,4 @@
+using System.Text;
 using AlePulse.Application.Interfaces;
 using AlePulse.Application.Services;
 using AlePulse.Infrastructure.Persistence;
@@ -5,9 +6,6 @@ using AlePulse.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
-using Microsoft.OpenApi.Models; // <--- Usings adicionados aqui
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,46 +17,19 @@ builder.Services.AddDbContext<AlePulseDbContext>(options =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IWorkoutRepository, WorkoutRepository>(); // Adicione esta linha
+builder.Services.AddScoped<IWorkoutRepository, WorkoutRepository>();
+builder.Services.AddScoped<IWorkoutSessionRepository, WorkoutSessionRepository>();
 
 // 3. Registra os Controllers
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // Ignora os loops de referência infinita nas respostas da API
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
-// 4. Configuração do Swagger UI com JWT
+// 4. Configuração do Swagger UI (Simplificado)
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "AlePulse.Api", Version = "v1" });
-
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "JWT Authorization header usando o esquema Bearer. Exemplo: \"Bearer {token}\"",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
+builder.Services.AddSwaggerGen();
 
 // 5. Configuração do JWT (Autenticação)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

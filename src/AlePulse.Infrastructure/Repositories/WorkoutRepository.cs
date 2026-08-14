@@ -43,4 +43,14 @@ public class WorkoutRepository : IWorkoutRepository
     {
         await _context.SaveChangesAsync();
     }
+    public async Task DeleteAsync(Workout workout)
+    {
+        // Exclusão lógica (Soft Delete) - some da tela mas mantém o histórico no banco
+        workout.IsActive = false;
+        _context.Workouts.Update(workout);
+    }
+    public async Task DeleteExerciseFromWorkoutAsync(WorkoutExercise exercise)
+    {
+        _context.WorkoutExercises.Remove(exercise);
+    }
 }
