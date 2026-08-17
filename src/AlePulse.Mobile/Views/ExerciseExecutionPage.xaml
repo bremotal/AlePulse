@@ -3,25 +3,32 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="AlePulse.Mobile.Views.ExerciseExecutionPage"
              BackgroundColor="#121212"
-             Title="Executar Exercício">
+             Title="Treino Ativo">
 
-    <Grid RowDefinitions="Auto, Auto, *, Auto" Padding="20">
+    <Grid RowDefinitions="Auto, Auto, Auto, Auto, *, Auto" Padding="20">
 
-        <!-- Título -->
-        <Label Grid.Row="0" x:Name="TitleLabel" FontSize="28" FontAttributes="Bold" TextColor="#FFFFFF" Margin="0,20,0,20" />
+        <!-- Navegação entre Exercícios -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" Margin="0,20,0,15">
+            <Button Grid.Column="0" Text="‹" FontSize="24" FontAttributes="Bold" BackgroundColor="#2B2B2B" TextColor="#FFFFFF" WidthRequest="50" CornerRadius="25" Clicked="OnPrevClicked"/>
+            <Picker Grid.Column="1" x:Name="ExercisePicker" Title="Trocar Exercício" TitleColor="#888888" TextColor="#FFFFFF" HorizontalOptions="Center" BackgroundColor="#1E1E1E" ItemDisplayBinding="{Binding Exercise.Name}" SelectedIndexChanged="OnExerciseChanged"/>
+            <Button Grid.Column="2" Text="›" FontSize="24" FontAttributes="Bold" BackgroundColor="#2B2B2B" TextColor="#FFFFFF" WidthRequest="50" CornerRadius="25" Clicked="OnNextClicked"/>
+        </Grid>
+
+        <!-- Título do Exercício Atual -->
+        <Label Grid.Row="1" x:Name="TitleLabel" FontSize="24" FontAttributes="Bold" TextColor="#FFFFFF" HorizontalOptions="Center" Margin="0,0,0,15"/>
 
         <!-- Registro da Série Atual -->
-        <Border Grid.Row="1" BackgroundColor="#1E1E1E" Stroke="#2B2B2B" Padding="20" Margin="0,0,0,20">
+        <Border Grid.Row="2" BackgroundColor="#1E1E1E" Stroke="#2B2B2B" Padding="15" Margin="0,0,0,15">
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="15" />
             </Border.StrokeShape>
-            <VerticalStackLayout Spacing="15">
+            <VerticalStackLayout Spacing="10">
                 <Grid ColumnDefinitions="*, Auto">
                     <Label Grid.Column="0" Text="REGISTRAR SÉRIE" TextColor="#FF6A00" FontAttributes="Bold" VerticalOptions="Center"/>
-                    <Button Grid.Column="1" x:Name="LoadHistoryBtn" Text="Carregar Último" BackgroundColor="#2B2B2B" TextColor="#FFFFFF" CornerRadius="10" HeightRequest="40" Clicked="OnLoadHistoryClicked"/>
+                    <Button Grid.Column="1" x:Name="LoadHistoryBtn" Text="Usar Último" BackgroundColor="#2B2B2B" TextColor="#FFFFFF" CornerRadius="10" HeightRequest="40" Clicked="OnLoadHistoryClicked"/>
                 </Grid>
 
-                <Grid ColumnDefinitions="*, *, *" ColumnSpacing="15">
+                <Grid ColumnDefinitions="*, *, *" ColumnSpacing="10">
                     <VerticalStackLayout Grid.Column="0" Spacing="5">
                         <Label Text="Série" TextColor="#888888"/>
                         <Border BackgroundColor="#121212" Stroke="#2B2B2B" Padding="10">
@@ -54,31 +61,41 @@
             </VerticalStackLayout>
         </Border>
 
+        <!-- CRONÔMETRO DE DESCANSO -->
+        <Border Grid.Row="3" x:Name="RestTimerBorder" BackgroundColor="#2B2B2B" Stroke="#FF6A00" Padding="15" Margin="0,0,0,15" IsVisible="False">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="15" />
+            </Border.StrokeShape>
+            <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                <Label Text="DESCANSO" TextColor="#FF6A00" FontAttributes="Bold" HorizontalOptions="Center"/>
+                <Label x:Name="TimerLabel" Text="00:00" FontSize="48" FontAttributes="Bold" TextColor="#FFFFFF" HorizontalOptions="Center"/>
+                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                    <Button Text="-15s" BackgroundColor="#1E1E1E" TextColor="#FFFFFF" CornerRadius="10" Clicked="OnMinus15Clicked"/>
+                    <Button Text="Pular" BackgroundColor="#1E1E1E" TextColor="#FFFFFF" CornerRadius="10" Clicked="OnSkipRestClicked"/>
+                    <Button Text="+15s" BackgroundColor="#1E1E1E" TextColor="#FFFFFF" CornerRadius="10" Clicked="OnPlus15Clicked"/>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+
         <!-- Histórico Agrupado por Dia -->
-        <CollectionView Grid.Row="2" x:Name="HistoryList" BackgroundColor="Transparent" IsGrouped="True">
+        <CollectionView Grid.Row="4" x:Name="HistoryList" BackgroundColor="Transparent" IsGrouped="True">
             <CollectionView.EmptyView>
                 <Label Text="Sem histórico ainda." TextColor="#888888" HorizontalOptions="Center"/>
             </CollectionView.EmptyView>
-
-            <!-- Cabeçalho do Dia (Linha Laranja) -->
             <CollectionView.GroupHeaderTemplate>
                 <DataTemplate>
-                    <StackLayout Orientation="Horizontal" Margin="0,15,0,5">
+                    <StackLayout Orientation="Horizontal" Margin="0,10,0,5">
                         <Line HeightRequest="1" BackgroundColor="#FF6A00" WidthRequest="20" VerticalOptions="Center"/>
                         <Label Text="{Binding DateDisplay}" TextColor="#FF6A00" FontAttributes="Bold" Margin="10,0,0,0"/>
                         <Line HeightRequest="1" BackgroundColor="#FF6A00" HorizontalOptions="FillAndExpand" VerticalOptions="Center" Margin="10,0,0,0"/>
                     </StackLayout>
                 </DataTemplate>
             </CollectionView.GroupHeaderTemplate>
-
-            <!-- Item da Série (Com Botões) -->
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Frame BackgroundColor="#1E1E1E" BorderColor="#2B2B2B" Padding="15" Margin="0,0,0,10" HasShadow="False">
                         <Grid ColumnDefinitions="*, Auto, Auto" RowDefinitions="Auto, Auto">
-
                             <Label Grid.Row="0" Grid.Column="0" Text="{Binding SetNumber, StringFormat='Série {0}'}" TextColor="#FFFFFF" FontAttributes="Bold" FontSize="16"/>
-
                             <Label Grid.Row="1" Grid.Column="0" TextColor="#888888" FontSize="14" VerticalOptions="Center">
                                 <Label.Text>
                                     <MultiBinding StringFormat="{}{0} kg x {1} reps">
@@ -87,25 +104,15 @@
                                     </MultiBinding>
                                 </Label.Text>
                             </Label>
-
-                            <!-- Botão Editar -->
-                            <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
-                                    Text="✏️" BackgroundColor="Transparent" TextColor="#FF6A00"
-                                    WidthRequest="45" HeightRequest="45" CornerRadius="10"
-                                    Clicked="OnEditSetClicked"/>
-
-                            <!-- Botão Excluir -->
-                            <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="2"
-                                    Text="🗑️" BackgroundColor="Transparent" TextColor="Red"
-                                    WidthRequest="45" HeightRequest="45" CornerRadius="10"
-                                    Clicked="OnDeleteSetClicked"/>
+                            <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Text="✏️" BackgroundColor="Transparent" TextColor="#FF6A00" WidthRequest="45" HeightRequest="45" CornerRadius="10" Clicked="OnEditSetClicked"/>
+                            <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" Text="🗑️" BackgroundColor="Transparent" TextColor="Red" WidthRequest="45" HeightRequest="45" CornerRadius="10" Clicked="OnDeleteSetClicked"/>
                         </Grid>
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <!-- Rodapé -->
-        <Button Grid.Row="3" Text="VOLTAR" BackgroundColor="#2B2B2B" TextColor="#FFFFFF" CornerRadius="10" HeightRequest="50" Clicked="OnBackClicked"/>
+        <!-- Rodapé Finalizar -->
+        <Button Grid.Row="5" Text="FINALIZAR TREINO" BackgroundColor="#2B2B2B" TextColor="#FFFFFF" CornerRadius="10" HeightRequest="50" Clicked="OnBackClicked"/>
     </Grid>
 </ContentPage>

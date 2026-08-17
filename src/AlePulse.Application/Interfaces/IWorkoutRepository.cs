@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AlePulse.Domain.Entities;
+﻿using AlePulse.Domain.Entities;
 
 namespace AlePulse.Application.Interfaces;
 
@@ -14,5 +11,5 @@ public interface IWorkoutRepository
     Task SaveChangesAsync();
     Task DeleteAsync(Workout workout);
     Task DeleteExerciseFromWorkoutAsync(WorkoutExercise exercise);
-
+    Task UpdateExerciseAsync(WorkoutExercise exercise);
 }

@@ -1,24 +1,51 @@
 using AlePulse.Mobile.Models;
 using AlePulse.Mobile.Services;
 using System.Globalization;
+using System.Runtime.InteropServices;
 
 namespace AlePulse.Mobile.Views;
 
 public partial class ExerciseExecutionPage : ContentPage
 {
     private readonly Guid _workoutId;
-    private readonly Guid _exerciseId;
+    private List<WorkoutExerciseDto> _allExercises = new();
+    private int _currentIndex = 0;
     private Guid? _editingSetId = null;
 
-    public ExerciseExecutionPage(Guid workoutId, WorkoutExerciseDto exercise)
+    // Variáveis do Cronômetro
+    private int _remainingSeconds;
+    private bool _isTimerRunning;
+
+    // Importação do Beep do Windows (para teste no Windows Machine)
+    [DllImport("kernel32.dll")]
+    public static extern bool Beep(int frequency, int duration);
+
+    public ExerciseExecutionPage(Guid workoutId, List<WorkoutExerciseDto> exercises)
     {
         InitializeComponent();
         _workoutId = workoutId;
-        _exerciseId = exercise.Exercise!.Id;
+        _allExercises = exercises;
 
-        TitleLabel.Text = exercise.Exercise.Name;
+        ExercisePicker.ItemsSource = _allExercises;
+        ChangeExercise(0);
+    }
+
+    private void ChangeExercise(int newIndex)
+    {
+        if (_allExercises.Count == 0) return;
+        _currentIndex = Math.Clamp(newIndex, 0, _allExercises.Count - 1);
+
+        var exercise = _allExercises[_currentIndex];
+        ExercisePicker.SelectedIndex = _currentIndex;
+
+        TitleLabel.Text = exercise.Exercise!.Name;
         WeightEntry.Text = exercise.Weight.ToString();
         RepsEntry.Text = exercise.Repetitions.ToString();
+
+        _editingSetId = null;
+        SaveBtn.Text = "REGISTRAR SÉRIE";
+
+        LoadHistory();
     }
 
     protected override async void OnAppearing()
@@ -31,9 +58,11 @@ public partial class ExerciseExecutionPage : ContentPage
     {
         try
         {
-            var history = await ApiService.GetHistoryAsync(_exerciseId);
+            if (_allExercises.Count == 0) return;
+            var currentExerciseId = _allExercises[_currentIndex].Exercise!.Id;
 
-            // Agrupa por dia e ordena do mais recente para o mais antigo
+            var history = await ApiService.GetHistoryAsync(currentExerciseId);
+
             var grouped = history
                 .GroupBy(e => e.CompletedAt.Date)
                 .Select(g => new GroupedExerciseSet(
@@ -45,29 +74,36 @@ public partial class ExerciseExecutionPage : ContentPage
 
             HistoryList.ItemsSource = grouped;
 
-            // Se não estiver editando, calcula o próximo número de série automaticamente
             if (!_editingSetId.HasValue)
             {
-                // Pega apenas as séries feitas HOJE
                 var todaySets = history.Where(x => x.CompletedAt.Date == DateTime.Now.Date).ToList();
-
                 if (todaySets.Count > 0)
                 {
-                    // Se já fez séries hoje, pega o maior número e soma 1
                     SetEntry.Text = (todaySets.Max(x => x.SetNumber) + 1).ToString();
                 }
                 else
                 {
-                    // Se não fez nenhuma série hoje, começa do 1
                     SetEntry.Text = "1";
                 }
             }
         }
         catch { }
     }
+
+    private void OnExerciseChanged(object sender, EventArgs e)
+    {
+        if (ExercisePicker.SelectedIndex >= 0 && ExercisePicker.SelectedIndex != _currentIndex)
+        {
+            ChangeExercise(ExercisePicker.SelectedIndex);
+        }
+    }
+
+    private void OnPrevClicked(object sender, EventArgs e) => ChangeExercise(_currentIndex - 1);
+    private void OnNextClicked(object sender, EventArgs e) => ChangeExercise(_currentIndex + 1);
+
     private async void OnSaveSetClicked(object sender, EventArgs e)
     {
-        SaveBtn.IsEnabled = false; // Bloqueia o botão para evitar cliques duplos
+        SaveBtn.IsEnabled = false;
 
         if (!int.TryParse(SetEntry.Text, out int setNum) ||
             !decimal.TryParse(WeightEntry.Text, out decimal weight) ||
@@ -78,10 +114,12 @@ public partial class ExerciseExecutionPage : ContentPage
             return;
         }
 
+        var currentExercise = _allExercises[_currentIndex];
+        var currentExerciseId = currentExercise.Exercise!.Id;
         bool success = false;
+
         if (_editingSetId.HasValue)
         {
-            // MODO EDIÇÃO
             success = await ApiService.UpdateSetAsync(_editingSetId.Value, setNum, weight, reps);
             if (success)
             {
@@ -89,45 +127,35 @@ public partial class ExerciseExecutionPage : ContentPage
                 _editingSetId = null;
                 SaveBtn.Text = "REGISTRAR SÉRIE";
             }
-            else
-            {
-                await DisplayAlertAsync("Erro API", $"Não foi possível atualizar.\n{ApiService.LastError}", "OK");
-            }
+            else { await DisplayAlertAsync("Erro API", $"Não foi possível atualizar.\n{ApiService.LastError}", "OK"); }
         }
         else
         {
-            // MODO INSERÇÃO
-            success = await ApiService.LogSetAsync(_workoutId, _exerciseId, setNum, weight, reps);
+            success = await ApiService.LogSetAsync(_workoutId, currentExerciseId, setNum, weight, reps);
             if (success)
             {
-                await DisplayAlertAsync("Sucesso", "Série registrada!", "OK");
-                SetEntry.Text = (setNum + 1).ToString(); // Incrementa automaticamente para a próxima série
+                SetEntry.Text = (setNum + 1).ToString();
+
+                // INICIA O CRONÔMETRO AUTOMATICAMENTE APÓS REGISTRAR
+                int restTime = currentExercise.RestSeconds > 0 ? currentExercise.RestSeconds : 90;
+                StartRestTimer(restTime);
             }
-            else
-            {
-                await DisplayAlertAsync("Erro API", $"Não foi possível registrar.\n{ApiService.LastError}", "OK");
-            }
+            else { await DisplayAlertAsync("Erro API", $"Não foi possível registrar.\n{ApiService.LastError}", "OK"); }
         }
 
         if (success) await LoadHistory();
-
-        SaveBtn.IsEnabled = true; // Libera o botão
+        SaveBtn.IsEnabled = true;
     }
 
     private async void OnLoadHistoryClicked(object sender, EventArgs e)
     {
-        var history = await ApiService.GetHistoryAsync(_exerciseId);
+        var currentExerciseId = _allExercises[_currentIndex].Exercise!.Id;
+        var history = await ApiService.GetHistoryAsync(currentExerciseId);
         if (history.Count > 0)
         {
             var lastSet = history.OrderByDescending(x => x.CompletedAt).First();
             WeightEntry.Text = lastSet.Weight.ToString();
             RepsEntry.Text = lastSet.Repetitions.ToString();
-            // Não alteramos o SetEntry aqui para não bagunçar a contagem atual
-            await DisplayAlertAsync("Carregado", "Carga e repetições do último treino preenchidas.", "OK");
-        }
-        else
-        {
-            await DisplayAlertAsync("Aviso", "Sem histórico anterior para este exercício.", "OK");
         }
     }
 
@@ -152,7 +180,6 @@ public partial class ExerciseExecutionPage : ContentPage
             {
                 bool success = await ApiService.DeleteSetAsync(set.Id);
                 if (success) await LoadHistory();
-                else await DisplayAlertAsync("Erro API", $"Não foi possível excluir.\n{ApiService.LastError}", "OK");
             }
         }
     }
@@ -160,5 +187,75 @@ public partial class ExerciseExecutionPage : ContentPage
     private void OnBackClicked(object sender, EventArgs e)
     {
         Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
+    }
+
+    // --- LÓGICA DO CRONÔMETRO ---
+
+    private void StartRestTimer(int seconds)
+    {
+        _isTimerRunning = true;
+        _remainingSeconds = seconds;
+        RestTimerBorder.IsVisible = true;
+        UpdateTimerLabel();
+
+        Device.StartTimer(TimeSpan.FromSeconds(1), () =>
+        {
+            if (!_isTimerRunning) return false;
+
+            _remainingSeconds--;
+
+            if (_remainingSeconds <= 0)
+            {
+                TimerFinished();
+                return false; // Para o timer
+            }
+
+            UpdateTimerLabel();
+            return true; // Continua o timer
+        });
+    }
+
+    private void UpdateTimerLabel()
+    {
+        var time = TimeSpan.FromSeconds(_remainingSeconds);
+        TimerLabel.Text = time.ToString(@"mm\:ss");
+    }
+
+    private void TimerFinished()
+    {
+        _isTimerRunning = false;
+        RestTimerBorder.IsVisible = false;
+        TimerLabel.Text = "00:00";
+
+        try
+        {
+            // Toca um beep no Windows
+            if (DeviceInfo.Platform == DevicePlatform.WinUI)
+            {
+                Beep(800, 500); // Frequência 800Hz por 500ms
+            }
+
+            // Vibra o celular (funciona no Android/iOS)
+            Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
+        }
+        catch { }
+    }
+
+    private void OnMinus15Clicked(object sender, EventArgs e)
+    {
+        _remainingSeconds = Math.Max(0, _remainingSeconds - 15);
+        UpdateTimerLabel();
+    }
+
+    private void OnPlus15Clicked(object sender, EventArgs e)
+    {
+        _remainingSeconds += 15;
+        UpdateTimerLabel();
+    }
+
+    private void OnSkipRestClicked(object sender, EventArgs e)
+    {
+        _remainingSeconds = 0;
+        TimerFinished();
     }
 }

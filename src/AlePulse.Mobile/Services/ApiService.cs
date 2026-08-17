@@ -165,9 +165,20 @@ public static class ApiService
         }
         return response.IsSuccessStatusCode;
     }
-}
+    public static async Task<bool> UpdateWorkoutExerciseAsync(Guid workoutId, Guid exerciseId, int sets, int reps, decimal weight, int rest)
+    {
+        var dto = new { sets, repetitions = reps, weight, restSeconds = rest };
+        var response = await _client.PutAsJsonAsync($"/api/Workouts/{workoutId}/exercises/{exerciseId}", dto);
 
-public class LoginResponse
-{
-    public string? Token { get; set; }
+        if (!response.IsSuccessStatusCode)
+        {
+            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        }
+        return response.IsSuccessStatusCode;
+    }
+
+    public class LoginResponse
+    {
+        public string? Token { get; set; }
+    }
 }

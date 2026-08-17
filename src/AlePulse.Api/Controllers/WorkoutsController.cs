@@ -111,4 +111,24 @@ public class WorkoutsController : ControllerBase
 
         return NoContent();
     }
+   
+    [HttpPut("{workoutId}/exercises/{exerciseId}")]
+    public async Task<IActionResult> UpdateExercise(Guid workoutId, Guid exerciseId, [FromBody] AddWorkoutExerciseDto dto)
+    {
+        var workout = await _workoutRepository.GetByIdAsync(workoutId);
+        if (workout == null || workout.UserId != GetUserId())
+            return NotFound("Treino não encontrado.");
+
+        var exercise = workout.Exercises.FirstOrDefault(e => e.Id == exerciseId);
+        if (exercise == null)
+            return NotFound("Exercício não encontrado neste treino.");
+
+        exercise.Sets = dto.Sets;
+        exercise.Repetitions = dto.Repetitions;
+        exercise.Weight = dto.Weight;
+        exercise.RestSeconds = dto.RestSeconds;
+
+        await _workoutRepository.UpdateExerciseAsync(exercise);
+        return NoContent();
+    }
 }

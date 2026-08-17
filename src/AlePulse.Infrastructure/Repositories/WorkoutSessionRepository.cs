@@ -84,4 +84,16 @@ public class WorkoutSessionRepository : IWorkoutSessionRepository
             await _context.SaveChangesAsync();
         }
     }
+    public async Task UpdateExerciseAsync(WorkoutExercise exercise)
+    {
+        var existing = await _context.WorkoutExercises.FindAsync(exercise.Id);
+        if (existing != null)
+        {
+            existing.Sets = exercise.Sets;
+            existing.Repetitions = exercise.Repetitions;
+            existing.Weight = exercise.Weight;
+            existing.RestSeconds = exercise.RestSeconds;
+            await _context.SaveChangesAsync();
+        }
+    }
 }

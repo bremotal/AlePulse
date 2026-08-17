@@ -7,7 +7,6 @@ public partial class WorkoutDetailPage : ContentPage
 {
     private readonly Guid _workoutId;
 
-    // Recebe o ID do treino quando a tela é criada
     public WorkoutDetailPage(Guid workoutId)
     {
         InitializeComponent();
@@ -35,17 +34,44 @@ public partial class WorkoutDetailPage : ContentPage
     {
         Application.Current!.MainPage = new HomePage();
     }
+
     private void OnAddExerciseClicked(object sender, EventArgs e)
     {
-        // Vai para a tela de adicionar exercício, passando o ID do treino
         Application.Current!.MainPage = new AddExercisePage(_workoutId);
     }
 
     private async void OnStartWorkoutClicked(object sender, EventArgs e)
     {
-        // Aviso temporário até criarmos a tela de execução de fato
-        await DisplayAlertAsync("Em breve", "A execução do treino em tempo real será implementada na próxima sprint!", "OK");
+        var workout = await ApiService.GetWorkoutByIdAsync(_workoutId);
+        if (workout?.Exercises != null && workout.Exercises.Count > 0)
+        {
+            // Envia a lista inteira de exercícios para o Player
+            Application.Current!.MainPage = new ExerciseExecutionPage(_workoutId, workout.Exercises.ToList());
+        }
+        else
+        {
+            await DisplayAlertAsync("Aviso", "Adicione exercícios ao treino antes de iniciar.", "OK");
+        }
     }
+
+    private void OnExerciseTapped(object sender, TappedEventArgs e)
+    {
+        if (sender is Border border && border.BindingContext is WorkoutExerciseDto exercise)
+        {
+            // Se clicar no card (mas não nos botões), abre apenas ele
+            Application.Current!.MainPage = new ExerciseExecutionPage(_workoutId, new List<WorkoutExerciseDto> { exercise });
+        }
+    }
+
+    // NOVO MÉTODO: Abrir tela de editar exercício
+    private void OnEditExerciseClicked(object sender, EventArgs e)
+    {
+        if (sender is Button button && button.BindingContext is WorkoutExerciseDto exercise)
+        {
+            Application.Current!.MainPage = new EditExercisePage(_workoutId, exercise);
+        }
+    }
+
     private async void OnDeleteExerciseClicked(object sender, EventArgs e)
     {
         if (sender is Button button && button.BindingContext is WorkoutExerciseDto exercise)
@@ -54,16 +80,8 @@ public partial class WorkoutDetailPage : ContentPage
             if (confirm)
             {
                 await ApiService.DeleteWorkoutExerciseAsync(_workoutId, exercise.Id);
-                await LoadWorkoutDetails(); // Recarrega a lista de exercícios
+                await LoadWorkoutDetails();
             }
-        }
-    }
-    private void OnExerciseTapped(object sender, TappedEventArgs e)
-    {
-        if (sender is Border border && border.BindingContext is WorkoutExerciseDto exercise)
-        {
-            // Abre a tela de execução passando o ID do treino e os dados do exercício
-            Application.Current!.MainPage = new ExerciseExecutionPage(_workoutId, exercise);
         }
     }
 }
