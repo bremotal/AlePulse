@@ -15,6 +15,7 @@ public partial class ExerciseExecutionPage : ContentPage
     // Variáveis do Cronômetro
     private int _remainingSeconds;
     private bool _isTimerRunning;
+    private DateTime _workoutStartTime; // Variável para o tempo total do treino
 
     // Importação do Beep do Windows (para teste no Windows Machine)
     [DllImport("kernel32.dll")]
@@ -28,6 +29,8 @@ public partial class ExerciseExecutionPage : ContentPage
 
         ExercisePicker.ItemsSource = _allExercises;
         ChangeExercise(0);
+
+        _workoutStartTime = DateTime.Now; // Inicia a contagem do tempo total
     }
 
     private void ChangeExercise(int newIndex)
@@ -46,6 +49,16 @@ public partial class ExerciseExecutionPage : ContentPage
         SaveBtn.Text = "REGISTRAR SÉRIE";
 
         LoadHistory();
+
+        // Verifica se é o último exercício para mudar o botão
+        if (_currentIndex == _allExercises.Count - 1)
+        {
+            NextFinishBtn.Text = "FINALIZAR TREINO";
+        }
+        else
+        {
+            NextFinishBtn.Text = "PRÓXIMO EXERCÍCIO";
+        }
     }
 
     protected override async void OnAppearing()
@@ -184,9 +197,29 @@ public partial class ExerciseExecutionPage : ContentPage
         }
     }
 
-    private void OnBackClicked(object sender, EventArgs e)
+    private void OnExitClicked(object sender, EventArgs e)
     {
+        // Pausa o cronômetro de descanso se estiver rodando
+        _isTimerRunning = false;
+        RestTimerBorder.IsVisible = false;
+
+        // Volta para a tela de detalhes sem mostrar o resumo
         Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
+    }
+
+    private void OnNextOrFinishClicked(object sender, EventArgs e)
+    {
+        // Se for o último exercício, finaliza o treino e mostra o resumo
+        if (_currentIndex == _allExercises.Count - 1)
+        {
+            TimeSpan duration = DateTime.Now - _workoutStartTime;
+            Application.Current!.MainPage = new WorkoutSummaryPage(duration, _allExercises, _workoutId);
+        }
+        // Se não for o último, vai para o próximo exercício
+        else
+        {
+            ChangeExercise(_currentIndex + 1);
+        }
     }
 
     // --- LÓGICA DO CRONÔMETRO ---

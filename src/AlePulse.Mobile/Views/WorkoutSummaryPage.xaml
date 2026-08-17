@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AlePulse.Mobile.Views.WorkoutSummaryPage"
+             BackgroundColor="#121212"
+             Title="Resumo do Treino">
+
+    <VerticalStackLayout Padding="30" Spacing="25" VerticalOptions="Center" HorizontalOptions="Center">
+
+        <Label Text="✅"
+               FontSize="80"
+               HorizontalOptions="Center" />
+
+        <Label Text="TREINO CONCLUÍDO!"
+               FontSize="28"
+               FontAttributes="Bold"
+               TextColor="#FF6A00"
+               HorizontalOptions="Center" />
+
+        <Label Text="Parabéns! Você mais um passo mais perto do seu objetivo."
+               FontSize="16"
+               TextColor="#E0E0E0"
+               HorizontalOptions="Center"
+               HorizontalTextAlignment="Center" />
+
+        <!-- Cards de Estatísticas -->
+        <Grid ColumnDefinitions="*, *" ColumnSpacing="20" Margin="0,30,0,0">
+
+            <!-- Tempo Total -->
+            <Border Grid.Column="0" BackgroundColor="#1E1E1E" Stroke="#2B2B2B" Padding="20">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="15" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                    <Label Text="⏱️ Tempo Total" TextColor="#888888" FontSize="14" HorizontalOptions="Center"/>
+                    <Label x:Name="TimeLabel" Text="00:00" TextColor="#FFFFFF" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Volume Total -->
+            <Border Grid.Column="1" BackgroundColor="#1E1E1E" Stroke="#2B2B2B" Padding="20">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="15" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                    <Label Text="🏋️ Volume Total" TextColor="#888888" FontSize="14" HorizontalOptions="Center"/>
+                    <Label x:Name="VolumeLabel" Text="0 kg" TextColor="#FFFFFF" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <Button Text="VOLTAR PARA A HOME"
+                BackgroundColor="#FF6A00"
+                TextColor="#FFFFFF"
+                FontAttributes="Bold"
+                CornerRadius="10"
+                HeightRequest="50"
+                Margin="0,30,0,0"
+                Clicked="OnBackHomeClicked" />
+
+    </VerticalStackLayout>
+</ContentPage>

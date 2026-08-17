@@ -112,7 +112,26 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <!-- Rodapé Finalizar -->
-        <Button Grid.Row="5" Text="FINALIZAR TREINO" BackgroundColor="#2B2B2B" TextColor="#FFFFFF" CornerRadius="10" HeightRequest="50" Clicked="OnBackClicked"/>
+        <!-- Rodapé com opções de Sair e Próximo/Finalizar -->
+        <Grid Grid.Row="5" ColumnDefinitions="*, *" ColumnSpacing="15">
+            <Button Grid.Column="0"
+                    Text="SAIR"
+                    BackgroundColor="#2B2B2B"
+                    TextColor="#FFFFFF"
+                    CornerRadius="10"
+                    HeightRequest="50"
+                    Clicked="OnExitClicked" />
+
+            <Button Grid.Column="1"
+                    x:Name="NextFinishBtn"
+                    Text="PRÓXIMO EXERCÍCIO"
+                    BackgroundColor="#FF6A00"
+                    TextColor="#FFFFFF"
+                    FontAttributes="Bold"
+                    CornerRadius="10"
+                    HeightRequest="50"
+                    Clicked="OnNextOrFinishClicked" />
+        </Grid>
+
     </Grid>
 </ContentPage>
