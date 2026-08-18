@@ -48,7 +48,14 @@
                 CornerRadius="10"
                 HeightRequest="50"
                 Clicked="OnLoginClicked" />
-
+        
+        <ActivityIndicator x:Name="LoadingSpinner"
+                           Color="#FF6A00"
+                           IsRunning="False"
+                           IsVisible="False"
+                           HeightRequest="40"
+                           WidthRequest="40" />
+        
         <Label x:Name="ErrorLabel"
                TextColor="Red"
                IsVisible="False"

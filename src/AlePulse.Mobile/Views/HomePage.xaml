@@ -5,8 +5,8 @@
              BackgroundColor="#121212"
              Title="Início">
 
-    <Grid RowDefinitions="Auto, Auto, *, Auto" Padding="20">
-
+    <Grid RowDefinitions="Auto, Auto, Auto, *, Auto" Padding="20">
+        
         <!-- Cabeçalho com Botão de Perfil -->
         <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,20,0,10">
             <VerticalStackLayout Grid.Column="0" Spacing="5" HorizontalOptions="Center">
@@ -43,8 +43,18 @@
                 Margin="0,0,0,15"
                 Clicked="OnCreateWorkoutClicked" />
 
+        <!-- Loader de Carregamento da Lista -->
+        <ActivityIndicator x:Name="LoadingSpinner"
+                           Grid.Row="2"
+                           Color="#FF6A00"
+                           IsRunning="False"
+                           IsVisible="False"
+                           HeightRequest="50"
+                           WidthRequest="50"
+                           Margin="0,20,0,0" />
+
         <!-- Lista de Treinos -->
-        <CollectionView x:Name="WorkoutsList" Grid.Row="2" BackgroundColor="Transparent">
+        <CollectionView x:Name="WorkoutsList" Grid.Row="3" BackgroundColor="Transparent">
 
             <!-- O que mostrar quando a lista estiver vazia -->
             <CollectionView.EmptyView>
@@ -89,7 +99,7 @@
         </CollectionView>
 
         <!-- Rodapé com Botão Sair -->
-        <Button Grid.Row="3"
+        <Button Grid.Row="4"
                 Text="SAIR DA CONTA"
                 BackgroundColor="#2B2B2B"
                 TextColor="#FFFFFF"

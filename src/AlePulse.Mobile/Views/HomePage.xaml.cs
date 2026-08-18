@@ -18,6 +18,9 @@ public partial class HomePage : ContentPage
 
     private async Task LoadWorkouts()
     {
+        LoadingSpinner.IsVisible = true;
+        LoadingSpinner.IsRunning = true;
+
         try
         {
             var workouts = await ApiService.GetWorkoutsAsync();
@@ -26,6 +29,11 @@ public partial class HomePage : ContentPage
         catch (Exception)
         {
             WorkoutsList.ItemsSource = new List<WorkoutDto>();
+        }
+        finally
+        {
+            LoadingSpinner.IsRunning = false;
+            LoadingSpinner.IsVisible = false;
         }
     }
 

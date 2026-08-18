@@ -26,8 +26,9 @@ public partial class LoginPage : ContentPage
     private async void OnLoginClicked(object sender, EventArgs e)
     {
         ErrorLabel.IsVisible = false;
-        LoginButton.Text = "ENTRANDO...";
-        LoginButton.IsEnabled = false;
+        LoginButton.IsVisible = false;
+        LoadingSpinner.IsVisible = true;
+        LoadingSpinner.IsRunning = true;
 
         var token = await ApiService.LoginAsync(EmailEntry.Text, PasswordEntry.Text);
 
@@ -42,7 +43,8 @@ public partial class LoginPage : ContentPage
             ErrorLabel.IsVisible = true;
         }
 
-        LoginButton.Text = "ENTRAR";
-        LoginButton.IsEnabled = true;
+        LoadingSpinner.IsRunning = false;
+        LoadingSpinner.IsVisible = false;
+        LoginButton.IsVisible = true;
     }
 }
