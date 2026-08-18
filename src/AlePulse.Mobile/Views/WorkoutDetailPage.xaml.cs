@@ -63,7 +63,6 @@ public partial class WorkoutDetailPage : ContentPage
         }
     }
 
-    // NOVO MÉTODO: Abrir tela de editar exercício
     private void OnEditExerciseClicked(object sender, EventArgs e)
     {
         if (sender is Button button && button.BindingContext is WorkoutExerciseDto exercise)

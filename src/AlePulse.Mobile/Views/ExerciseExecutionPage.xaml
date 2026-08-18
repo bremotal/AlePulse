@@ -2,58 +2,58 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="AlePulse.Mobile.Views.ExerciseExecutionPage"
-             BackgroundColor="#121212"
+             BackgroundColor="{AppThemeBinding Dark=#121212, Light=#F9F9F9}"
              Title="Treino Ativo">
 
     <Grid RowDefinitions="Auto, Auto, Auto, Auto, *, Auto" Padding="20">
 
         <!-- Navegação entre Exercícios -->
         <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" Margin="0,20,0,15">
-            <Button Grid.Column="0" Text="‹" FontSize="24" FontAttributes="Bold" BackgroundColor="#2B2B2B" TextColor="#FFFFFF" WidthRequest="50" CornerRadius="25" Clicked="OnPrevClicked"/>
-            <Picker Grid.Column="1" x:Name="ExercisePicker" Title="Trocar Exercício" TitleColor="#888888" TextColor="#FFFFFF" HorizontalOptions="Center" BackgroundColor="#1E1E1E" ItemDisplayBinding="{Binding Exercise.Name}" SelectedIndexChanged="OnExerciseChanged"/>
-            <Button Grid.Column="2" Text="›" FontSize="24" FontAttributes="Bold" BackgroundColor="#2B2B2B" TextColor="#FFFFFF" WidthRequest="50" CornerRadius="25" Clicked="OnNextClicked"/>
+            <Button Grid.Column="0" Text="‹" FontSize="24" FontAttributes="Bold" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" WidthRequest="50" CornerRadius="25" Clicked="OnPrevClicked"/>
+            <Picker Grid.Column="1" x:Name="ExercisePicker" Title="Trocar Exercício" TitleColor="#888888" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" HorizontalOptions="Center" BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" ItemDisplayBinding="{Binding Exercise.Name}" SelectedIndexChanged="OnExerciseChanged"/>
+            <Button Grid.Column="2" Text="›" FontSize="24" FontAttributes="Bold" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" WidthRequest="50" CornerRadius="25" Clicked="OnNextClicked"/>
         </Grid>
 
         <!-- Título do Exercício Atual -->
-        <Label Grid.Row="1" x:Name="TitleLabel" FontSize="24" FontAttributes="Bold" TextColor="#FFFFFF" HorizontalOptions="Center" Margin="0,0,0,15"/>
+        <Label Grid.Row="1" x:Name="TitleLabel" FontSize="24" FontAttributes="Bold" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" HorizontalOptions="Center" Margin="0,0,0,15"/>
 
         <!-- Registro da Série Atual -->
-        <Border Grid.Row="2" BackgroundColor="#1E1E1E" Stroke="#2B2B2B" Padding="15" Margin="0,0,0,15">
+        <Border Grid.Row="2" BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" Stroke="{AppThemeBinding Dark=#2B2B2B, Light=#EEEEEE}" Padding="15" Margin="0,0,0,15">
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="15" />
             </Border.StrokeShape>
             <VerticalStackLayout Spacing="10">
                 <Grid ColumnDefinitions="*, Auto">
                     <Label Grid.Column="0" Text="REGISTRAR SÉRIE" TextColor="#FF6A00" FontAttributes="Bold" VerticalOptions="Center"/>
-                    <Button Grid.Column="1" x:Name="LoadHistoryBtn" Text="Usar Último" BackgroundColor="#2B2B2B" TextColor="#FFFFFF" CornerRadius="10" HeightRequest="40" Clicked="OnLoadHistoryClicked"/>
+                    <Button Grid.Column="1" x:Name="LoadHistoryBtn" Text="Usar Último" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" CornerRadius="10" HeightRequest="40" Clicked="OnLoadHistoryClicked"/>
                 </Grid>
 
                 <Grid ColumnDefinitions="*, *, *" ColumnSpacing="10">
                     <VerticalStackLayout Grid.Column="0" Spacing="5">
                         <Label Text="Série" TextColor="#888888"/>
-                        <Border BackgroundColor="#121212" Stroke="#2B2B2B" Padding="10">
+                        <Border BackgroundColor="{AppThemeBinding Dark=#121212, Light=#F9F9F9}" Stroke="{AppThemeBinding Dark=#2B2B2B, Light=#EEEEEE}" Padding="10">
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="8"/>
                             </Border.StrokeShape>
-                            <Entry x:Name="SetEntry" TextColor="#FFFFFF" Keyboard="Numeric" Text="1"/>
+                            <Entry x:Name="SetEntry" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" Keyboard="Numeric" Text="1"/>
                         </Border>
                     </VerticalStackLayout>
                     <VerticalStackLayout Grid.Column="1" Spacing="5">
                         <Label Text="Peso (kg)" TextColor="#888888"/>
-                        <Border BackgroundColor="#121212" Stroke="#2B2B2B" Padding="10">
+                        <Border BackgroundColor="{AppThemeBinding Dark=#121212, Light=#F9F9F9}" Stroke="{AppThemeBinding Dark=#2B2B2B, Light=#EEEEEE}" Padding="10">
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="8"/>
                             </Border.StrokeShape>
-                            <Entry x:Name="WeightEntry" TextColor="#FFFFFF" Keyboard="Numeric"/>
+                            <Entry x:Name="WeightEntry" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" Keyboard="Numeric"/>
                         </Border>
                     </VerticalStackLayout>
                     <VerticalStackLayout Grid.Column="2" Spacing="5">
                         <Label Text="Reps" TextColor="#888888"/>
-                        <Border BackgroundColor="#121212" Stroke="#2B2B2B" Padding="10">
+                        <Border BackgroundColor="{AppThemeBinding Dark=#121212, Light=#F9F9F9}" Stroke="{AppThemeBinding Dark=#2B2B2B, Light=#EEEEEE}" Padding="10">
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="8"/>
                             </Border.StrokeShape>
-                            <Entry x:Name="RepsEntry" TextColor="#FFFFFF" Keyboard="Numeric"/>
+                            <Entry x:Name="RepsEntry" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" Keyboard="Numeric"/>
                         </Border>
                     </VerticalStackLayout>
                 </Grid>
@@ -62,17 +62,17 @@
         </Border>
 
         <!-- CRONÔMETRO DE DESCANSO -->
-        <Border Grid.Row="3" x:Name="RestTimerBorder" BackgroundColor="#2B2B2B" Stroke="#FF6A00" Padding="15" Margin="0,0,0,15" IsVisible="False">
+        <Border Grid.Row="3" x:Name="RestTimerBorder" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#FFF3E0}" Stroke="#FF6A00" Padding="15" Margin="0,0,0,15" IsVisible="False">
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="15" />
             </Border.StrokeShape>
             <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
                 <Label Text="DESCANSO" TextColor="#FF6A00" FontAttributes="Bold" HorizontalOptions="Center"/>
-                <Label x:Name="TimerLabel" Text="00:00" FontSize="48" FontAttributes="Bold" TextColor="#FFFFFF" HorizontalOptions="Center"/>
+                <Label x:Name="TimerLabel" Text="00:00" FontSize="48" FontAttributes="Bold" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" HorizontalOptions="Center"/>
                 <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                    <Button Text="-15s" BackgroundColor="#1E1E1E" TextColor="#FFFFFF" CornerRadius="10" Clicked="OnMinus15Clicked"/>
-                    <Button Text="Pular" BackgroundColor="#1E1E1E" TextColor="#FFFFFF" CornerRadius="10" Clicked="OnSkipRestClicked"/>
-                    <Button Text="+15s" BackgroundColor="#1E1E1E" TextColor="#FFFFFF" CornerRadius="10" Clicked="OnPlus15Clicked"/>
+                    <Button Text="-15s" BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" CornerRadius="10" Clicked="OnMinus15Clicked"/>
+                    <Button Text="Pular" BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" CornerRadius="10" Clicked="OnSkipRestClicked"/>
+                    <Button Text="+15s" BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" CornerRadius="10" Clicked="OnPlus15Clicked"/>
                 </HorizontalStackLayout>
             </VerticalStackLayout>
         </Border>
@@ -93,9 +93,9 @@
             </CollectionView.GroupHeaderTemplate>
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame BackgroundColor="#1E1E1E" BorderColor="#2B2B2B" Padding="15" Margin="0,0,0,10" HasShadow="False">
+                    <Frame BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" BorderColor="{AppThemeBinding Dark=#2B2B2B, Light=#EEEEEE}" Padding="15" Margin="0,0,0,10" HasShadow="False">
                         <Grid ColumnDefinitions="*, Auto, Auto" RowDefinitions="Auto, Auto">
-                            <Label Grid.Row="0" Grid.Column="0" Text="{Binding SetNumber, StringFormat='Série {0}'}" TextColor="#FFFFFF" FontAttributes="Bold" FontSize="16"/>
+                            <Label Grid.Row="0" Grid.Column="0" Text="{Binding SetNumber, StringFormat='Série {0}'}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" FontAttributes="Bold" FontSize="16"/>
                             <Label Grid.Row="1" Grid.Column="0" TextColor="#888888" FontSize="14" VerticalOptions="Center">
                                 <Label.Text>
                                     <MultiBinding StringFormat="{}{0} kg x {1} reps">
@@ -116,8 +116,8 @@
         <Grid Grid.Row="5" ColumnDefinitions="*, *" ColumnSpacing="15">
             <Button Grid.Column="0"
                     Text="SAIR"
-                    BackgroundColor="#2B2B2B"
-                    TextColor="#FFFFFF"
+                    BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}"
+                    TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}"
                     CornerRadius="10"
                     HeightRequest="50"
                     Clicked="OnExitClicked" />

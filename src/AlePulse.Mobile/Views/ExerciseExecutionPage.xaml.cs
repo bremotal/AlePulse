@@ -262,14 +262,14 @@ public partial class ExerciseExecutionPage : ContentPage
 
         try
         {
-            // Toca um beep no Windows
+            // Toca um beep no Windows (Frequência 800Hz por 500ms)
             if (DeviceInfo.Platform == DevicePlatform.WinUI)
             {
-                Beep(800, 500); // Frequência 800Hz por 500ms
+                Beep(800, 500);
             }
 
-            // Vibra o celular (funciona no Android/iOS)
-            Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
+            // Vibra o celular por 1 segundo (funciona no Android/iOS)
+            Vibration.Default.Vibrate(TimeSpan.FromSeconds(1));
         }
         catch { }
     }
