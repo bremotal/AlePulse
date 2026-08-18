@@ -126,6 +126,18 @@ public static class ApiService
         return null;
     }
 
+    public static async Task<bool> UpdateWorkoutExerciseAsync(Guid workoutId, Guid exerciseId, int sets, int reps, decimal weight, int rest)
+    {
+        var dto = new { sets, repetitions = reps, weight, restSeconds = rest };
+        var response = await _client.PutAsJsonAsync($"/api/Workouts/{workoutId}/exercises/{exerciseId}", dto);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        }
+        return response.IsSuccessStatusCode;
+    }
+
     public static async Task<List<Models.ExerciseSetDto>> GetHistoryAsync(Guid exerciseId)
     {
         var response = await _client.GetAsync($"/api/History/{exerciseId}");
@@ -165,10 +177,22 @@ public static class ApiService
         }
         return response.IsSuccessStatusCode;
     }
-    public static async Task<bool> UpdateWorkoutExerciseAsync(Guid workoutId, Guid exerciseId, int sets, int reps, decimal weight, int rest)
+
+    // NOVOS MÉTODOS DE PERFIL E SENHA
+    public static async Task<Models.ProfileDto?> GetMyProfileAsync()
     {
-        var dto = new { sets, repetitions = reps, weight, restSeconds = rest };
-        var response = await _client.PutAsJsonAsync($"/api/Workouts/{workoutId}/exercises/{exerciseId}", dto);
+        var response = await _client.GetAsync("/api/Users/me");
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadFromJsonAsync<Models.ProfileDto>();
+        }
+        return null;
+    }
+
+    public static async Task<bool> ChangePasswordAsync(string currentPassword, string newPassword)
+    {
+        var dto = new { currentPassword, newPassword };
+        var response = await _client.PutAsJsonAsync("/api/Users/change-password", dto);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -176,9 +200,20 @@ public static class ApiService
         }
         return response.IsSuccessStatusCode;
     }
-
-    public class LoginResponse
+    public static async Task<bool> UpdateProfileAsync(string name, string email)
     {
-        public string? Token { get; set; }
+        var dto = new { name, email };
+        var response = await _client.PutAsJsonAsync("/api/Users/update-profile", dto);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        }
+        return response.IsSuccessStatusCode;
     }
+}
+
+public class LoginResponse
+{
+    public string? Token { get; set; }
 }

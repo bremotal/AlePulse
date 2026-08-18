@@ -2,7 +2,9 @@
 using AlePulse.Application.Interfaces;
 using AlePulse.Application.Services;
 using AlePulse.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AlePulse.Api.Controllers;
 
@@ -17,6 +19,13 @@ public class UsersController : ControllerBase
     {
         _userRepository = userRepository;
         _authService = authService;
+    }
+
+    // Método privado para extrair o ID do usuário do Token JWT
+    private Guid GetUserId()
+    {
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier);
+        return claim != null ? Guid.Parse(claim.Value) : Guid.Empty;
     }
 
     [HttpGet("{id}")]
@@ -38,7 +47,6 @@ public class UsersController : ControllerBase
         {
             Name = dto.Name,
             Email = dto.Email,
-            // Agora a senha é criptografada antes de ir para o banco!
             PasswordHash = _authService.HashPassword(dto.Password)
         };
 
@@ -57,5 +65,50 @@ public class UsersController : ControllerBase
 
         var token = _authService.GenerateJwtToken(user);
         return Ok(new { token });
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetMyProfile()
+    {
+        var user = await _userRepository.GetByIdAsync(GetUserId());
+        if (user == null) return NotFound();
+
+        return Ok(new { user.Name, user.Email });
+    }
+
+    [Authorize]
+    [HttpPut("update-profile")]
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto)
+    {
+        var user = await _userRepository.GetByIdAsync(GetUserId());
+        if (user == null) return NotFound();
+
+        // Verifica se o e-mail novo não pertence a outra pessoa
+        var existingUser = await _userRepository.GetByEmailAsync(dto.Email);
+        if (existingUser != null && existingUser.Id != user.Id)
+            return Conflict("Este e-mail já está em uso por outra conta.");
+
+        user.Name = dto.Name;
+        user.Email = dto.Email;
+
+        await _userRepository.UpdateUserAsync(user);
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpPut("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+    {
+        var user = await _userRepository.GetByIdAsync(GetUserId());
+        if (user == null) return NotFound();
+
+        if (!_authService.VerifyPassword(dto.CurrentPassword, user.PasswordHash))
+            return BadRequest("Senha atual incorreta.");
+
+        user.PasswordHash = _authService.HashPassword(dto.NewPassword);
+        await _userRepository.UpdateUserAsync(user);
+
+        return NoContent();
     }
 }

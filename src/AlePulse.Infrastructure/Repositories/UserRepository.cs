@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AlePulse.Application.Interfaces;
+﻿using AlePulse.Application.Interfaces;
 using AlePulse.Domain.Entities;
 using AlePulse.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +31,12 @@ public class UserRepository : IUserRepository
 
     public async Task SaveChangesAsync()
     {
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateUserAsync(User user)
+    {
+        _context.Users.Update(user);
         await _context.SaveChangesAsync();
     }
 }

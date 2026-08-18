@@ -36,19 +36,18 @@ public partial class HomePage : ContentPage
 
     private async void OnLogoutClicked(object sender, EventArgs e)
     {
-        await ApiService.LogoutAsync(); // Apaga o token
+        await ApiService.LogoutAsync();
         Application.Current!.MainPage = new LoginPage();
     }
 
-    // Evento de clique em um treino da lista
     private async void OnWorkoutTapped(object sender, TappedEventArgs e)
     {
         if (sender is Border border && border.BindingContext is WorkoutDto workout)
         {
-            // Navega direto para os detalhes passando o ID do treino
             Application.Current!.MainPage = new WorkoutDetailPage(workout.Id);
         }
     }
+
     private async void OnDeleteWorkoutClicked(object sender, EventArgs e)
     {
         if (sender is Button button && button.BindingContext is WorkoutDto workout)
@@ -57,8 +56,14 @@ public partial class HomePage : ContentPage
             if (confirm)
             {
                 await ApiService.DeleteWorkoutAsync(workout.Id);
-                await LoadWorkouts(); // Recarrega a lista
+                await LoadWorkouts();
             }
         }
+    }
+
+    // NOVO MÉTODO: Abrir tela de perfil
+    private void OnProfileClicked(object sender, EventArgs e)
+    {
+        Application.Current!.MainPage = new ProfilePage();
     }
 }

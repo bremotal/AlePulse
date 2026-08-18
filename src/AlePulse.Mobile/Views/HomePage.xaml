@@ -7,18 +7,30 @@
 
     <Grid RowDefinitions="Auto, Auto, *, Auto" Padding="20">
 
-        <!-- Cabeçalho -->
-        <VerticalStackLayout Grid.Row="0" Spacing="5" Margin="0,20,0,10" HorizontalOptions="Center">
-            <Label Text="BEM-VINDO AO"
-                   FontSize="14"
-                   TextColor="#E0E0E0"
-                   HorizontalOptions="Center" />
-            <Label Text="ALEPULSE"
-                   FontSize="36"
-                   FontAttributes="Bold"
-                   TextColor="#FF6A00"
-                   HorizontalOptions="Center" />
-        </VerticalStackLayout>
+        <!-- Cabeçalho com Botão de Perfil -->
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,20,0,10">
+            <VerticalStackLayout Grid.Column="0" Spacing="5" HorizontalOptions="Center">
+                <Label Text="BEM-VINDO AO"
+                       FontSize="14"
+                       TextColor="#E0E0E0"
+                       HorizontalOptions="Center" />
+                <Label Text="ALEPULSE"
+                       FontSize="36"
+                       FontAttributes="Bold"
+                       TextColor="#FF6A00"
+                       HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <Button Grid.Column="1"
+                    Text="👤"
+                    BackgroundColor="#2B2B2B"
+                    TextColor="#FFFFFF"
+                    WidthRequest="50"
+                    HeightRequest="50"
+                    CornerRadius="25"
+                    VerticalOptions="Center"
+                    Clicked="OnProfileClicked" />
+        </Grid>
 
         <!-- Botão Fixo de Criar Treino -->
         <Button Grid.Row="1"
@@ -73,6 +85,7 @@
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
+
         </CollectionView>
 
         <!-- Rodapé com Botão Sair -->

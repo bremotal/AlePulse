@@ -9,6 +9,20 @@ public partial class LoginPage : ContentPage
         InitializeComponent();
     }
 
+    // Executa sempre que a tela de login aparece
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        // Verifica se o usuário já está logado sem travar a tela
+        bool isLogged = await ApiService.IsUserLoggedInAsync();
+        if (isLogged)
+        {
+            // Se tiver token salvo, pula direto para a Home!
+            Application.Current!.MainPage = new HomePage();
+        }
+    }
+
     private async void OnLoginClicked(object sender, EventArgs e)
     {
         ErrorLabel.IsVisible = false;
@@ -19,10 +33,7 @@ public partial class LoginPage : ContentPage
 
         if (!string.IsNullOrEmpty(token))
         {
-            // Guarda o token no ApiService para usar nas próximas requisições
             ApiService.SetToken(token);
-
-            // Navega para a Home
             Application.Current!.MainPage = new HomePage();
         }
         else
