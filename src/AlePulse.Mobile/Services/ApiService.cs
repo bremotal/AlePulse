@@ -14,10 +14,12 @@ public static class ApiService
     static ApiService()
     {
         var baseUrl = DeviceInfo.Platform == DevicePlatform.Android
-            ? "http://10.0.2.2:5204"
+            ? "https://open-sneezing-uncoiled.ngrok-free.dev"
             : "http://localhost:5204";
 
         _client = new HttpClient { BaseAddress = new Uri(baseUrl) };
+
+        _client.DefaultRequestHeaders.Add("ngrok-skip-browser-warning", "69420");
     }
 
     public static void SetToken(string token)
@@ -211,9 +213,22 @@ public static class ApiService
         }
         return response.IsSuccessStatusCode;
     }
-}
+    public static async Task<bool> UploadExerciseImageAsync(Guid exerciseId, FileResult file)
+    {
+        using var content = new MultipartFormDataContent();
+        var stream = await file.OpenReadAsync();
+        content.Add(new StreamContent(stream), "file", file.FileName);
 
-public class LoginResponse
-{
-    public string? Token { get; set; }
+        var response = await _client.PostAsync($"/api/Exercises/{exerciseId}/media/upload", content);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        }
+        return response.IsSuccessStatusCode;
+    }
+    public class LoginResponse
+    {
+        public string? Token { get; set; }
+    }
 }

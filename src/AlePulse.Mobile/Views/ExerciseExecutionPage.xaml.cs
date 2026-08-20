@@ -15,9 +15,12 @@ public partial class ExerciseExecutionPage : ContentPage
     // Variáveis do Cronômetro
     private int _remainingSeconds;
     private bool _isTimerRunning;
-    private DateTime _workoutStartTime; // Variável para o tempo total do treino
+    private DateTime _workoutStartTime;
 
-    // Importação do Beep do Windows (para teste no Windows Machine)
+    // Variável para guardar a URL do GIF atual
+    private string? _currentGifUrl;
+
+    // Importação do Beep do Windows
     [DllImport("kernel32.dll")]
     public static extern bool Beep(int frequency, int duration);
 
@@ -30,7 +33,7 @@ public partial class ExerciseExecutionPage : ContentPage
         ExercisePicker.ItemsSource = _allExercises;
         ChangeExercise(0);
 
-        _workoutStartTime = DateTime.Now; // Inicia a contagem do tempo total
+        _workoutStartTime = DateTime.Now;
     }
 
     private void ChangeExercise(int newIndex)
@@ -45,12 +48,24 @@ public partial class ExerciseExecutionPage : ContentPage
         WeightEntry.Text = exercise.Weight.ToString();
         RepsEntry.Text = exercise.Repetitions.ToString();
 
+        // LÓGICA DO GIF: Carrega a animação se existir
+        if (exercise.Exercise?.Medias != null && exercise.Exercise.Medias.Count > 0)
+        {
+            _currentGifUrl = exercise.Exercise.Medias[0].Url;
+            ExerciseGif.IsVisible = true;
+            ExerciseGif.Source = ImageSource.FromUri(new Uri(_currentGifUrl));
+        }
+        else
+        {
+            _currentGifUrl = null;
+            ExerciseGif.IsVisible = false;
+        }
+
         _editingSetId = null;
         SaveBtn.Text = "REGISTRAR SÉRIE";
 
         LoadHistory();
 
-        // Verifica se é o último exercício para mudar o botão
         if (_currentIndex == _allExercises.Count - 1)
         {
             NextFinishBtn.Text = "FINALIZAR TREINO";
@@ -148,8 +163,6 @@ public partial class ExerciseExecutionPage : ContentPage
             if (success)
             {
                 SetEntry.Text = (setNum + 1).ToString();
-
-                // INICIA O CRONÔMETRO AUTOMATICAMENTE APÓS REGISTRAR
                 int restTime = currentExercise.RestSeconds > 0 ? currentExercise.RestSeconds : 90;
                 StartRestTimer(restTime);
             }
@@ -199,23 +212,18 @@ public partial class ExerciseExecutionPage : ContentPage
 
     private void OnExitClicked(object sender, EventArgs e)
     {
-        // Pausa o cronômetro de descanso se estiver rodando
         _isTimerRunning = false;
         RestTimerBorder.IsVisible = false;
-
-        // Volta para a tela de detalhes sem mostrar o resumo
         Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
     }
 
     private void OnNextOrFinishClicked(object sender, EventArgs e)
     {
-        // Se for o último exercício, finaliza o treino e mostra o resumo
         if (_currentIndex == _allExercises.Count - 1)
         {
             TimeSpan duration = DateTime.Now - _workoutStartTime;
             Application.Current!.MainPage = new WorkoutSummaryPage(duration, _allExercises, _workoutId);
         }
-        // Se não for o último, vai para o próximo exercício
         else
         {
             ChangeExercise(_currentIndex + 1);
@@ -240,11 +248,11 @@ public partial class ExerciseExecutionPage : ContentPage
             if (_remainingSeconds <= 0)
             {
                 TimerFinished();
-                return false; // Para o timer
+                return false;
             }
 
             UpdateTimerLabel();
-            return true; // Continua o timer
+            return true;
         });
     }
 
@@ -262,13 +270,10 @@ public partial class ExerciseExecutionPage : ContentPage
 
         try
         {
-            // Toca um beep no Windows (Frequência 800Hz por 500ms)
             if (DeviceInfo.Platform == DevicePlatform.WinUI)
             {
                 Beep(800, 500);
             }
-
-            // Vibra o celular por 1 segundo (funciona no Android/iOS)
             Vibration.Default.Vibrate(TimeSpan.FromSeconds(1));
         }
         catch { }
@@ -290,5 +295,21 @@ public partial class ExerciseExecutionPage : ContentPage
     {
         _remainingSeconds = 0;
         TimerFinished();
+    }
+
+    // --- LÓGICA DO POPUP DO GIF ---
+
+    private void OnGifTapped(object sender, TappedEventArgs e)
+    {
+        if (!string.IsNullOrEmpty(_currentGifUrl))
+        {
+            PopupGif.Source = ImageSource.FromUri(new Uri(_currentGifUrl));
+            GifPopupOverlay.IsVisible = true;
+        }
+    }
+
+    private void OnClosePopupClicked(object sender, EventArgs e)
+    {
+        GifPopupOverlay.IsVisible = false;
     }
 }

@@ -19,6 +19,7 @@ public class WorkoutRepository : IWorkoutRepository
         return await _context.Workouts
             .Include(w => w.Exercises)
                 .ThenInclude(we => we.Exercise)
+                    .ThenInclude(e => e!.Medias)
             .FirstOrDefaultAsync(w => w.Id == id);
     }
 

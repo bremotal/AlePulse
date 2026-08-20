@@ -40,7 +40,8 @@
                             <RoundRectangle CornerRadius="15" />
                         </Border.StrokeShape>
 
-                        <Grid ColumnDefinitions="*, Auto, Auto" RowDefinitions="Auto, Auto">
+                        <!-- Grid com 4 colunas: Dados, Upload, Editar, Excluir -->
+                        <Grid ColumnDefinitions="*, Auto, Auto, Auto" RowDefinitions="Auto, Auto">
 
                             <Label Grid.Row="0" Grid.Column="0"
                                    Text="{Binding Exercise.Name}"
@@ -54,7 +55,19 @@
                                 <Label Text="{Binding Weight, StringFormat='{0} kg'}" TextColor="{AppThemeBinding Dark=#888888, Light=#666666}" FontSize="14" />
                             </HorizontalStackLayout>
 
+                            <!-- Botão de Upload de Imagem -->
                             <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
+                                    Text="📷"
+                                    BackgroundColor="Transparent"
+                                    TextColor="#FF6A00"
+                                    FontSize="20"
+                                    WidthRequest="50"
+                                    HeightRequest="50"
+                                    VerticalOptions="Center"
+                                    Clicked="OnUploadImageClicked" />
+
+                            <!-- Botão de Editar -->
+                            <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="2"
                                     Text="✏️"
                                     BackgroundColor="Transparent"
                                     TextColor="#FF6A00"
@@ -64,7 +77,8 @@
                                     VerticalOptions="Center"
                                     Clicked="OnEditExerciseClicked" />
 
-                            <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="2"
+                            <!-- Botão de Excluir -->
+                            <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="3"
                                     Text="🗑️"
                                     BackgroundColor="Transparent"
                                     TextColor="Red"

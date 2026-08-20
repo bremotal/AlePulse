@@ -38,4 +38,8 @@ public class ExerciseRepository : IExerciseRepository
     {
         await _context.SaveChangesAsync();
     }
+    public async Task AddMediaAsync(ExerciseMedia media)
+    {
+        await _context.ExerciseMedias.AddAsync(media);
+    }
 }

@@ -30,21 +30,32 @@ public partial class LoginPage : ContentPage
         LoadingSpinner.IsVisible = true;
         LoadingSpinner.IsRunning = true;
 
-        var token = await ApiService.LoginAsync(EmailEntry.Text, PasswordEntry.Text);
+        try
+        {
+            var token = await ApiService.LoginAsync(EmailEntry.Text, PasswordEntry.Text);
 
-        if (!string.IsNullOrEmpty(token))
-        {
-            ApiService.SetToken(token);
-            Application.Current!.MainPage = new HomePage();
+            if (!string.IsNullOrEmpty(token))
+            {
+                ApiService.SetToken(token);
+                Application.Current!.MainPage = new HomePage();
+            }
+            else
+            {
+                ErrorLabel.Text = "E-mail ou senha inválidos.";
+                ErrorLabel.IsVisible = true;
+            }
         }
-        else
+        catch (Exception ex)
         {
-            ErrorLabel.Text = "E-mail ou senha inválidos.";
+            // Se der erro de rede/conexão, mostra o erro sem fechar o app
+            ErrorLabel.Text = "Erro de conexão com o servidor. Verifique o IP e o Firewall.";
             ErrorLabel.IsVisible = true;
         }
-
-        LoadingSpinner.IsRunning = false;
-        LoadingSpinner.IsVisible = false;
-        LoginButton.IsVisible = true;
+        finally
+        {
+            LoadingSpinner.IsRunning = false;
+            LoadingSpinner.IsVisible = false;
+            LoginButton.IsVisible = true;
+        }
     }
 }

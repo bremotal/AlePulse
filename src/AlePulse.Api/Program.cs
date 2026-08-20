@@ -5,7 +5,9 @@ using AlePulse.Infrastructure.Persistence;
 using AlePulse.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,9 +29,36 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
-// 4. Configuração do Swagger UI (Simplificado)
+// 4. Configuração do Swagger UI com JWT
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "AlePulse.Api", Version = "v1" });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header usando o esquema Bearer. Exemplo: \"Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 // 5. Configuração do JWT (Autenticação)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -50,11 +79,24 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// 7. Diz à API para usar Autenticação e Autorização
+// 7. Configuração para servir as imagens dos exercícios (Uploads)
+var wwwrootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+if (!Directory.Exists(wwwrootPath))
+{
+    Directory.CreateDirectory(wwwrootPath);
+}
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(wwwrootPath),
+    RequestPath = ""
+});
+
+// 8. Diz à API para usar Autenticação e Autorização
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 8. Diz à API para usar as rotas dos Controllers
+// 9. Diz à API para usar as rotas dos Controllers
 app.MapControllers();
 
 app.Run();

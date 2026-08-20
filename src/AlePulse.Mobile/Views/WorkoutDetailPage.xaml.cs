@@ -83,4 +83,39 @@ public partial class WorkoutDetailPage : ContentPage
             }
         }
     }
+
+    // NOVO MÉTODO: Fazer upload de imagem da galeria
+    private async void OnUploadImageClicked(object sender, EventArgs e)
+    {
+        if (sender is Button button && button.BindingContext is WorkoutExerciseDto exercise)
+        {
+            try
+            {
+                // Abre a galeria de fotos do celular/computador
+                var file = await FilePicker.Default.PickAsync(new PickOptions
+                {
+                    PickerTitle = "Selecione a imagem do exercício",
+                    FileTypes = FilePickerFileType.Images
+                });
+
+                if (file == null) return; // Usuário cancelou
+
+                // Envia para a API
+                bool success = await ApiService.UploadExerciseImageAsync(exercise.Exercise!.Id, file);
+                if (success)
+                {
+                    await DisplayAlertAsync("Sucesso", "Imagem enviada!", "OK");
+                    await LoadWorkoutDetails(); // Atualiza a tela
+                }
+                else
+                {
+                    await DisplayAlertAsync("Erro", $"Falha no upload.\n{ApiService.LastError}", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlertAsync("Erro", ex.Message, "OK");
+            }
+        }
+    }
 }

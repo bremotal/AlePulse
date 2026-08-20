@@ -11,4 +11,5 @@ public interface IExerciseRepository
     Task<IEnumerable<Exercise>> GetAllAsync();
     Task AddAsync(Exercise exercise);
     Task SaveChangesAsync();
+    Task AddMediaAsync(ExerciseMedia media);
 }
