@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AlePulse.Mobile.Views.RegisterPage"
+             BackgroundColor="{AppThemeBinding Dark=#121212, Light=#F9F9F9}"
+             Title="Cadastro">
+
+    <VerticalStackLayout Padding="30" Spacing="20" VerticalOptions="Center">
+
+        <Label Text="ALEPULSE" FontSize="40" FontAttributes="Bold" TextColor="#FF6A00" HorizontalOptions="Center" />
+        <Label Text="Crie sua conta" FontSize="16" TextColor="{AppThemeBinding Dark=#E0E0E0, Light=#333333}" HorizontalOptions="Center" Margin="0,0,0,30" />
+
+        <Border BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" Stroke="{AppThemeBinding Dark=#2B2B2B, Light=#EEEEEE}" Padding="15">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="10" />
+            </Border.StrokeShape>
+            <Entry x:Name="NameEntry" Placeholder="Nome Completo" PlaceholderColor="#888888" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" />
+        </Border>
+
+        <Border BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" Stroke="{AppThemeBinding Dark=#2B2B2B, Light=#EEEEEE}" Padding="15">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="10" />
+            </Border.StrokeShape>
+            <Entry x:Name="EmailEntry" Placeholder="E-mail" PlaceholderColor="#888888" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" Keyboard="Email" />
+        </Border>
+
+        <Border BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" Stroke="{AppThemeBinding Dark=#2B2B2B, Light=#EEEEEE}" Padding="15">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="10" />
+            </Border.StrokeShape>
+            <Entry x:Name="PasswordEntry" Placeholder="Senha" PlaceholderColor="#888888" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" IsPassword="True" />
+        </Border>
+
+        <Button x:Name="RegisterButton" Text="CADASTRAR" BackgroundColor="#FF6A00" TextColor="#FFFFFF" FontAttributes="Bold" CornerRadius="10" HeightRequest="50" Clicked="OnRegisterClicked" />
+        <ActivityIndicator x:Name="LoadingSpinner" Color="#FF6A00" IsRunning="False" IsVisible="False" HeightRequest="40" WidthRequest="40" />
+        <Label x:Name="ErrorLabel" TextColor="Red" IsVisible="False" HorizontalOptions="Center" />
+
+        <Button Text="Já tenho conta. Fazer Login." BackgroundColor="Transparent" TextColor="{AppThemeBinding Dark=#E0E0E0, Light=#333333}" Clicked="OnBackToLoginClicked" />
+
+    </VerticalStackLayout>
+</ContentPage>

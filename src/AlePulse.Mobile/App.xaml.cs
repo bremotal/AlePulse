@@ -11,8 +11,7 @@ public partial class App : Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        // Abre direto na LoginPage.
-        // A LoginPage vai verificar em background se já existe token salvo.
+        // Abre direto na LoginPage sem travar a tela
         return new Window(new LoginPage());
     }
 }

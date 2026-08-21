@@ -9,16 +9,13 @@ public partial class LoginPage : ContentPage
         InitializeComponent();
     }
 
-    // Executa sempre que a tela de login aparece
     protected override async void OnAppearing()
     {
         base.OnAppearing();
 
-        // Verifica se o usuário já está logado sem travar a tela
         bool isLogged = await ApiService.IsUserLoggedInAsync();
         if (isLogged)
         {
-            // Se tiver token salvo, pula direto para a Home!
             Application.Current!.MainPage = new HomePage();
         }
     }
@@ -45,9 +42,8 @@ public partial class LoginPage : ContentPage
                 ErrorLabel.IsVisible = true;
             }
         }
-        catch (Exception ex)
+        catch
         {
-            // Se der erro de rede/conexão, mostra o erro sem fechar o app
             ErrorLabel.Text = "Erro de conexão com o servidor. Verifique o IP e o Firewall.";
             ErrorLabel.IsVisible = true;
         }
@@ -57,5 +53,10 @@ public partial class LoginPage : ContentPage
             LoadingSpinner.IsVisible = false;
             LoginButton.IsVisible = true;
         }
+    }
+
+    private void OnRegisterClicked(object sender, EventArgs e)
+    {
+        Application.Current!.MainPage = new RegisterPage();
     }
 }

@@ -16,11 +16,10 @@ public partial class ExerciseExecutionPage : ContentPage
     private int _remainingSeconds;
     private bool _isTimerRunning;
     private DateTime _workoutStartTime;
+    private DateTime _restEndTime;
 
-    // Variável para guardar a URL do GIF atual
     private string? _currentGifUrl;
 
-    // Importação do Beep do Windows
     [DllImport("kernel32.dll")]
     public static extern bool Beep(int frequency, int duration);
 
@@ -48,12 +47,11 @@ public partial class ExerciseExecutionPage : ContentPage
         WeightEntry.Text = exercise.Weight.ToString();
         RepsEntry.Text = exercise.Repetitions.ToString();
 
-        // LÓGICA DO GIF: Carrega a animação se existir
         if (exercise.Exercise?.Medias != null && exercise.Exercise.Medias.Count > 0)
         {
             _currentGifUrl = exercise.Exercise.Medias[0].Url;
             ExerciseGif.IsVisible = true;
-            ExerciseGif.Source = ImageSource.FromUri(new Uri(_currentGifUrl));
+            ExerciseGif.Source = ImageSource.FromUri(new Uri(ApiService.GetAbsoluteUrl(_currentGifUrl)));
         }
         else
         {
@@ -79,6 +77,22 @@ public partial class ExerciseExecutionPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+
+        // Se o cronômetro estava rodando, recalcula o tempo ao voltar para a tela
+        if (_isTimerRunning)
+        {
+            var remaining = _restEndTime - DateTime.Now;
+            if (remaining.TotalSeconds <= 0)
+            {
+                TimerFinished();
+            }
+            else
+            {
+                _remainingSeconds = (int)Math.Ceiling(remaining.TotalSeconds);
+                UpdateTimerLabel();
+            }
+        }
+
         await LoadHistory();
     }
 
@@ -235,22 +249,23 @@ public partial class ExerciseExecutionPage : ContentPage
     private void StartRestTimer(int seconds)
     {
         _isTimerRunning = true;
-        _remainingSeconds = seconds;
+        _restEndTime = DateTime.Now.AddSeconds(seconds);
         RestTimerBorder.IsVisible = true;
-        UpdateTimerLabel();
 
+        // Mantém o cronômetro visual rodando na tela
         Device.StartTimer(TimeSpan.FromSeconds(1), () =>
         {
             if (!_isTimerRunning) return false;
 
-            _remainingSeconds--;
+            var remaining = _restEndTime - DateTime.Now;
 
-            if (_remainingSeconds <= 0)
+            if (remaining.TotalSeconds <= 0)
             {
                 TimerFinished();
                 return false;
             }
 
+            _remainingSeconds = (int)Math.Ceiling(remaining.TotalSeconds);
             UpdateTimerLabel();
             return true;
         });
@@ -281,13 +296,15 @@ public partial class ExerciseExecutionPage : ContentPage
 
     private void OnMinus15Clicked(object sender, EventArgs e)
     {
-        _remainingSeconds = Math.Max(0, _remainingSeconds - 15);
+        _restEndTime = _restEndTime.AddSeconds(-15);
+        _remainingSeconds = Math.Max(0, (int)Math.Ceiling((_restEndTime - DateTime.Now).TotalSeconds));
         UpdateTimerLabel();
     }
 
     private void OnPlus15Clicked(object sender, EventArgs e)
     {
-        _remainingSeconds += 15;
+        _restEndTime = _restEndTime.AddSeconds(15);
+        _remainingSeconds = (int)Math.Ceiling((_restEndTime - DateTime.Now).TotalSeconds);
         UpdateTimerLabel();
     }
 
@@ -303,7 +320,7 @@ public partial class ExerciseExecutionPage : ContentPage
     {
         if (!string.IsNullOrEmpty(_currentGifUrl))
         {
-            PopupGif.Source = ImageSource.FromUri(new Uri(_currentGifUrl));
+            PopupGif.Source = ImageSource.FromUri(new Uri(ApiService.GetAbsoluteUrl(_currentGifUrl)));
             GifPopupOverlay.IsVisible = true;
         }
     }

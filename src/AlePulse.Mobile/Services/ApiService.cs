@@ -13,13 +13,24 @@ public static class ApiService
 
     static ApiService()
     {
-        var baseUrl = DeviceInfo.Platform == DevicePlatform.Android
-            ? "https://open-sneezing-uncoiled.ngrok-free.dev"
-            : "http://localhost:5204";
+        // Usando a URL pública do Ngrok (funciona no Windows e no Celular real)
+        // AQUI VOCÊ COLOCA A URL QUE O NGROK TE DEU HOJE
+        var baseUrl = "https://open-sneezing-uncoiled.ngrok-free.dev";
 
         _client = new HttpClient { BaseAddress = new Uri(baseUrl) };
 
+        // Adiciona este cabeçalho para o Ngrok não bloquear o app
         _client.DefaultRequestHeaders.Add("ngrok-skip-browser-warning", "69420");
+    }
+
+    // Helper para montar a URL completa da imagem
+    public static string GetAbsoluteUrl(string relativeUrl)
+    {
+        if (string.IsNullOrEmpty(relativeUrl)) return string.Empty;
+
+        if (relativeUrl.StartsWith("http")) return relativeUrl;
+
+        return $"{_client.BaseAddress}{relativeUrl.TrimStart('/')}";
     }
 
     public static void SetToken(string token)
@@ -59,6 +70,13 @@ public static class ApiService
             return result?.Token;
         }
         return null;
+    }
+
+    public static async Task<bool> RegisterAsync(string name, string email, string password)
+    {
+        var dto = new { name, email, password };
+        var response = await _client.PostAsJsonAsync("/api/Users/register", dto);
+        return response.IsSuccessStatusCode;
     }
 
     public static async Task<bool> CreateWorkoutAsync(string name, string description)
@@ -140,6 +158,21 @@ public static class ApiService
         return response.IsSuccessStatusCode;
     }
 
+    public static async Task<bool> UploadExerciseImageAsync(Guid exerciseId, FileResult file)
+    {
+        using var content = new MultipartFormDataContent();
+        var stream = await file.OpenReadAsync();
+        content.Add(new StreamContent(stream), "file", file.FileName);
+
+        var response = await _client.PostAsync($"/api/Exercises/{exerciseId}/media/upload", content);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        }
+        return response.IsSuccessStatusCode;
+    }
+
     public static async Task<List<Models.ExerciseSetDto>> GetHistoryAsync(Guid exerciseId)
     {
         var response = await _client.GetAsync($"/api/History/{exerciseId}");
@@ -180,7 +213,6 @@ public static class ApiService
         return response.IsSuccessStatusCode;
     }
 
-    // NOVOS MÉTODOS DE PERFIL E SENHA
     public static async Task<Models.ProfileDto?> GetMyProfileAsync()
     {
         var response = await _client.GetAsync("/api/Users/me");
@@ -189,6 +221,18 @@ public static class ApiService
             return await response.Content.ReadFromJsonAsync<Models.ProfileDto>();
         }
         return null;
+    }
+
+    public static async Task<bool> UpdateProfileAsync(string name, string email)
+    {
+        var dto = new { name, email };
+        var response = await _client.PutAsJsonAsync("/api/Users/update-profile", dto);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        }
+        return response.IsSuccessStatusCode;
     }
 
     public static async Task<bool> ChangePasswordAsync(string currentPassword, string newPassword)
@@ -202,33 +246,9 @@ public static class ApiService
         }
         return response.IsSuccessStatusCode;
     }
-    public static async Task<bool> UpdateProfileAsync(string name, string email)
-    {
-        var dto = new { name, email };
-        var response = await _client.PutAsJsonAsync("/api/Users/update-profile", dto);
+}
 
-        if (!response.IsSuccessStatusCode)
-        {
-            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
-        }
-        return response.IsSuccessStatusCode;
-    }
-    public static async Task<bool> UploadExerciseImageAsync(Guid exerciseId, FileResult file)
-    {
-        using var content = new MultipartFormDataContent();
-        var stream = await file.OpenReadAsync();
-        content.Add(new StreamContent(stream), "file", file.FileName);
-
-        var response = await _client.PostAsync($"/api/Exercises/{exerciseId}/media/upload", content);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
-        }
-        return response.IsSuccessStatusCode;
-    }
-    public class LoginResponse
-    {
-        public string? Token { get; set; }
-    }
+public class LoginResponse
+{
+    public string? Token { get; set; }
 }
