@@ -79,4 +79,29 @@ public class WorkoutProgramsController : ControllerBase
 
         return Ok(workout);
     }
+    // Editar Ficha
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateProgram(Guid id, [FromBody] CreateWorkoutProgramDto dto)
+    {
+        var program = await _programRepository.GetByIdAsync(id);
+        if (program == null || program.UserId != GetUserId()) return NotFound();
+
+        program.Name = dto.Name;
+        program.Description = dto.Description;
+
+        await _programRepository.UpdateAsync(program);
+        return NoContent();
+    }
+
+    // Excluir Ficha
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteProgram(Guid id)
+    {
+        var program = await _programRepository.GetByIdAsync(id);
+        if (program == null || program.UserId != GetUserId()) return NotFound();
+
+        await _programRepository.DeleteAsync(program);
+        await _programRepository.SaveChangesAsync();
+        return NoContent();
+    }
 }

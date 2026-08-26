@@ -16,7 +16,7 @@ public partial class LoginPage : ContentPage
         bool isLogged = await ApiService.IsUserLoggedInAsync();
         if (isLogged)
         {
-            Application.Current!.MainPage = new HomePage();
+            Application.Current!.MainPage = new ProgramsPage();
         }
     }
 
@@ -34,7 +34,8 @@ public partial class LoginPage : ContentPage
             if (!string.IsNullOrEmpty(token))
             {
                 ApiService.SetToken(token);
-                Application.Current!.MainPage = new HomePage();
+                // MUDAMOS DE HomePage PARA ProgramsPage AQUI!
+                Application.Current!.MainPage = new ProgramsPage();
             }
             else
             {

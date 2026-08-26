@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AlePulse.Mobile.Views.ProgramsPage"
+             BackgroundColor="{AppThemeBinding Dark=#121212, Light=#F9F9F9}"
+             Title="Minhas Fichas">
+
+    <Grid RowDefinitions="Auto, Auto, *, Auto" Padding="20">
+
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,20,0,10">
+            <VerticalStackLayout Grid.Column="0" Spacing="5" HorizontalOptions="Center">
+                <Label Text="BEM-VINDO AO" FontSize="14" TextColor="{AppThemeBinding Dark=#E0E0E0, Light=#333333}" HorizontalOptions="Center" />
+                <Label Text="ALEPULSE" FontSize="36" FontAttributes="Bold" TextColor="#FF6A00" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+            <Button Grid.Column="1" Text="👤" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#F5F5F5}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" WidthRequest="50" HeightRequest="50" CornerRadius="25" VerticalOptions="Center" Clicked="OnProfileClicked" />
+        </Grid>
+
+        <Button Grid.Row="1" Text="+ CRIAR NOVA FICHA" BackgroundColor="#FF6A00" TextColor="#FFFFFF" FontAttributes="Bold" CornerRadius="10" HeightRequest="45" Margin="0,0,0,15" Clicked="OnCreateProgramClicked" />
+
+        <CollectionView x:Name="ProgramsList" Grid.Row="2" BackgroundColor="Transparent">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout Spacing="15" HorizontalOptions="Center" VerticalOptions="Center" Margin="0,50,0,0">
+                    <Label Text="Nenhuma ficha criada." TextColor="{AppThemeBinding Dark=#888888, Light=#666666}" FontSize="18" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" Stroke="{AppThemeBinding Dark=#2B2B2B, Light=#EEEEEE}" Margin="0,0,0,15" Padding="15">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnProgramTapped" />
+                        </Border.GestureRecognizers>
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="15" />
+                        </Border.StrokeShape>
+                        <Grid ColumnDefinitions="*, Auto, Auto" RowDefinitions="Auto, Auto">
+                            <VerticalStackLayout Grid.Column="0" Spacing="5">
+                                <Label Text="{Binding Name}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" FontSize="20" FontAttributes="Bold" />
+                                <Label Text="{Binding Description}" TextColor="{AppThemeBinding Dark=#888888, Light=#666666}" FontSize="14" />
+                            </VerticalStackLayout>
+                            <Button Grid.Column="1" Text="✏️" BackgroundColor="Transparent" TextColor="#FF6A00" WidthRequest="50" HeightRequest="50" Clicked="OnEditProgramClicked" />
+                            <Button Grid.Column="2" Text="🗑️" BackgroundColor="Transparent" TextColor="Red" WidthRequest="50" HeightRequest="50" Clicked="OnDeleteProgramClicked" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Button Grid.Row="3" Text="SAIR DA CONTA" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" CornerRadius="10" HeightRequest="50" Margin="0,10,0,0" Clicked="OnLogoutClicked" />
+    </Grid>
+</ContentPage>

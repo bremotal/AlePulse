@@ -44,4 +44,20 @@ public class WorkoutProgramRepository : IWorkoutProgramRepository
     {
         await _context.SaveChangesAsync();
     }
+    public async Task DeleteAsync(WorkoutProgram program)
+    {
+        program.IsActive = false;
+        _context.WorkoutPrograms.Update(program);
+    }
+
+    public async Task UpdateAsync(WorkoutProgram program)
+    {
+        var existing = await _context.WorkoutPrograms.FindAsync(program.Id);
+        if (existing != null)
+        {
+            existing.Name = program.Name;
+            existing.Description = program.Description;
+            await _context.SaveChangesAsync();
+        }
+    }
 }

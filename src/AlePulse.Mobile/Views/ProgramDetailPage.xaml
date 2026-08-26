@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AlePulse.Mobile.Views.ProgramDetailPage"
+             BackgroundColor="{AppThemeBinding Dark=#121212, Light=#F9F9F9}"
+             Title="Treinos da Ficha">
+
+    <Grid RowDefinitions="Auto, Auto, *, Auto" Padding="20">
+
+        <VerticalStackLayout Grid.Row="0" Spacing="5" Margin="0,20,0,20">
+            <Label x:Name="ProgramNameLabel" FontSize="28" FontAttributes="Bold" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" />
+        </VerticalStackLayout>
+
+        <BoxView Grid.Row="1" HeightRequest="1" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}" Margin="0,0,0,20" />
+
+        <CollectionView x:Name="WorkoutsList" Grid.Row="2" BackgroundColor="Transparent">
+            <CollectionView.EmptyView>
+                <Label Text="Nenhum treino nesta ficha." TextColor="{AppThemeBinding Dark=#888888, Light=#666666}" FontSize="16" HorizontalOptions="Center" Margin="0,50,0,0" />
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" Stroke="{AppThemeBinding Dark=#2B2B2B, Light=#EEEEEE}" Margin="0,0,0,15" Padding="15">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnWorkoutTapped" />
+                        </Border.GestureRecognizers>
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="15" />
+                        </Border.StrokeShape>
+                        <Grid ColumnDefinitions="*, Auto, Auto" RowDefinitions="Auto, Auto">
+                            <VerticalStackLayout Grid.Column="0" Spacing="5">
+                                <Label Text="{Binding Name}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" FontSize="20" FontAttributes="Bold" />
+                                <Label Text="{Binding Description}" TextColor="{AppThemeBinding Dark=#888888, Light=#666666}" FontSize="14" />
+                            </VerticalStackLayout>
+                            <Button Grid.Column="1" Text="✏️" BackgroundColor="Transparent" TextColor="#FF6A00" WidthRequest="50" HeightRequest="50" Clicked="OnEditWorkoutClicked" />
+                            <Button Grid.Column="2" Text="🗑️" BackgroundColor="Transparent" TextColor="Red" WidthRequest="50" HeightRequest="50" Clicked="OnDeleteWorkoutClicked" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Grid Grid.Row="3" ColumnDefinitions="*, *" ColumnSpacing="15">
+            <Button Grid.Column="0" Text="VOLTAR" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" CornerRadius="10" HeightRequest="50" Clicked="OnBackClicked" />
+            <Button Grid.Column="1" Text="+ TREINO" BackgroundColor="#FF6A00" TextColor="#FFFFFF" FontAttributes="Bold" CornerRadius="10" HeightRequest="50" Clicked="OnAddWorkoutClicked" />
+        </Grid>
+
+    </Grid>
+</ContentPage>

@@ -82,6 +82,33 @@ public static class ApiService
         var response = await _client.PostAsJsonAsync("/api/Workouts", newWorkout);
         return response.IsSuccessStatusCode;
     }
+    public static async Task<List<Models.WorkoutProgramDto>> GetProgramsAsync()
+    {
+        var response = await _client.GetAsync("/api/WorkoutPrograms");
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadFromJsonAsync<List<Models.WorkoutProgramDto>>();
+        }
+        return new List<Models.WorkoutProgramDto>();
+    }
+    public static async Task<bool> CreateProgramAsync(string name, string description)
+    {
+        var dto = new { name, description };
+        var response = await _client.PostAsJsonAsync("/api/WorkoutPrograms", dto);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        }
+        return response.IsSuccessStatusCode;
+    }
+    public static async Task<bool> AddWorkoutToProgramAsync(Guid programId, string name, string description)
+    {
+        var dto = new { name, description };
+        var response = await _client.PostAsJsonAsync($"/api/WorkoutPrograms/{programId}/workouts", dto);
+        return response.IsSuccessStatusCode;
+    }
+
 
     public static async Task<List<Models.WorkoutDto>> GetWorkoutsAsync()
     {
@@ -241,6 +268,43 @@ public static class ApiService
         {
             LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
         }
+        return response.IsSuccessStatusCode;
+    }
+    public static async Task<Models.WorkoutProgramDto?> GetProgramByIdAsync(Guid id)
+    {
+        var response = await _client.GetAsync($"/api/WorkoutPrograms/{id}");
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadFromJsonAsync<Models.WorkoutProgramDto>();
+        }
+        return null;
+    }
+
+    // Deletar e Editar Ficha
+    public static async Task<bool> DeleteProgramAsync(Guid id)
+    {
+        var response = await _client.DeleteAsync($"/api/WorkoutPrograms/{id}");
+        return response.IsSuccessStatusCode;
+    }
+
+    public static async Task<bool> UpdateProgramAsync(Guid id, string name, string description)
+    {
+        var dto = new { name, description };
+        var response = await _client.PutAsJsonAsync($"/api/WorkoutPrograms/{id}", dto);
+        return response.IsSuccessStatusCode;
+    }
+
+    // Deletar e Editar Treino (A, B, C)
+    public static async Task<bool> DeleteWorkoutAsync(Guid id)
+    {
+        var response = await _client.DeleteAsync($"/api/Workouts/{id}");
+        return response.IsSuccessStatusCode;
+    }
+
+    public static async Task<bool> UpdateWorkoutAsync(Guid id, string name, string description)
+    {
+        var dto = new { name, description };
+        var response = await _client.PutAsJsonAsync($"/api/Workouts/{id}", dto);
         return response.IsSuccessStatusCode;
     }
 }

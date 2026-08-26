@@ -9,4 +9,6 @@ public interface IWorkoutProgramRepository
     Task AddAsync(WorkoutProgram program);
     Task AddWorkoutAsync(Workout workout);
     Task SaveChangesAsync();
+    Task DeleteAsync(WorkoutProgram program);
+    Task UpdateAsync(WorkoutProgram program);
 }

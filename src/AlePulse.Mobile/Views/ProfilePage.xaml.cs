@@ -40,7 +40,7 @@ public partial class ProfilePage : ContentPage
         if (success)
         {
             await DisplayAlertAsync("Sucesso", "Dados atualizados!", "OK");
-            await LoadProfile(); // Atualiza a tela
+            await LoadProfile();
         }
         else
         {
@@ -75,6 +75,6 @@ public partial class ProfilePage : ContentPage
 
     private void OnBackClicked(object sender, EventArgs e)
     {
-        Application.Current!.MainPage = new HomePage();
+        Application.Current!.MainPage = new ProgramsPage();
     }
 }
