@@ -2,6 +2,11 @@
 
   <ItemGroup>
     <Compile Remove="Class1.cs" />
+    <Compile Remove="Migrations\20260821184618_InitialPostgres.cs" />
+    <Compile Remove="Migrations\20260821184618_InitialPostgres.Designer.cs" />
+    <Compile Remove="Migrations\20260826104000_AddWorkoutProgram.cs" />
+    <Compile Remove="Migrations\20260826104000_AddWorkoutProgram.Designer.cs" />
+    <Compile Remove="Migrations\AlePulseDbContextModelSnapshot.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,6 +22,10 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.11" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
   <PropertyGroup>

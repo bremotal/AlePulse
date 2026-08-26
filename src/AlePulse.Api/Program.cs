@@ -21,6 +21,7 @@ builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IWorkoutRepository, WorkoutRepository>();
 builder.Services.AddScoped<IWorkoutSessionRepository, WorkoutSessionRepository>();
+builder.Services.AddScoped<IWorkoutProgramRepository, WorkoutProgramRepository>(); // NOVO
 
 // 3. Registra os Controllers
 builder.Services.AddControllers()

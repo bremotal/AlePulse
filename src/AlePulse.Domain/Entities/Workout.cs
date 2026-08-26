@@ -11,7 +11,7 @@ public class Workout : BaseEntity
 
     public string Name { get; set; } = string.Empty; // Ex: Treino A - Peito e Tríceps
     public string? Description { get; set; }
-
-    // Relacionamento 1 para N
     public ICollection<WorkoutExercise> Exercises { get; set; } = new List<WorkoutExercise>();
+    public Guid WorkoutProgramId { get; set; }
+    public WorkoutProgram WorkoutProgram { get; set; } = null!;
 }

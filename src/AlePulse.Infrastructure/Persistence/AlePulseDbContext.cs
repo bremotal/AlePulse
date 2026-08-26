@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AlePulse.Domain.Entities;
+﻿using AlePulse.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace AlePulse.Infrastructure.Persistence;
@@ -20,7 +17,8 @@ public class AlePulseDbContext : DbContext
     public DbSet<Exercise> Exercises { get; set; }
     public DbSet<ExerciseMedia> ExerciseMedias { get; set; }
 
-    // Treinos Planejados
+    // Fichas e Treinos
+    public DbSet<WorkoutProgram> WorkoutPrograms { get; set; }
     public DbSet<Workout> Workouts { get; set; }
     public DbSet<WorkoutExercise> WorkoutExercises { get; set; }
 
@@ -43,6 +41,12 @@ public class AlePulseDbContext : DbContext
             .HasMany(e => e.Medias)
             .WithOne(m => m.Exercise)
             .HasForeignKey(m => m.ExerciseId);
+
+        // Configuração do WorkoutProgram e Workout (Relação 1 para N)
+        modelBuilder.Entity<WorkoutProgram>()
+            .HasMany(p => p.Workouts)
+            .WithOne(w => w.WorkoutProgram)
+            .HasForeignKey(w => w.WorkoutProgramId);
 
         // Configuração do Workout e WorkoutExercise (Relação 1 para N)
         modelBuilder.Entity<Workout>()
