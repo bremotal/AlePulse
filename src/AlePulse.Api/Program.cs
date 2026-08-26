@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // 1. Configuração do Banco de Dados
 builder.Services.AddDbContext<AlePulseDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // 2. Injeção de Dependência dos Repositórios e Serviços
 builder.Services.AddScoped<IUserRepository, UserRepository>();

@@ -13,14 +13,10 @@ public static class ApiService
 
     static ApiService()
     {
-        // Usando a URL pública do Ngrok (funciona no Windows e no Celular real)
-        // AQUI VOCÊ COLOCA A URL QUE O NGROK TE DEU HOJE
-        var baseUrl = "https://open-sneezing-uncoiled.ngrok-free.dev";
+        // COLOQUE AQUI O IPv4 DO SEU COMPUTADOR (Ex: 192.168.1.10)
+        var baseUrl = "http://192.168.25.1:5204";
 
         _client = new HttpClient { BaseAddress = new Uri(baseUrl) };
-
-        // Adiciona este cabeçalho para o Ngrok não bloquear o app
-        _client.DefaultRequestHeaders.Add("ngrok-skip-browser-warning", "69420");
     }
 
     // Helper para montar a URL completa da imagem

@@ -6,10 +6,10 @@
 		<!--TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>-->
 
 		<!-- Note for MacCatalyst:
-		The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.
-		When specifying both architectures, use the plural <RuntimeIdentifiers> instead of the singular <RuntimeIdentifier>.
-		The Mac App Store will NOT accept apps with ONLY maccatalyst-arm64 indicated;
-		either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
+        The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.
+        When specifying both architectures, use the plural <RuntimeIdentifiers> instead of the singular <RuntimeIdentifier>.
+        The Mac App Store will NOT accept apps with ONLY maccatalyst-arm64 indicated;
+        either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
 		<!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
 
 		<OutputType>Exe</OutputType>
@@ -20,11 +20,11 @@
 		<Nullable>enable</Nullable>
 
 		<!-- Enable XAML source generation for faster build times and improved performance.
-		     This generates C# code from XAML at compile time instead of runtime inflation.
-		     To disable, remove this line.
-		     For individual files, you can override by setting Inflator metadata:
-		       <MauiXaml Update="MyPage.xaml" Inflator="Default" /> (reverts to defaults: Runtime for Debug, XamlC for Release)
-		       <MauiXaml Update="MyPage.xaml" Inflator="Runtime" /> (force runtime inflation) -->
+             This generates C# code from XAML at compile time instead of runtime inflation.
+             To disable, remove this line.
+             For individual files, you can override by setting Inflator metadata:
+               <MauiXaml Update="MyPage.xaml" Inflator="Default" /> (reverts to defaults: Runtime for Debug, XamlC for Release)
+               <MauiXaml Update="MyPage.xaml" Inflator="Runtime" /> (force runtime inflation) -->
 		<MauiXamlInflator>SourceGen</MauiXamlInflator>
 
 		<!-- Display name -->
@@ -49,13 +49,14 @@
 
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\alepulse.svg" Color="#121212" />
-		<!-- Splash Screen -->
-		<MauiSplashScreen Include="Resources\Splash\alepulse.svg" Color="#121212" />
+
+		<!-- Splash Screen (Com tempo mínimo de 3 segundos) -->
+		<MauiSplashScreen Include="Resources\Splash\alepulse.png" Color="#121212" MinimumDuration="3" />
+
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
-		
+
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
 
@@ -64,8 +65,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="Resources\AppIcon\appiconfg.svg" />
-	  <None Remove="Resources\Splash\splash.svg" />
+		<None Remove="Resources\Splash\splash.svg" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -75,56 +75,56 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\AlePulse.Shared\AlePulse.Shared.csproj" />
+		<ProjectReference Include="..\AlePulse.Shared\AlePulse.Shared.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="ViewModels\" />
+		<Folder Include="ViewModels\" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <MauiXaml Update="Views\AddExercisePage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\CreateWorkoutPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\EditExercisePage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\ExerciseExecutionPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\HomePage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\LoginPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\ProfilePage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\RegisterPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\WorkoutDetailPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\WorkoutSummaryPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
+		<MauiXaml Update="Views\AddExercisePage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\CreateWorkoutPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\EditExercisePage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\ExerciseExecutionPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\HomePage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\LoginPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\ProfilePage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\RegisterPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\WorkoutDetailPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\WorkoutSummaryPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="Views\ProfilePage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </None>
-	  <None Update="Views\RegisterPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </None>
-	  <None Update="Views\WorkoutSummaryPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </None>
+		<None Update="Views\ProfilePage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</None>
+		<None Update="Views\RegisterPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</None>
+		<None Update="Views\WorkoutSummaryPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</None>
 	</ItemGroup>
 
 </Project>
