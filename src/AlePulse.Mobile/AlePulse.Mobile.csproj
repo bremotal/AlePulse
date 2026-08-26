@@ -45,14 +45,16 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+
 	</PropertyGroup>
 
 	<ItemGroup>
 		<!-- App Icon -->
 
 		<!-- Splash Screen (Com tempo mínimo de 3 segundos) -->
-		<MauiSplashScreen Include="Resources\Splash\alepulse.png" Color="#121212" MinimumDuration="3" />
-
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" Color="#121212" />
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#121212" MinimumDuration="3" />
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
@@ -86,16 +88,10 @@
 		<MauiXaml Update="Views\AddExercisePage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Views\CreateWorkoutPage.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
 		<MauiXaml Update="Views\EditExercisePage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\ExerciseExecutionPage.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
-		<MauiXaml Update="Views\HomePage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\LoginPage.xaml">
@@ -124,6 +120,12 @@
 	<ItemGroup>
 		<None Update="Views\ProfilePage.xaml">
 			<Generator>MSBuild:Compile</Generator>
+		</None>
+		<None Update="Views\ProgramDetailPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</None>
+		<None Update="Views\ProgramsPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
 		</None>
 		<None Update="Views\RegisterPage.xaml">
 			<Generator>MSBuild:Compile</Generator>

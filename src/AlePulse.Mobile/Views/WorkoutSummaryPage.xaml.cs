@@ -42,6 +42,7 @@ public partial class WorkoutSummaryPage : ContentPage
 
     private void OnBackHomeClicked(object sender, EventArgs e)
     {
-        Application.Current!.MainPage = new HomePage();
+        // Alterado para voltar para a tela de Fichas
+        Application.Current!.MainPage = new ProgramsPage();
     }
 }

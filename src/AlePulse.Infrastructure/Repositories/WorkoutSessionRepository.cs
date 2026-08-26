@@ -26,8 +26,14 @@ public class WorkoutSessionRepository : IWorkoutSessionRepository
 
     public async Task LogSetAsync(Guid userId, Guid workoutId, Guid exerciseId, LogSetDto dto)
     {
+        // Define o início e o fim do dia de hoje em UTC
+        var today = DateTime.UtcNow.Date;
+        var tomorrow = today.AddDays(1);
+
+        // Busca se já existe uma sessão aberta hoje usando intervalo (>= e <)
+        // Isso evita o crash no PostgreSQL por usar .Date
         var session = await _context.WorkoutSessions
-            .FirstOrDefaultAsync(s => s.WorkoutId == workoutId && s.UserId == userId && s.StartedAt.Date == DateTime.Now);
+            .FirstOrDefaultAsync(s => s.WorkoutId == workoutId && s.UserId == userId && s.StartedAt >= today && s.StartedAt < tomorrow);
 
         if (session == null)
         {
@@ -35,7 +41,7 @@ public class WorkoutSessionRepository : IWorkoutSessionRepository
             {
                 UserId = userId,
                 WorkoutId = workoutId,
-                StartedAt = DateTime.Now.Date,
+                StartedAt = DateTime.UtcNow,
                 Status = SessionStatus.InProgress
             };
             await _context.WorkoutSessions.AddAsync(session);
@@ -50,7 +56,7 @@ public class WorkoutSessionRepository : IWorkoutSessionRepository
             Weight = dto.Weight,
             Repetitions = dto.Repetitions,
             IsCompleted = true,
-            CompletedAt = DateTime.Now.Date
+            CompletedAt = DateTime.UtcNow
         };
 
         await _context.ExerciseSets.AddAsync(set);

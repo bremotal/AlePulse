@@ -32,7 +32,7 @@ public partial class WorkoutDetailPage : ContentPage
 
     private void OnBackClicked(object sender, EventArgs e)
     {
-        Application.Current!.MainPage = new HomePage();
+        Application.Current!.MainPage = new ProgramsPage();
     }
 
     private void OnAddExerciseClicked(object sender, EventArgs e)
@@ -45,7 +45,6 @@ public partial class WorkoutDetailPage : ContentPage
         var workout = await ApiService.GetWorkoutByIdAsync(_workoutId);
         if (workout?.Exercises != null && workout.Exercises.Count > 0)
         {
-            // Envia a lista inteira de exercícios para o Player
             Application.Current!.MainPage = new ExerciseExecutionPage(_workoutId, workout.Exercises.ToList());
         }
         else
@@ -58,7 +57,6 @@ public partial class WorkoutDetailPage : ContentPage
     {
         if (sender is Border border && border.BindingContext is WorkoutExerciseDto exercise)
         {
-            // Se clicar no card (mas não nos botões), abre apenas ele
             Application.Current!.MainPage = new ExerciseExecutionPage(_workoutId, new List<WorkoutExerciseDto> { exercise });
         }
     }
@@ -84,28 +82,25 @@ public partial class WorkoutDetailPage : ContentPage
         }
     }
 
-    // NOVO MÉTODO: Fazer upload de imagem da galeria
     private async void OnUploadImageClicked(object sender, EventArgs e)
     {
         if (sender is Button button && button.BindingContext is WorkoutExerciseDto exercise)
         {
             try
             {
-                // Abre a galeria de fotos do celular/computador
                 var file = await FilePicker.Default.PickAsync(new PickOptions
                 {
                     PickerTitle = "Selecione a imagem do exercício",
                     FileTypes = FilePickerFileType.Images
                 });
 
-                if (file == null) return; // Usuário cancelou
+                if (file == null) return;
 
-                // Envia para a API
                 bool success = await ApiService.UploadExerciseImageAsync(exercise.Exercise!.Id, file);
                 if (success)
                 {
                     await DisplayAlertAsync("Sucesso", "Imagem enviada!", "OK");
-                    await LoadWorkoutDetails(); // Atualiza a tela
+                    await LoadWorkoutDetails();
                 }
                 else
                 {

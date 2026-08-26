@@ -13,20 +13,17 @@ public static class ApiService
 
     static ApiService()
     {
-        // A URL pública da nossa API na nuvem (Render)
+        // Usando a URL pública da nossa API na nuvem (Render)
         var baseUrl = "https://alepulse-api.onrender.com";
 
         _client = new HttpClient { BaseAddress = new Uri(baseUrl) };
-        _client.DefaultRequestHeaders.Add("ngrok-skip-browser-warning", "69420"); // Pode deixar essa linha, não atrapalha
+        _client.DefaultRequestHeaders.Add("ngrok-skip-browser-warning", "69420");
     }
 
-    // Helper para montar a URL completa da imagem
     public static string GetAbsoluteUrl(string relativeUrl)
     {
         if (string.IsNullOrEmpty(relativeUrl)) return string.Empty;
-
         if (relativeUrl.StartsWith("http")) return relativeUrl;
-
         return $"{_client.BaseAddress}{relativeUrl.TrimStart('/')}";
     }
 
@@ -55,7 +52,6 @@ public static class ApiService
     public static async Task<string?> LoginAsync(string email, string password)
     {
         var response = await _client.PostAsJsonAsync("/api/Users/login", new { email, password });
-
         if (response.IsSuccessStatusCode)
         {
             var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
@@ -76,12 +72,8 @@ public static class ApiService
         return response.IsSuccessStatusCode;
     }
 
-    public static async Task<bool> CreateWorkoutAsync(string name, string description)
-    {
-        var newWorkout = new { name, description };
-        var response = await _client.PostAsJsonAsync("/api/Workouts", newWorkout);
-        return response.IsSuccessStatusCode;
-    }
+    // --- MÉTODOS DA FICHA (WORKOUT PROGRAM) ---
+
     public static async Task<List<Models.WorkoutProgramDto>> GetProgramsAsync()
     {
         var response = await _client.GetAsync("/api/WorkoutPrograms");
@@ -91,34 +83,47 @@ public static class ApiService
         }
         return new List<Models.WorkoutProgramDto>();
     }
+
+    public static async Task<Models.WorkoutProgramDto?> GetProgramByIdAsync(Guid id)
+    {
+        var response = await _client.GetAsync($"/api/WorkoutPrograms/{id}");
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadFromJsonAsync<Models.WorkoutProgramDto>();
+        }
+        return null;
+    }
+
     public static async Task<bool> CreateProgramAsync(string name, string description)
     {
         var dto = new { name, description };
         var response = await _client.PostAsJsonAsync("/api/WorkoutPrograms", dto);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
-        }
+        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
         return response.IsSuccessStatusCode;
     }
+
+    public static async Task<bool> UpdateProgramAsync(Guid id, string name, string description)
+    {
+        var dto = new { name, description };
+        var response = await _client.PutAsJsonAsync($"/api/WorkoutPrograms/{id}", dto);
+        return response.IsSuccessStatusCode;
+    }
+
+    public static async Task<bool> DeleteProgramAsync(Guid id)
+    {
+        var response = await _client.DeleteAsync($"/api/WorkoutPrograms/{id}");
+        return response.IsSuccessStatusCode;
+    }
+
     public static async Task<bool> AddWorkoutToProgramAsync(Guid programId, string name, string description)
     {
         var dto = new { name, description };
         var response = await _client.PostAsJsonAsync($"/api/WorkoutPrograms/{programId}/workouts", dto);
+        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
         return response.IsSuccessStatusCode;
     }
 
-
-    public static async Task<List<Models.WorkoutDto>> GetWorkoutsAsync()
-    {
-        var response = await _client.GetAsync("/api/Workouts");
-        if (response.IsSuccessStatusCode)
-        {
-            return await response.Content.ReadFromJsonAsync<List<Models.WorkoutDto>>();
-        }
-        return new List<Models.WorkoutDto>();
-    }
+    // --- MÉTODOS DE TREINOS (WORKOUTS) ---
 
     public static async Task<Models.WorkoutDetailDto?> GetWorkoutByIdAsync(Guid id)
     {
@@ -130,20 +135,17 @@ public static class ApiService
         return null;
     }
 
+    public static async Task<bool> UpdateWorkoutAsync(Guid id, string name, string description)
+    {
+        var dto = new { name, description };
+        var response = await _client.PutAsJsonAsync($"/api/Workouts/{id}", dto);
+        return response.IsSuccessStatusCode;
+    }
+
     public static async Task<bool> DeleteWorkoutAsync(Guid id)
     {
         var response = await _client.DeleteAsync($"/api/Workouts/{id}");
         return response.IsSuccessStatusCode;
-    }
-
-    public static async Task<List<Models.ExerciseDto>> GetExercisesAsync()
-    {
-        var response = await _client.GetAsync("/api/Exercises");
-        if (response.IsSuccessStatusCode)
-        {
-            return await response.Content.ReadFromJsonAsync<List<Models.ExerciseDto>>();
-        }
-        return new List<Models.ExerciseDto>();
     }
 
     public static async Task<bool> AddExerciseToWorkoutAsync(Guid workoutId, Guid exerciseId, int sets, int reps, decimal weight, int rest)
@@ -159,6 +161,26 @@ public static class ApiService
         return response.IsSuccessStatusCode;
     }
 
+    public static async Task<bool> UpdateWorkoutExerciseAsync(Guid workoutId, Guid exerciseId, int sets, int reps, decimal weight, int rest)
+    {
+        var dto = new { sets, repetitions = reps, weight, restSeconds = rest };
+        var response = await _client.PutAsJsonAsync($"/api/Workouts/{workoutId}/exercises/{exerciseId}", dto);
+        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        return response.IsSuccessStatusCode;
+    }
+
+    // --- MÉTODOS DE EXERCÍCIOS ---
+
+    public static async Task<List<Models.ExerciseDto>> GetExercisesAsync()
+    {
+        var response = await _client.GetAsync("/api/Exercises");
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadFromJsonAsync<List<Models.ExerciseDto>>();
+        }
+        return new List<Models.ExerciseDto>();
+    }
+
     public static async Task<Models.ExerciseDto?> CreateExerciseAsync(string name)
     {
         var dto = new { name, primaryMuscleGroup = "Personalizado", secondaryMuscleGroup = "", equipment = "", difficulty = "Intermediário", instructions = "" };
@@ -170,18 +192,6 @@ public static class ApiService
         return null;
     }
 
-    public static async Task<bool> UpdateWorkoutExerciseAsync(Guid workoutId, Guid exerciseId, int sets, int reps, decimal weight, int rest)
-    {
-        var dto = new { sets, repetitions = reps, weight, restSeconds = rest };
-        var response = await _client.PutAsJsonAsync($"/api/Workouts/{workoutId}/exercises/{exerciseId}", dto);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
-        }
-        return response.IsSuccessStatusCode;
-    }
-
     public static async Task<bool> UploadExerciseImageAsync(Guid exerciseId, FileResult file)
     {
         using var content = new MultipartFormDataContent();
@@ -189,13 +199,11 @@ public static class ApiService
         content.Add(new StreamContent(stream), "file", file.FileName);
 
         var response = await _client.PostAsync($"/api/Exercises/{exerciseId}/media/upload", content);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
-        }
+        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
         return response.IsSuccessStatusCode;
     }
+
+    // --- MÉTODOS DE HISTÓRICO E SÉRIES ---
 
     public static async Task<List<Models.ExerciseSetDto>> GetHistoryAsync(Guid exerciseId)
     {
@@ -218,24 +226,18 @@ public static class ApiService
     {
         var dto = new { setNumber, weight, repetitions = reps };
         var response = await _client.PutAsJsonAsync($"/api/History/{setId}", dto);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
-        }
+        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
         return response.IsSuccessStatusCode;
     }
 
     public static async Task<bool> DeleteSetAsync(Guid setId)
     {
         var response = await _client.DeleteAsync($"/api/History/{setId}");
-
-        if (!response.IsSuccessStatusCode)
-        {
-            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
-        }
+        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
         return response.IsSuccessStatusCode;
     }
+
+    // --- MÉTODOS DE PERFIL ---
 
     public static async Task<Models.ProfileDto?> GetMyProfileAsync()
     {
@@ -251,11 +253,7 @@ public static class ApiService
     {
         var dto = new { name, email };
         var response = await _client.PutAsJsonAsync("/api/Users/update-profile", dto);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
-        }
+        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
         return response.IsSuccessStatusCode;
     }
 
@@ -263,48 +261,7 @@ public static class ApiService
     {
         var dto = new { currentPassword, newPassword };
         var response = await _client.PutAsJsonAsync("/api/Users/change-password", dto);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
-        }
-        return response.IsSuccessStatusCode;
-    }
-    public static async Task<Models.WorkoutProgramDto?> GetProgramByIdAsync(Guid id)
-    {
-        var response = await _client.GetAsync($"/api/WorkoutPrograms/{id}");
-        if (response.IsSuccessStatusCode)
-        {
-            return await response.Content.ReadFromJsonAsync<Models.WorkoutProgramDto>();
-        }
-        return null;
-    }
-
-    // Deletar e Editar Ficha
-    public static async Task<bool> DeleteProgramAsync(Guid id)
-    {
-        var response = await _client.DeleteAsync($"/api/WorkoutPrograms/{id}");
-        return response.IsSuccessStatusCode;
-    }
-
-    public static async Task<bool> UpdateProgramAsync(Guid id, string name, string description)
-    {
-        var dto = new { name, description };
-        var response = await _client.PutAsJsonAsync($"/api/WorkoutPrograms/{id}", dto);
-        return response.IsSuccessStatusCode;
-    }
-
-    // Deletar e Editar Treino (A, B, C)
-    public static async Task<bool> DeleteWorkoutAsync(Guid id)
-    {
-        var response = await _client.DeleteAsync($"/api/Workouts/{id}");
-        return response.IsSuccessStatusCode;
-    }
-
-    public static async Task<bool> UpdateWorkoutAsync(Guid id, string name, string description)
-    {
-        var dto = new { name, description };
-        var response = await _client.PutAsJsonAsync($"/api/Workouts/{id}", dto);
+        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
         return response.IsSuccessStatusCode;
     }
 }
