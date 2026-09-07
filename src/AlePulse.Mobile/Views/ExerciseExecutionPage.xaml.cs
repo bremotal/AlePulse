@@ -101,17 +101,20 @@ public partial class ExerciseExecutionPage : ContentPage
         try
         {
             if (_allExercises.Count == 0) return;
-            var currentExerciseId = _allExercises[_currentIndex].ExerciseId;
+            var currentExerciseId = _allExercises[_currentIndex].ExerciseId != Guid.Empty
+                ? _allExercises[_currentIndex].ExerciseId
+                : (_allExercises[_currentIndex].Exercise?.Id ?? Guid.Empty);
 
             var history = await ApiService.GetHistoryAsync(currentExerciseId);
 
+            // CORREÇÃO: Ordena os GRUPOS por data (DateTime) antes de converter para string
             var grouped = history
                 .GroupBy(e => e.CompletedAt.Date)
+                .OrderByDescending(g => g.Key) // Ordena por DateTime (mais recente primeiro)
                 .Select(g => new GroupedExerciseSet(
                     g.Key.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
                     g.OrderByDescending(x => x.CompletedAt).ToList()
                 ))
-                .OrderByDescending(g => g.DateDisplay)
                 .ToList();
 
             HistoryList.ItemsSource = grouped;

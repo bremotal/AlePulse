@@ -280,6 +280,16 @@ public static class ApiService
         if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
         return response.IsSuccessStatusCode;
     }
+    // NOVO MÉTODO: Excluir exercício da biblioteca
+    public static async Task<bool> DeleteExerciseAsync(Guid exerciseId)
+    {
+        var response = await _client.DeleteAsync($"/api/Exercises/{exerciseId}");
+        if (!response.IsSuccessStatusCode)
+        {
+            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        }
+        return response.IsSuccessStatusCode;
+    }
 }
 
 public class LoginResponse

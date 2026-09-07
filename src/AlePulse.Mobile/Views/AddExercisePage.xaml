@@ -102,7 +102,32 @@
                         HeightRequest="50"
                         Clicked="OnAddClicked" />
             </Grid>
+            <Grid ColumnDefinitions="*, *" ColumnSpacing="15" Margin="0,10,0,20">
+                <Button Grid.Column="0"
+                        Text="CANCELAR"
+                        BackgroundColor="#2B2B2B"
+                        TextColor="#FFFFFF"
+                        CornerRadius="10"
+                        HeightRequest="50"
+                        Clicked="OnCancelClicked" />
 
+                <Button Grid.Column="1"
+                        Text="ADICIONAR"
+                        BackgroundColor="#FF6A00"
+                        TextColor="#FFFFFF"
+                        FontAttributes="Bold"
+                        CornerRadius="10"
+                        HeightRequest="50"
+                        Clicked="OnAddClicked" />
+            </Grid>
+
+            <!-- NOVO BOTÃO: Excluir da Biblioteca -->
+            <Button Text="🗑️ EXCLUIR DA BIBLIOTECA"
+                    BackgroundColor="Transparent"
+                    TextColor="Red"
+                    FontSize="Micro"
+                    Padding="0,10,0,0"
+                    Clicked="OnDeleteFromLibraryClicked" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

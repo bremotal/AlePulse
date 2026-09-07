@@ -113,4 +113,17 @@ public class ExercisesController : ControllerBase
 
         return Ok(new { message = "Imagem enviada com sucesso!", url = imageUrl });
     }
+    // NOVO ENDPOINT: Excluir exercício permanentemente da biblioteca
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var exercise = await _exerciseRepository.GetByIdAsync(id);
+        if (exercise == null) return NotFound("Exercício não encontrado.");
+
+        // Soft delete: marca como inativo em vez de apagar fisicamente
+        exercise.IsActive = false;
+        await _exerciseRepository.SaveChangesAsync();
+
+        return NoContent();
+    }
 }

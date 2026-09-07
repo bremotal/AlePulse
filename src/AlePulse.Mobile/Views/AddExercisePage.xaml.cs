@@ -67,4 +67,30 @@ public partial class AddExercisePage : ContentPage
     {
         Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
     }
+    // NOVO MÉTODO: Excluir exercício selecionado da biblioteca
+    private async void OnDeleteFromLibraryClicked(object sender, EventArgs e)
+    {
+        if (ExercisePicker.SelectedItem is not ExerciseDto selectedExercise)
+        {
+            await DisplayAlertAsync("Aviso", "Selecione um exercício da lista para excluí-lo.", "OK");
+            return;
+        }
+
+        bool confirm = await DisplayAlertAsync("Excluir", $"Excluir '{selectedExercise.Name}' permanentemente da biblioteca?", "Sim", "Não");
+        if (!confirm) return;
+
+        bool success = await ApiService.DeleteExerciseAsync(selectedExercise.Id);
+        if (success)
+        {
+            await DisplayAlertAsync("Sucesso", "Exercício excluído da biblioteca!", "OK");
+            // Recarrega a lista sem o exercício excluído
+            var exercises = await ApiService.GetExercisesAsync();
+            ExercisePicker.ItemsSource = exercises;
+            ExercisePicker.SelectedItem = null;
+        }
+        else
+        {
+            await DisplayAlertAsync("Erro", $"Não foi possível excluir.\n{ApiService.LastError}", "OK");
+        }
+    }
 }
