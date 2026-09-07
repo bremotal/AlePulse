@@ -31,8 +31,7 @@
 
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.png" Color="#000000" Condition="'$(TargetFramework)' != 'net10.0-android'" />
-		<!-- Splash Screen -->
+		<MauiIcon Include="Resources\AppIcon\appicon.png" Color="#000000" Condition="'$(TargetFramework)' != 'net10.0-android'" />		<!-- Splash Screen -->
 		<MauiSplashScreen Include="Resources\Splash\splash.png" Color="#000000" />
 
 		<!-- Images -->

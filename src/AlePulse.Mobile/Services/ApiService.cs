@@ -13,9 +13,7 @@ public static class ApiService
 
     static ApiService()
     {
-        // Usando a URL pública da nossa API na nuvem (Render)
         var baseUrl = "https://alepulse-api.onrender.com";
-
         _client = new HttpClient { BaseAddress = new Uri(baseUrl) };
         _client.DefaultRequestHeaders.Add("ngrok-skip-browser-warning", "69420");
     }
@@ -119,11 +117,7 @@ public static class ApiService
     {
         var dto = new { name, description };
         var response = await _client.PostAsJsonAsync($"/api/WorkoutPrograms/{programId}/workouts", dto);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
-        }
+        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
         return response.IsSuccessStatusCode;
     }
 
@@ -156,6 +150,7 @@ public static class ApiService
     {
         var dto = new { exerciseId, sets, repetitions = reps, weight, restSeconds = rest };
         var response = await _client.PostAsJsonAsync($"/api/Workouts/{workoutId}/exercises", dto);
+        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
         return response.IsSuccessStatusCode;
     }
 
@@ -219,16 +214,23 @@ public static class ApiService
         return new List<Models.ExerciseSetDto>();
     }
 
+    // NOVO MÉTODO: Buscar exercícios feitos hoje
     public static async Task<List<Guid>> GetCompletedExercisesTodayAsync(Guid workoutId)
     {
-        var response = await _client.GetAsync($"/api/History/completed-today/{workoutId}");
-        if (response.IsSuccessStatusCode)
+        try
         {
-            return await response.Content.ReadFromJsonAsync<List<Guid>>();
+            var response = await _client.GetAsync($"/api/History/completed-today/{workoutId}");
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<List<Guid>>() ?? new List<Guid>();
+            }
+        }
+        catch
+        {
+            // Se a nuvem der erro ou retornar formato errado, ignora e retorna lista vazia
         }
         return new List<Guid>();
     }
-
     public static async Task<bool> LogSetAsync(Guid workoutId, Guid exerciseId, int setNumber, decimal weight, int reps)
     {
         var dto = new { setNumber, weight, repetitions = reps };

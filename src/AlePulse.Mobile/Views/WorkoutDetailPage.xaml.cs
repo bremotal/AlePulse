@@ -21,25 +21,30 @@ public partial class WorkoutDetailPage : ContentPage
 
     private async Task LoadWorkoutDetails()
     {
-        var workout = await ApiService.GetWorkoutByIdAsync(_workoutId);
-        if (workout != null)
+        try
         {
-            WorkoutNameLabel.Text = workout.Name;
-            WorkoutDescLabel.Text = workout.Description;
-
-            // Busca quais exercícios já foram feitos hoje
-            var completedIds = await ApiService.GetCompletedExercisesTodayAsync(_workoutId);
-
-            // Marca cada exercício com um check se já foi feito
-            if (workout.Exercises != null)
+            var workout = await ApiService.GetWorkoutByIdAsync(_workoutId);
+            if (workout != null)
             {
-                foreach (var ex in workout.Exercises)
-                {
-                    ex.IsCompletedToday = completedIds.Contains(ex.ExerciseId);
-                }
-            }
+                WorkoutNameLabel.Text = workout.Name ?? "Treino";
+                WorkoutDescLabel.Text = workout.Description ?? string.Empty;
 
-            ExercisesList.ItemsSource = workout.Exercises;
+                var completedIds = await ApiService.GetCompletedExercisesTodayAsync(_workoutId);
+
+                if (workout.Exercises != null)
+                {
+                    foreach (var ex in workout.Exercises)
+                    {
+                        ex.IsCompletedToday = completedIds.Contains(ex.ExerciseId);
+                    }
+                }
+
+                ExercisesList.ItemsSource = workout.Exercises;
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Erro", $"Não foi possível carregar o treino:\n{ex.Message}", "OK");
         }
     }
 
@@ -55,15 +60,21 @@ public partial class WorkoutDetailPage : ContentPage
 
     private async void OnStartWorkoutClicked(object sender, EventArgs e)
     {
-        var workout = await ApiService.GetWorkoutByIdAsync(_workoutId);
-        if (workout?.Exercises != null && workout.Exercises.Count > 0)
+        try
         {
-            // Inicia o treino completo (isSingleExercise = false)
-            Application.Current!.MainPage = new ExerciseExecutionPage(_workoutId, workout.Exercises.ToList(), false);
+            var workout = await ApiService.GetWorkoutByIdAsync(_workoutId);
+            if (workout?.Exercises != null && workout.Exercises.Count > 0)
+            {
+                Application.Current!.MainPage = new ExerciseExecutionPage(_workoutId, workout.Exercises.ToList(), false);
+            }
+            else
+            {
+                await DisplayAlertAsync("Aviso", "Adicione exercícios ao treino antes de iniciar.", "OK");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            await DisplayAlertAsync("Aviso", "Adicione exercícios ao treino antes de iniciar.", "OK");
+            await DisplayAlertAsync("Erro", $"Não foi possível iniciar:\n{ex.Message}", "OK");
         }
     }
 
@@ -71,7 +82,6 @@ public partial class WorkoutDetailPage : ContentPage
     {
         if (sender is Border border && border.BindingContext is WorkoutExerciseDto exercise)
         {
-            // Inicia apenas UM exercício (isSingleExercise = true)
             Application.Current!.MainPage = new ExerciseExecutionPage(_workoutId, new List<WorkoutExerciseDto> { exercise }, true);
         }
     }

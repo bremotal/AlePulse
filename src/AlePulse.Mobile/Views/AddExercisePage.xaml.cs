@@ -24,13 +24,11 @@ public partial class AddExercisePage : ContentPage
     {
         Guid exerciseId = Guid.Empty;
 
-        // Se o usuário digitou um novo exercício, cria ele primeiro
         if (!string.IsNullOrWhiteSpace(NewExerciseEntry.Text))
         {
             var newEx = await ApiService.CreateExerciseAsync(NewExerciseEntry.Text);
             if (newEx != null) exerciseId = newEx.Id;
         }
-        // Senão, pega o selecionado no Picker
         else if (ExercisePicker.SelectedItem is ExerciseDto selectedExercise)
         {
             exerciseId = selectedExercise.Id;
@@ -51,7 +49,7 @@ public partial class AddExercisePage : ContentPage
             return;
         }
 
-        var success = await ApiService.AddExerciseToWorkoutAsync(_workoutId, exerciseId, sets, reps, weight, rest);
+        bool success = await ApiService.AddExerciseToWorkoutAsync(_workoutId, exerciseId, sets, reps, weight, rest);
 
         if (success)
         {
@@ -60,7 +58,8 @@ public partial class AddExercisePage : ContentPage
         }
         else
         {
-            await DisplayAlertAsync("Erro", "Não foi possível adicionar.", "OK");
+            // Mostra o erro da API (ex: "Este exercício já foi adicionado a este treino.")
+            await DisplayAlertAsync("Erro", $"Não foi possível adicionar.\n{ApiService.LastError}", "OK");
         }
     }
 

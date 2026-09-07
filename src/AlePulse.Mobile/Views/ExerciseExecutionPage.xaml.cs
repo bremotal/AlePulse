@@ -2,10 +2,6 @@ using AlePulse.Mobile.Models;
 using AlePulse.Mobile.Services;
 using System.Globalization;
 
-#if ANDROID
-using Android.Media;
-#endif
-
 namespace AlePulse.Mobile.Views;
 
 public partial class ExerciseExecutionPage : ContentPage
@@ -16,7 +12,6 @@ public partial class ExerciseExecutionPage : ContentPage
     private Guid? _editingSetId = null;
     private readonly bool _isSingleExercise;
 
-    // Variáveis do Cronômetro
     private int _remainingSeconds;
     private bool _isTimerRunning;
     private DateTime _workoutStartTime;
@@ -45,7 +40,7 @@ public partial class ExerciseExecutionPage : ContentPage
         var exercise = _allExercises[_currentIndex];
         ExercisePicker.SelectedIndex = _currentIndex;
 
-        TitleLabel.Text = exercise.Exercise!.Name;
+        TitleLabel.Text = exercise.Exercise?.Name ?? "Exercício";
         WeightEntry.Text = exercise.Weight.ToString();
         RepsEntry.Text = exercise.Repetitions.ToString();
 
@@ -106,7 +101,7 @@ public partial class ExerciseExecutionPage : ContentPage
         try
         {
             if (_allExercises.Count == 0) return;
-            var currentExerciseId = _allExercises[_currentIndex].Exercise!.Id;
+            var currentExerciseId = _allExercises[_currentIndex].ExerciseId;
 
             var history = await ApiService.GetHistoryAsync(currentExerciseId);
 
@@ -162,7 +157,7 @@ public partial class ExerciseExecutionPage : ContentPage
         }
 
         var currentExercise = _allExercises[_currentIndex];
-        var currentExerciseId = currentExercise.Exercise!.Id;
+        var currentExerciseId = currentExercise.ExerciseId;
         bool success = false;
 
         if (_editingSetId.HasValue)
@@ -178,11 +173,9 @@ public partial class ExerciseExecutionPage : ContentPage
         }
         else
         {
-            // 1. INICIA O CRONÔMETRO IMEDIATAMENTE
             int restTime = currentExercise.RestSeconds > 0 ? currentExercise.RestSeconds : 90;
             StartRestTimer(restTime);
 
-            // 2. SALVA NA NUVEM
             success = await ApiService.LogSetAsync(_workoutId, currentExerciseId, setNum, weight, reps);
             if (success)
             {
@@ -247,8 +240,6 @@ public partial class ExerciseExecutionPage : ContentPage
         }
     }
 
-    // --- LÓGICA DO CRONÔMETRO ---
-
     private void StartRestTimer(int seconds)
     {
         _isTimerRunning = true;
@@ -287,14 +278,13 @@ public partial class ExerciseExecutionPage : ContentPage
 
         try
         {
-            // BIP NATIVO DO ANDROID E WINDOWS
+            // BIP NATIVO DO ANDROID (Som de notificação do sistema)
 #if ANDROID
-            var toneGen = new Android.Media.ToneGenerator(Android.Media.Stream.System, 100);
-            toneGen.StartTone(Android.Media.Tone.PropBeep, 1000); // Toca por 1 segundo
-#elif WINDOWS
-            // No Windows, usa a vibração nativa da tela (ou pode ignorar se não vibrar)
+            var uri = Android.Media.RingtoneManager.GetDefaultUri(Android.Media.RingtoneType.Notification);
+            var ringtone = Android.Media.RingtoneManager.GetRingtone(Android.App.Application.Context, uri);
+            ringtone?.Play();
 #endif
-            // Vibra o celular por 1 segundo
+
             Vibration.Default.Vibrate(TimeSpan.FromSeconds(1));
         }
         catch { }
@@ -319,8 +309,6 @@ public partial class ExerciseExecutionPage : ContentPage
         _remainingSeconds = 0;
         TimerFinished();
     }
-
-    // --- LÓGICA DO POPUP DO GIF ---
 
     private void OnGifTapped(object sender, TappedEventArgs e)
     {

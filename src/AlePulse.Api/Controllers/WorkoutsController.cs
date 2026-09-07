@@ -19,41 +19,42 @@ public class WorkoutsController : ControllerBase
         _workoutRepository = workoutRepository;
     }
 
-    // Pega o ID do usuário logado direto do Token JWT
-    private Guid GetUserId() => Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-
-    [HttpGet]
-    public async Task<IActionResult> GetMyWorkouts()
+    private Guid GetUserId()
     {
-        var userId = GetUserId();
-        var workouts = await _workoutRepository.GetAllByUserIdAsync(userId);
-        return Ok(workouts);
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier);
+        return claim != null ? Guid.Parse(claim.Value) : Guid.Empty;
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
         var workout = await _workoutRepository.GetByIdAsync(id);
-        if (workout == null || workout.UserId != GetUserId())
-            return NotFound("Treino não encontrado ou não pertence a você.");
-
+        if (workout == null || workout.UserId != GetUserId()) return NotFound();
         return Ok(workout);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateWorkoutDto dto)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateWorkout(Guid id, [FromBody] AddWorkoutToProgramDto dto)
     {
-        var workout = new Workout
-        {
-            Name = dto.Name,
-            Description = dto.Description,
-            UserId = GetUserId()
-        };
+        var workout = await _workoutRepository.GetByIdAsync(id);
+        if (workout == null || workout.UserId != GetUserId()) return NotFound();
 
-        await _workoutRepository.AddAsync(workout);
+        workout.Name = dto.Name;
+        workout.Description = dto.Description;
+
         await _workoutRepository.SaveChangesAsync();
+        return NoContent();
+    }
 
-        return CreatedAtAction(nameof(GetById), new { id = workout.Id }, workout);
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var workout = await _workoutRepository.GetByIdAsync(id);
+        if (workout == null || workout.UserId != GetUserId()) return NotFound();
+
+        await _workoutRepository.DeleteAsync(workout);
+        await _workoutRepository.SaveChangesAsync();
+        return NoContent();
     }
 
     [HttpPost("{workoutId}/exercises")]
@@ -61,9 +62,13 @@ public class WorkoutsController : ControllerBase
     {
         var workout = await _workoutRepository.GetByIdAsync(workoutId);
         if (workout == null || workout.UserId != GetUserId())
-            return NotFound("Treino não encontrado ou não pertence a você.");
+            return NotFound("Treino não encontrado.");
 
-        // Pega a próxima ordem do exercício na ficha
+        // NOVA REGRA: Impedir adicionar o mesmo exercício duas vezes no mesmo treino
+        var exerciseExists = workout.Exercises.Any(e => e.ExerciseId == dto.ExerciseId);
+        if (exerciseExists)
+            return Conflict("Este exercício já foi adicionado a este treino.");
+
         var nextOrder = workout.Exercises.Any() ? workout.Exercises.Max(e => e.Order) + 1 : 1;
 
         var workoutExercise = new WorkoutExercise
@@ -82,36 +87,7 @@ public class WorkoutsController : ControllerBase
 
         return Ok(workoutExercise);
     }
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(Guid id)
-    {
-        var workout = await _workoutRepository.GetByIdAsync(id);
-        if (workout == null || workout.UserId != GetUserId())
-            return NotFound();
 
-        await _workoutRepository.DeleteAsync(workout);
-        await _workoutRepository.SaveChangesAsync();
-
-        return NoContent();
-    }
-    [HttpDelete("{workoutId}/exercises/{exerciseId}")]
-    public async Task<IActionResult> DeleteExercise(Guid workoutId, Guid exerciseId)
-    {
-        var workout = await _workoutRepository.GetByIdAsync(workoutId);
-        if (workout == null || workout.UserId != GetUserId())
-            return NotFound("Treino não encontrado.");
-
-        // Procura o exercício dentro da ficha de treino
-        var exerciseToRemove = workout.Exercises.FirstOrDefault(e => e.Id == exerciseId);
-        if (exerciseToRemove == null)
-            return NotFound("Exercício não encontrado neste treino.");
-
-        await _workoutRepository.DeleteExerciseFromWorkoutAsync(exerciseToRemove);
-        await _workoutRepository.SaveChangesAsync();
-
-        return NoContent();
-    }
-   
     [HttpPut("{workoutId}/exercises/{exerciseId}")]
     public async Task<IActionResult> UpdateExercise(Guid workoutId, Guid exerciseId, [FromBody] AddWorkoutExerciseDto dto)
     {
@@ -129,6 +105,23 @@ public class WorkoutsController : ControllerBase
         exercise.RestSeconds = dto.RestSeconds;
 
         await _workoutRepository.UpdateExerciseAsync(exercise);
+        return NoContent();
+    }
+
+    [HttpDelete("{workoutId}/exercises/{exerciseId}")]
+    public async Task<IActionResult> DeleteExercise(Guid workoutId, Guid exerciseId)
+    {
+        var workout = await _workoutRepository.GetByIdAsync(workoutId);
+        if (workout == null || workout.UserId != GetUserId())
+            return NotFound("Treino não encontrado.");
+
+        var exerciseToRemove = workout.Exercises.FirstOrDefault(e => e.Id == exerciseId);
+        if (exerciseToRemove == null)
+            return NotFound("Exercício não encontrado neste treino.");
+
+        await _workoutRepository.DeleteExerciseFromWorkoutAsync(exerciseToRemove);
+        await _workoutRepository.SaveChangesAsync();
+
         return NoContent();
     }
 }
