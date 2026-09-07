@@ -29,17 +29,23 @@ public partial class WorkoutDetailPage : ContentPage
                 WorkoutNameLabel.Text = workout.Name ?? "Treino";
                 WorkoutDescLabel.Text = workout.Description ?? string.Empty;
 
+                // Busca a lista de IDs de exercícios feitos hoje
                 var completedIds = await ApiService.GetCompletedExercisesTodayAsync(_workoutId);
 
                 if (workout.Exercises != null)
                 {
                     foreach (var ex in workout.Exercises)
                     {
+                        // Marca o exercício se o ID dele estiver na lista de feitos hoje
                         ex.IsCompletedToday = completedIds.Contains(ex.ExerciseId);
                     }
                 }
 
-                ExercisesList.ItemsSource = workout.Exercises;
+                // Atualiza a tela em segundo plano para garantir que o XAML redesenhe o Check
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    ExercisesList.ItemsSource = workout.Exercises;
+                });
             }
         }
         catch (Exception ex)

@@ -2,8 +2,10 @@
 using AlePulse.Application.DTOs;
 using AlePulse.Application.Interfaces;
 using AlePulse.Domain.Entities;
+using AlePulse.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AlePulse.Api.Controllers;
 
@@ -13,10 +15,12 @@ namespace AlePulse.Api.Controllers;
 public class WorkoutsController : ControllerBase
 {
     private readonly IWorkoutRepository _workoutRepository;
+    private readonly AlePulseDbContext _context; // Injeção do banco para buscar o nome do exercício
 
-    public WorkoutsController(IWorkoutRepository workoutRepository)
+    public WorkoutsController(IWorkoutRepository workoutRepository, AlePulseDbContext context)
     {
         _workoutRepository = workoutRepository;
+        _context = context;
     }
 
     private Guid GetUserId()
@@ -64,10 +68,16 @@ public class WorkoutsController : ControllerBase
         if (workout == null || workout.UserId != GetUserId())
             return NotFound("Treino não encontrado.");
 
-        // NOVA REGRA: Impedir adicionar o mesmo exercício duas vezes no mesmo treino
-        var exerciseExists = workout.Exercises.Any(e => e.ExerciseId == dto.ExerciseId);
-        if (exerciseExists)
-            return Conflict("Este exercício já foi adicionado a este treino.");
+        // Busca o nome do exercício que está tentando adicionar
+        var exerciseToAdd = await _context.Exercises.FindAsync(dto.ExerciseId);
+        if (exerciseToAdd == null) return NotFound("Exercício não encontrado na biblioteca.");
+
+        // REGRA: Verifica se já existe um exercício com o MESMO NOME no treino (ignora maiúsculas/minúsculas)
+        var nameExists = workout.Exercises.Any(e => e.Exercise != null &&
+            e.Exercise.Name.ToLower() == exerciseToAdd.Name.ToLower());
+
+        if (nameExists)
+            return Conflict("Você já adicionou um exercício com este nome neste treino.");
 
         var nextOrder = workout.Exercises.Any() ? workout.Exercises.Max(e => e.Order) + 1 : 1;
 

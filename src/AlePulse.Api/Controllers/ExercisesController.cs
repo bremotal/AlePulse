@@ -2,8 +2,10 @@
 using AlePulse.Application.Interfaces;
 using AlePulse.Domain.Entities;
 using AlePulse.Domain.Enums;
+using AlePulse.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AlePulse.Api.Controllers;
 
@@ -13,10 +15,12 @@ namespace AlePulse.Api.Controllers;
 public class ExercisesController : ControllerBase
 {
     private readonly IExerciseRepository _exerciseRepository;
+    private readonly AlePulseDbContext _context; // Injeção do banco para verificar nomes duplicados
 
-    public ExercisesController(IExerciseRepository exerciseRepository)
+    public ExercisesController(IExerciseRepository exerciseRepository, AlePulseDbContext context)
     {
         _exerciseRepository = exerciseRepository;
+        _context = context;
     }
 
     [HttpGet]
@@ -37,6 +41,11 @@ public class ExercisesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateExerciseDto dto)
     {
+        // REGRA: Impede criar exercício se já existir um com o mesmo nome (ignora maiúsculas/minúsculas)
+        var existingExercise = await _context.Exercises.FirstOrDefaultAsync(e => e.Name.ToLower() == dto.Name.ToLower());
+        if (existingExercise != null)
+            return Conflict("Já existe um exercício com este nome na biblioteca.");
+
         var exercise = new Exercise
         {
             Name = dto.Name,
@@ -78,8 +87,7 @@ public class ExercisesController : ControllerBase
         if (file == null || file.Length == 0)
             return BadRequest("Nenhum arquivo enviado.");
 
-        // Caminho corrigido para funcionar no Linux (Render)
-        var uploadsFolder = Path.Combine(AppContext.BaseDirectory, "wwwroot", "uploads");
+        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
         if (!Directory.Exists(uploadsFolder))
             Directory.CreateDirectory(uploadsFolder);
 
@@ -91,7 +99,6 @@ public class ExercisesController : ControllerBase
             await file.CopyToAsync(stream);
         }
 
-        // Salva o caminho relativo no banco de dados
         var imageUrl = $"/uploads/{uniqueFileName}";
 
         var media = new ExerciseMedia
