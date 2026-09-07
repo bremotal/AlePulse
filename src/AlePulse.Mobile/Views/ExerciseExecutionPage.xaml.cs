@@ -107,7 +107,7 @@ public partial class ExerciseExecutionPage : ContentPage
 
             var history = await ApiService.GetHistoryAsync(currentExerciseId);
 
-            // CORREÇÃO: Ordena os GRUPOS por data (DateTime) antes de converter para string
+            // CORREÇÃO DA ORDEM DAS DATAS: Ordena os GRUPOS por data (DateTime) antes de converter para string
             var grouped = history
                 .GroupBy(e => e.CompletedAt.Date)
                 .OrderByDescending(g => g.Key) // Ordena por DateTime (mais recente primeiro)
@@ -160,7 +160,10 @@ public partial class ExerciseExecutionPage : ContentPage
         }
 
         var currentExercise = _allExercises[_currentIndex];
-        var currentExerciseId = currentExercise.ExerciseId;
+        var currentExerciseId = currentExercise.ExerciseId != Guid.Empty
+            ? currentExercise.ExerciseId
+            : (currentExercise.Exercise?.Id ?? Guid.Empty);
+
         bool success = false;
 
         if (_editingSetId.HasValue)

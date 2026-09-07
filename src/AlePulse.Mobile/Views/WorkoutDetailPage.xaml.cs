@@ -35,7 +35,6 @@ public partial class WorkoutDetailPage : ContentPage
                 {
                     foreach (var ex in workout.Exercises)
                     {
-                        // FALLBACK: Usa ExerciseId ou Exercise.Id (caso um deles venha vazio da API)
                         var exerciseGuid = ex.ExerciseId != Guid.Empty
                             ? ex.ExerciseId
                             : (ex.Exercise?.Id ?? Guid.Empty);

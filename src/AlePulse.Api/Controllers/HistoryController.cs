@@ -14,7 +14,7 @@ namespace AlePulse.Api.Controllers;
 public class HistoryController : ControllerBase
 {
     private readonly IWorkoutSessionRepository _sessionRepository;
-    private readonly AlePulseDbContext _context; // Injeção do banco de dados
+    private readonly AlePulseDbContext _context;
 
     public HistoryController(IWorkoutSessionRepository sessionRepository, AlePulseDbContext context)
     {
@@ -72,6 +72,7 @@ public class HistoryController : ControllerBase
         }
     }
 
+    // ENDPOINT: Buscar quais exercícios do treino já foram feitos hoje
     [HttpGet("completed-today/{workoutId}")]
     public async Task<IActionResult> GetCompletedExercisesToday(Guid workoutId)
     {
@@ -81,7 +82,9 @@ public class HistoryController : ControllerBase
         var setsToday = await _context.ExerciseSets
             .Where(es => es.WorkoutSession.WorkoutId == workoutId
                       && es.WorkoutSession.UserId == userId
-                      && es.CompletedAt.Value.Date == today).Distinct()
+                      && es.CompletedAt.Value.Date == today)
+            .Select(es => es.ExerciseId)
+            .Distinct()
             .ToListAsync();
 
         return Ok(setsToday);

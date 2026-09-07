@@ -15,7 +15,7 @@ namespace AlePulse.Api.Controllers;
 public class ExercisesController : ControllerBase
 {
     private readonly IExerciseRepository _exerciseRepository;
-    private readonly AlePulseDbContext _context; // Injeção do banco para verificar nomes duplicados
+    private readonly AlePulseDbContext _context;
 
     public ExercisesController(IExerciseRepository exerciseRepository, AlePulseDbContext context)
     {
@@ -41,7 +41,7 @@ public class ExercisesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateExerciseDto dto)
     {
-        // REGRA: Impede criar exercício se já existir um com o mesmo nome (ignora maiúsculas/minúsculas)
+        // Impede criar exercício se já existir um com o mesmo nome
         var existingExercise = await _context.Exercises.FirstOrDefaultAsync(e => e.Name.ToLower() == dto.Name.ToLower());
         if (existingExercise != null)
             return Conflict("Já existe um exercício com este nome na biblioteca.");
@@ -63,7 +63,19 @@ public class ExercisesController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = exercise.Id }, exercise);
     }
 
-    // ENDPOINT: Adicionar GIF/Mídia via URL (Swagger)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var exercise = await _exerciseRepository.GetByIdAsync(id);
+        if (exercise == null) return NotFound("Exercício não encontrado.");
+
+        // Soft delete: marca como inativo em vez de apagar fisicamente
+        exercise.IsActive = false;
+        await _exerciseRepository.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     [HttpPost("{id}/media")]
     public async Task<IActionResult> AddMedia(Guid id, [FromBody] CreateMediaDto dto)
     {
@@ -77,7 +89,6 @@ public class ExercisesController : ControllerBase
         return Ok(new { message = "Mídia adicionada com sucesso!" });
     }
 
-    // ENDPOINT: Receber upload de imagem do celular
     [HttpPost("{id}/media/upload")]
     public async Task<IActionResult> UploadMedia(Guid id, IFormFile file)
     {
@@ -112,18 +123,5 @@ public class ExercisesController : ControllerBase
         await _exerciseRepository.SaveChangesAsync();
 
         return Ok(new { message = "Imagem enviada com sucesso!", url = imageUrl });
-    }
-    // NOVO ENDPOINT: Excluir exercício permanentemente da biblioteca
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(Guid id)
-    {
-        var exercise = await _exerciseRepository.GetByIdAsync(id);
-        if (exercise == null) return NotFound("Exercício não encontrado.");
-
-        // Soft delete: marca como inativo em vez de apagar fisicamente
-        exercise.IsActive = false;
-        await _exerciseRepository.SaveChangesAsync();
-
-        return NoContent();
     }
 }
