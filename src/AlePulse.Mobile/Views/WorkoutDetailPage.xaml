@@ -40,53 +40,25 @@
                             <RoundRectangle CornerRadius="15" />
                         </Border.StrokeShape>
 
-                        <!-- Grid com 4 colunas: Dados, Upload, Editar, Excluir -->
-                        <Grid ColumnDefinitions="*, Auto, Auto, Auto" RowDefinitions="Auto, Auto">
+                        <!-- Grid com 5 colunas -->
+                        <Grid ColumnDefinitions="*, Auto, Auto, Auto, Auto" RowDefinitions="Auto, Auto">
 
-                            <Label Grid.Row="0" Grid.Column="0"
-                                   Text="{Binding Exercise.Name}"
-                                   TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}"
-                                   FontSize="20"
-                                   FontAttributes="Bold" />
+                            <VerticalStackLayout Grid.Column="0" Spacing="5">
+                                <Label Text="{Binding Exercise.Name}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" FontSize="20" FontAttributes="Bold" />
+                                <Label Text="{Binding Description}" TextColor="{AppThemeBinding Dark=#888888, Light=#666666}" FontSize="14" />
+                            </VerticalStackLayout>
 
-                            <HorizontalStackLayout Grid.Row="1" Grid.Column="0" Spacing="10" Margin="0,5,0,0">
-                                <Label Text="{Binding Sets, StringFormat='{0} séries'}" TextColor="{AppThemeBinding Dark=#888888, Light=#666666}" FontSize="14" />
-                                <Label Text="{Binding Repetitions, StringFormat='{0} reps'}" TextColor="{AppThemeBinding Dark=#888888, Light=#666666}" FontSize="14" />
-                                <Label Text="{Binding Weight, StringFormat='{0} kg'}" TextColor="{AppThemeBinding Dark=#888888, Light=#666666}" FontSize="14" />
-                            </HorizontalStackLayout>
+                            <!-- CHECK VERDE DE TREINO FEITO -->
+                            <Label Grid.Column="1" Text="✅" FontSize="20" VerticalOptions="Center" Margin="10,0,0,0" IsVisible="{Binding IsCompletedToday}" />
 
-                            <!-- Botão de Upload de Imagem -->
-                            <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
-                                    Text="📷"
-                                    BackgroundColor="Transparent"
-                                    TextColor="#FF6A00"
-                                    FontSize="20"
-                                    WidthRequest="50"
-                                    HeightRequest="50"
-                                    VerticalOptions="Center"
-                                    Clicked="OnUploadImageClicked" />
+                            <!-- Botão Upload -->
+                            <Button Grid.Column="2" Text="📷" BackgroundColor="Transparent" TextColor="#FF6A00" WidthRequest="50" HeightRequest="50" Clicked="OnUploadImageClicked" />
 
-                            <!-- Botão de Editar -->
-                            <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="2"
-                                    Text="✏️"
-                                    BackgroundColor="Transparent"
-                                    TextColor="#FF6A00"
-                                    FontSize="20"
-                                    WidthRequest="50"
-                                    HeightRequest="50"
-                                    VerticalOptions="Center"
-                                    Clicked="OnEditExerciseClicked" />
+                            <!-- Botão Editar -->
+                            <Button Grid.Column="3" Text="✏️" BackgroundColor="Transparent" TextColor="#FF6A00" WidthRequest="50" HeightRequest="50" Clicked="OnEditExerciseClicked" />
 
-                            <!-- Botão de Excluir -->
-                            <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="3"
-                                    Text="🗑️"
-                                    BackgroundColor="Transparent"
-                                    TextColor="Red"
-                                    FontSize="20"
-                                    WidthRequest="50"
-                                    HeightRequest="50"
-                                    VerticalOptions="Center"
-                                    Clicked="OnDeleteExerciseClicked" />
+                            <!-- Botão Excluir (Devolvido!) -->
+                            <Button Grid.Column="4" Text="🗑️" BackgroundColor="Transparent" TextColor="Red" WidthRequest="50" HeightRequest="50" Clicked="OnDeleteExerciseClicked" />
                         </Grid>
                     </Border>
                 </DataTemplate>

@@ -26,6 +26,19 @@ public partial class WorkoutDetailPage : ContentPage
         {
             WorkoutNameLabel.Text = workout.Name;
             WorkoutDescLabel.Text = workout.Description;
+
+            // Busca quais exercícios já foram feitos hoje
+            var completedIds = await ApiService.GetCompletedExercisesTodayAsync(_workoutId);
+
+            // Marca cada exercício com um check se já foi feito
+            if (workout.Exercises != null)
+            {
+                foreach (var ex in workout.Exercises)
+                {
+                    ex.IsCompletedToday = completedIds.Contains(ex.ExerciseId);
+                }
+            }
+
             ExercisesList.ItemsSource = workout.Exercises;
         }
     }
@@ -45,7 +58,8 @@ public partial class WorkoutDetailPage : ContentPage
         var workout = await ApiService.GetWorkoutByIdAsync(_workoutId);
         if (workout?.Exercises != null && workout.Exercises.Count > 0)
         {
-            Application.Current!.MainPage = new ExerciseExecutionPage(_workoutId, workout.Exercises.ToList());
+            // Inicia o treino completo (isSingleExercise = false)
+            Application.Current!.MainPage = new ExerciseExecutionPage(_workoutId, workout.Exercises.ToList(), false);
         }
         else
         {
@@ -57,7 +71,8 @@ public partial class WorkoutDetailPage : ContentPage
     {
         if (sender is Border border && border.BindingContext is WorkoutExerciseDto exercise)
         {
-            Application.Current!.MainPage = new ExerciseExecutionPage(_workoutId, new List<WorkoutExerciseDto> { exercise });
+            // Inicia apenas UM exercício (isSingleExercise = true)
+            Application.Current!.MainPage = new ExerciseExecutionPage(_workoutId, new List<WorkoutExerciseDto> { exercise }, true);
         }
     }
 
@@ -88,10 +103,17 @@ public partial class WorkoutDetailPage : ContentPage
         {
             try
             {
+                var customFileType = new FilePickerFileType(
+                    new Dictionary<DevicePlatform, IEnumerable<string>>
+                    {
+                        { DevicePlatform.Android, new[] { "image/jpeg", "image/png", "image/gif" } },
+                        { DevicePlatform.WinUI, new[] { ".jpg", ".png", ".gif" } }
+                    });
+
                 var file = await FilePicker.Default.PickAsync(new PickOptions
                 {
-                    PickerTitle = "Selecione a imagem do exercício",
-                    FileTypes = FilePickerFileType.Images
+                    PickerTitle = "Selecione a imagem ou GIF do exercício",
+                    FileTypes = customFileType
                 });
 
                 if (file == null) return;

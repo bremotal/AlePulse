@@ -21,7 +21,7 @@ builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IWorkoutRepository, WorkoutRepository>();
 builder.Services.AddScoped<IWorkoutSessionRepository, WorkoutSessionRepository>();
-builder.Services.AddScoped<IWorkoutProgramRepository, WorkoutProgramRepository>(); // NOVO
+builder.Services.AddScoped<IWorkoutProgramRepository, WorkoutProgramRepository>();
 
 // 3. Registra os Controllers
 builder.Services.AddControllers()
@@ -80,8 +80,8 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// 7. Configuração para servir as imagens dos exercícios (Uploads)
-var wwwrootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+// 7. Configuração para servir as imagens dos exercícios (Corrigido para Render/Linux)
+var wwwrootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot");
 if (!Directory.Exists(wwwrootPath))
 {
     Directory.CreateDirectory(wwwrootPath);

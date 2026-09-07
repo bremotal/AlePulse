@@ -11,4 +11,5 @@ public interface IWorkoutProgramRepository
     Task SaveChangesAsync();
     Task DeleteAsync(WorkoutProgram program);
     Task UpdateAsync(WorkoutProgram program);
+    Task<bool> WorkoutNameExistsForUserAsync(Guid userId, string name);
 }

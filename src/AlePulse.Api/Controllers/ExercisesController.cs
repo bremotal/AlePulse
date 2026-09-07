@@ -78,7 +78,8 @@ public class ExercisesController : ControllerBase
         if (file == null || file.Length == 0)
             return BadRequest("Nenhum arquivo enviado.");
 
-        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+        // Caminho corrigido para funcionar no Linux (Render)
+        var uploadsFolder = Path.Combine(AppContext.BaseDirectory, "wwwroot", "uploads");
         if (!Directory.Exists(uploadsFolder))
             Directory.CreateDirectory(uploadsFolder);
 
@@ -90,7 +91,7 @@ public class ExercisesController : ControllerBase
             await file.CopyToAsync(stream);
         }
 
-        // Salva o caminho RELATIVO no banco de dados
+        // Salva o caminho relativo no banco de dados
         var imageUrl = $"/uploads/{uniqueFileName}";
 
         var media = new ExerciseMedia

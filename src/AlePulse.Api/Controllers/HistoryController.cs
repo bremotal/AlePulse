@@ -1,8 +1,10 @@
 ﻿using System.Security.Claims;
 using AlePulse.Application.DTOs;
 using AlePulse.Application.Interfaces;
+using AlePulse.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AlePulse.Api.Controllers;
 
@@ -12,10 +14,12 @@ namespace AlePulse.Api.Controllers;
 public class HistoryController : ControllerBase
 {
     private readonly IWorkoutSessionRepository _sessionRepository;
+    private readonly AlePulseDbContext _context; // Injeção do banco de dados
 
-    public HistoryController(IWorkoutSessionRepository sessionRepository)
+    public HistoryController(IWorkoutSessionRepository sessionRepository, AlePulseDbContext context)
     {
         _sessionRepository = sessionRepository;
+        _context = context;
     }
 
     private Guid GetUserId()
@@ -50,7 +54,6 @@ public class HistoryController : ControllerBase
         }
         catch (Exception ex)
         {
-            // Retorna o erro exato para o aplicativo
             return StatusCode(500, new { message = ex.Message, stack = ex.StackTrace });
         }
     }
@@ -65,8 +68,22 @@ public class HistoryController : ControllerBase
         }
         catch (Exception ex)
         {
-            // Retorna o erro exato para o aplicativo
             return StatusCode(500, new { message = ex.Message, stack = ex.StackTrace });
         }
+    }
+
+    [HttpGet("completed-today/{workoutId}")]
+    public async Task<IActionResult> GetCompletedExercisesToday(Guid workoutId)
+    {
+        var userId = GetUserId();
+        var today = DateTime.UtcNow.Date;
+
+        var setsToday = await _context.ExerciseSets
+            .Where(es => es.WorkoutSession.WorkoutId == workoutId
+                      && es.WorkoutSession.UserId == userId
+                      && es.CompletedAt.Value.Date == today).Distinct()
+            .ToListAsync();
+
+        return Ok(setsToday);
     }
 }

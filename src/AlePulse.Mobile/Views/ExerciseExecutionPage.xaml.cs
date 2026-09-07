@@ -1,7 +1,10 @@
 using AlePulse.Mobile.Models;
 using AlePulse.Mobile.Services;
 using System.Globalization;
-using System.Runtime.InteropServices;
+
+#if ANDROID
+using Android.Media;
+#endif
 
 namespace AlePulse.Mobile.Views;
 
@@ -11,6 +14,7 @@ public partial class ExerciseExecutionPage : ContentPage
     private List<WorkoutExerciseDto> _allExercises = new();
     private int _currentIndex = 0;
     private Guid? _editingSetId = null;
+    private readonly bool _isSingleExercise;
 
     // Variáveis do Cronômetro
     private int _remainingSeconds;
@@ -20,14 +24,12 @@ public partial class ExerciseExecutionPage : ContentPage
 
     private string? _currentGifUrl;
 
-    [DllImport("kernel32.dll")]
-    public static extern bool Beep(int frequency, int duration);
-
-    public ExerciseExecutionPage(Guid workoutId, List<WorkoutExerciseDto> exercises)
+    public ExerciseExecutionPage(Guid workoutId, List<WorkoutExerciseDto> exercises, bool isSingleExercise = false)
     {
         InitializeComponent();
         _workoutId = workoutId;
         _allExercises = exercises;
+        _isSingleExercise = isSingleExercise;
 
         ExercisePicker.ItemsSource = _allExercises;
         ChangeExercise(0);
@@ -64,7 +66,11 @@ public partial class ExerciseExecutionPage : ContentPage
 
         LoadHistory();
 
-        if (_currentIndex == _allExercises.Count - 1)
+        if (_isSingleExercise)
+        {
+            NextFinishBtn.Text = "FINALIZAR";
+        }
+        else if (_currentIndex == _allExercises.Count - 1)
         {
             NextFinishBtn.Text = "FINALIZAR TREINO";
         }
@@ -78,7 +84,6 @@ public partial class ExerciseExecutionPage : ContentPage
     {
         base.OnAppearing();
 
-        // Se o cronômetro estava rodando, recalcula o tempo ao voltar para a tela
         if (_isTimerRunning)
         {
             var remaining = _restEndTime - DateTime.Now;
@@ -173,12 +178,15 @@ public partial class ExerciseExecutionPage : ContentPage
         }
         else
         {
+            // 1. INICIA O CRONÔMETRO IMEDIATAMENTE
+            int restTime = currentExercise.RestSeconds > 0 ? currentExercise.RestSeconds : 90;
+            StartRestTimer(restTime);
+
+            // 2. SALVA NA NUVEM
             success = await ApiService.LogSetAsync(_workoutId, currentExerciseId, setNum, weight, reps);
             if (success)
             {
                 SetEntry.Text = (setNum + 1).ToString();
-                int restTime = currentExercise.RestSeconds > 0 ? currentExercise.RestSeconds : 90;
-                StartRestTimer(restTime);
             }
             else { await DisplayAlertAsync("Erro API", $"Não foi possível registrar.\n{ApiService.LastError}", "OK"); }
         }
@@ -187,15 +195,30 @@ public partial class ExerciseExecutionPage : ContentPage
         SaveBtn.IsEnabled = true;
     }
 
-    private async void OnLoadHistoryClicked(object sender, EventArgs e)
+    private void OnExitClicked(object sender, EventArgs e)
     {
-        var currentExerciseId = _allExercises[_currentIndex].Exercise!.Id;
-        var history = await ApiService.GetHistoryAsync(currentExerciseId);
-        if (history.Count > 0)
+        _isTimerRunning = false;
+        RestTimerBorder.IsVisible = false;
+        Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
+    }
+
+    private void OnNextOrFinishClicked(object sender, EventArgs e)
+    {
+        if (_isSingleExercise || _currentIndex == _allExercises.Count - 1)
         {
-            var lastSet = history.OrderByDescending(x => x.CompletedAt).First();
-            WeightEntry.Text = lastSet.Weight.ToString();
-            RepsEntry.Text = lastSet.Repetitions.ToString();
+            if (_isSingleExercise)
+            {
+                Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
+            }
+            else
+            {
+                TimeSpan duration = DateTime.Now - _workoutStartTime;
+                Application.Current!.MainPage = new WorkoutSummaryPage(duration, _allExercises, _workoutId);
+            }
+        }
+        else
+        {
+            ChangeExercise(_currentIndex + 1);
         }
     }
 
@@ -224,26 +247,6 @@ public partial class ExerciseExecutionPage : ContentPage
         }
     }
 
-    private void OnExitClicked(object sender, EventArgs e)
-    {
-        _isTimerRunning = false;
-        RestTimerBorder.IsVisible = false;
-        Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
-    }
-
-    private void OnNextOrFinishClicked(object sender, EventArgs e)
-    {
-        if (_currentIndex == _allExercises.Count - 1)
-        {
-            TimeSpan duration = DateTime.Now - _workoutStartTime;
-            Application.Current!.MainPage = new WorkoutSummaryPage(duration, _allExercises, _workoutId);
-        }
-        else
-        {
-            ChangeExercise(_currentIndex + 1);
-        }
-    }
-
     // --- LÓGICA DO CRONÔMETRO ---
 
     private void StartRestTimer(int seconds)
@@ -252,7 +255,6 @@ public partial class ExerciseExecutionPage : ContentPage
         _restEndTime = DateTime.Now.AddSeconds(seconds);
         RestTimerBorder.IsVisible = true;
 
-        // Mantém o cronômetro visual rodando na tela
         Device.StartTimer(TimeSpan.FromSeconds(1), () =>
         {
             if (!_isTimerRunning) return false;
@@ -285,10 +287,14 @@ public partial class ExerciseExecutionPage : ContentPage
 
         try
         {
-            if (DeviceInfo.Platform == DevicePlatform.WinUI)
-            {
-                Beep(800, 500);
-            }
+            // BIP NATIVO DO ANDROID E WINDOWS
+#if ANDROID
+            var toneGen = new Android.Media.ToneGenerator(Android.Media.Stream.System, 100);
+            toneGen.StartTone(Android.Media.Tone.PropBeep, 1000); // Toca por 1 segundo
+#elif WINDOWS
+            // No Windows, usa a vibração nativa da tela (ou pode ignorar se não vibrar)
+#endif
+            // Vibra o celular por 1 segundo
             Vibration.Default.Vibrate(TimeSpan.FromSeconds(1));
         }
         catch { }

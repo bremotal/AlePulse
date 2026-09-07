@@ -119,7 +119,11 @@ public static class ApiService
     {
         var dto = new { name, description };
         var response = await _client.PostAsJsonAsync($"/api/WorkoutPrograms/{programId}/workouts", dto);
-        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+
+        if (!response.IsSuccessStatusCode)
+        {
+            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        }
         return response.IsSuccessStatusCode;
     }
 
@@ -213,6 +217,16 @@ public static class ApiService
             return await response.Content.ReadFromJsonAsync<List<Models.ExerciseSetDto>>();
         }
         return new List<Models.ExerciseSetDto>();
+    }
+
+    public static async Task<List<Guid>> GetCompletedExercisesTodayAsync(Guid workoutId)
+    {
+        var response = await _client.GetAsync($"/api/History/completed-today/{workoutId}");
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadFromJsonAsync<List<Guid>>();
+        }
+        return new List<Guid>();
     }
 
     public static async Task<bool> LogSetAsync(Guid workoutId, Guid exerciseId, int setNumber, decimal weight, int reps)

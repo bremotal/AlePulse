@@ -18,6 +18,7 @@ public class WorkoutProgramRepository : IWorkoutProgramRepository
     {
         return await _context.WorkoutPrograms
             .Where(p => p.UserId == userId && p.IsActive)
+            .OrderByDescending(p => p.CreatedAt) // Ordena do mais novo para o mais velho
             .ToListAsync();
     }
 
@@ -59,5 +60,11 @@ public class WorkoutProgramRepository : IWorkoutProgramRepository
             existing.Description = program.Description;
             await _context.SaveChangesAsync();
         }
+    }
+    public async Task<bool> WorkoutNameExistsForUserAsync(Guid userId, string name)
+    {
+        // Verifica se já existe um treino com esse nome (ignorando maiúsculas/minúsculas) para o usuário
+        return await _context.Workouts
+            .AnyAsync(w => w.UserId == userId && w.Name.ToLower() == name.ToLower());
     }
 }

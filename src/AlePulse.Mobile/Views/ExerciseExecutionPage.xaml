@@ -31,10 +31,7 @@
                 <RoundRectangle CornerRadius="15" />
             </Border.StrokeShape>
             <VerticalStackLayout Spacing="10">
-                <Grid ColumnDefinitions="*, Auto">
-                    <Label Grid.Column="0" Text="REGISTRAR SÉRIE" TextColor="#FF6A00" FontAttributes="Bold" VerticalOptions="Center"/>
-                    <Button Grid.Column="1" x:Name="LoadHistoryBtn" Text="Usar Último" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" CornerRadius="10" HeightRequest="40" Clicked="OnLoadHistoryClicked"/>
-                </Grid>
+                <Label Text="REGISTRAR SÉRIE" TextColor="#FF6A00" FontAttributes="Bold" VerticalOptions="Center"/>
 
                 <Grid ColumnDefinitions="*, *, *" ColumnSpacing="10">
                     <VerticalStackLayout Grid.Column="0" Spacing="5">

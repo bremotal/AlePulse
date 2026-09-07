@@ -66,6 +66,10 @@ public class WorkoutProgramsController : ControllerBase
         if (program == null || program.UserId != GetUserId())
             return NotFound("Ficha não encontrada.");
 
+        // NOVA REGRA: Impedir treinos com nome duplicado
+        if (await _programRepository.WorkoutNameExistsForUserAsync(GetUserId(), dto.Name))
+            return Conflict("Já existe um treino com este nome.");
+
         var workout = new Workout
         {
             Name = dto.Name,
@@ -79,6 +83,8 @@ public class WorkoutProgramsController : ControllerBase
 
         return Ok(workout);
     }
+
+
     // Editar Ficha
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateProgram(Guid id, [FromBody] CreateWorkoutProgramDto dto)

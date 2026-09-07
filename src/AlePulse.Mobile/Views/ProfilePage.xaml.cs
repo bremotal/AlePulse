@@ -77,4 +77,13 @@ public partial class ProfilePage : ContentPage
     {
         Application.Current!.MainPage = new ProgramsPage();
     }
+    private async void OnDebugClicked(object sender, EventArgs e)
+    {
+        var token = await SecureStorage.GetAsync("auth_token");
+        var lastError = ApiService.LastError ?? "Nenhum erro registrado.";
+
+        await DisplayAlertAsync("Debug Info",
+            $"Token: {(token != null ? token.Substring(0, 20) + "..." : "Nulo")}\n\n" +
+            $"Último Erro API:\n{lastError}", "OK");
+    }
 }
