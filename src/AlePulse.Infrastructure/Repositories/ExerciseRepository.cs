@@ -17,7 +17,7 @@ public class ExerciseRepository : IExerciseRepository
     public async Task<Exercise?> GetByIdAsync(Guid id)
     {
         return await _context.Exercises
-            .Include(e => e.Medias) // Traz as mídias (GIFs/Vídeos) junto
+            .Include(e => e.Medias)
             .FirstOrDefaultAsync(e => e.Id == id);
     }
 
@@ -34,12 +34,14 @@ public class ExerciseRepository : IExerciseRepository
         await _context.Exercises.AddAsync(exercise);
     }
 
-    public async Task SaveChangesAsync()
-    {
-        await _context.SaveChangesAsync();
-    }
     public async Task AddMediaAsync(ExerciseMedia media)
     {
         await _context.ExerciseMedias.AddAsync(media);
+    }
+
+    // MÉTODO QUE FALTAVA:
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
     }
 }
