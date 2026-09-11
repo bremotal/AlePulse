@@ -6,6 +6,8 @@ namespace AlePulse.Mobile.Views;
 public partial class AddExercisePage : ContentPage
 {
     private readonly Guid _workoutId;
+    private List<ExerciseDto> _allExercises = new();
+    private ExerciseDto? _selectedExercise;
 
     public AddExercisePage(Guid workoutId)
     {
@@ -16,8 +18,21 @@ public partial class AddExercisePage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        var exercises = await ApiService.GetExercisesAsync();
-        ExercisePicker.ItemsSource = exercises;
+        _allExercises = await ApiService.GetExercisesAsync();
+        ExerciseList.ItemsSource = _allExercises;
+    }
+
+    // Lógica de pesquisa
+    private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+    {
+        var keyword = e.NewTextValue.ToLower();
+        ExerciseList.ItemsSource = _allExercises.Where(ex => ex.Name.ToLower().Contains(keyword)).ToList();
+    }
+
+    // Lógica de seleção na lista
+    private void OnExerciseSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        _selectedExercise = e.CurrentSelection.FirstOrDefault() as ExerciseDto;
     }
 
     private async void OnAddClicked(object sender, EventArgs e)
@@ -29,14 +44,14 @@ public partial class AddExercisePage : ContentPage
             var newEx = await ApiService.CreateExerciseAsync(NewExerciseEntry.Text);
             if (newEx != null) exerciseId = newEx.Id;
         }
-        else if (ExercisePicker.SelectedItem is ExerciseDto selectedExercise)
+        else if (_selectedExercise != null)
         {
-            exerciseId = selectedExercise.Id;
+            exerciseId = _selectedExercise.Id;
         }
 
         if (exerciseId == Guid.Empty)
         {
-            await DisplayAlertAsync("Aviso", "Selecione ou crie um exercício.", "OK");
+            await DisplayAlertAsync("Aviso", "Selecione um exercício da lista ou crie um novo.", "OK");
             return;
         }
 
@@ -58,7 +73,6 @@ public partial class AddExercisePage : ContentPage
         }
         else
         {
-            // Mostra o erro da API (ex: "Este exercício já foi adicionado a este treino.")
             await DisplayAlertAsync("Erro", $"Não foi possível adicionar.\n{ApiService.LastError}", "OK");
         }
     }
@@ -67,26 +81,26 @@ public partial class AddExercisePage : ContentPage
     {
         Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
     }
-    // NOVO MÉTODO: Excluir exercício selecionado da biblioteca
+
+    // Excluir da biblioteca
     private async void OnDeleteFromLibraryClicked(object sender, EventArgs e)
     {
-        if (ExercisePicker.SelectedItem is not ExerciseDto selectedExercise)
+        if (_selectedExercise == null)
         {
             await DisplayAlertAsync("Aviso", "Selecione um exercício da lista para excluí-lo.", "OK");
             return;
         }
 
-        bool confirm = await DisplayAlertAsync("Excluir", $"Excluir '{selectedExercise.Name}' permanentemente da biblioteca?", "Sim", "Não");
+        bool confirm = await DisplayAlertAsync("Excluir", $"Excluir '{_selectedExercise.Name}' permanentemente da biblioteca?", "Sim", "Não");
         if (!confirm) return;
 
-        bool success = await ApiService.DeleteExerciseAsync(selectedExercise.Id);
+        bool success = await ApiService.DeleteExerciseAsync(_selectedExercise.Id);
         if (success)
         {
             await DisplayAlertAsync("Sucesso", "Exercício excluído da biblioteca!", "OK");
-            // Recarrega a lista sem o exercício excluído
-            var exercises = await ApiService.GetExercisesAsync();
-            ExercisePicker.ItemsSource = exercises;
-            ExercisePicker.SelectedItem = null;
+            _allExercises = await ApiService.GetExercisesAsync();
+            ExerciseList.ItemsSource = _allExercises;
+            _selectedExercise = null;
         }
         else
         {

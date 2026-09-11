@@ -47,13 +47,10 @@ public partial class ExerciseExecutionPage : ContentPage
         if (exercise.Exercise?.Medias != null && exercise.Exercise.Medias.Count > 0)
         {
             _currentGifUrl = exercise.Exercise.Medias[0].Url;
-            ExerciseGif.IsVisible = true;
-            ExerciseGif.Source = ImageSource.FromUri(new Uri(ApiService.GetAbsoluteUrl(_currentGifUrl)));
         }
         else
         {
             _currentGifUrl = null;
-            ExerciseGif.IsVisible = false;
         }
 
         _editingSetId = null;
@@ -107,10 +104,9 @@ public partial class ExerciseExecutionPage : ContentPage
 
             var history = await ApiService.GetHistoryAsync(currentExerciseId);
 
-            // CORREÇÃO DA ORDEM DAS DATAS: Ordena os GRUPOS por data (DateTime) antes de converter para string
             var grouped = history
                 .GroupBy(e => e.CompletedAt.Date)
-                .OrderByDescending(g => g.Key) // Ordena por DateTime (mais recente primeiro)
+                .OrderByDescending(g => g.Key)
                 .Select(g => new GroupedExerciseSet(
                     g.Key.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
                     g.OrderByDescending(x => x.CompletedAt).ToList()
@@ -121,7 +117,8 @@ public partial class ExerciseExecutionPage : ContentPage
 
             if (!_editingSetId.HasValue)
             {
-                var todaySets = history.Where(x => x.CompletedAt.Date == DateTime.Now.Date).ToList();
+                // FIX: Conta apenas as séries feitas HOJE
+                var todaySets = history.Where(x => x.CompletedAt.Date == DateTime.Today).ToList();
                 if (todaySets.Count > 0)
                 {
                     SetEntry.Text = (todaySets.Max(x => x.SetNumber) + 1).ToString();
@@ -196,8 +193,7 @@ public partial class ExerciseExecutionPage : ContentPage
 
     private void OnExitClicked(object sender, EventArgs e)
     {
-        _isTimerRunning = false;
-        RestTimerBorder.IsVisible = false;
+        // FIX: Não para o timer ao sair. Ele continua em background e vibrará quando zerar.
         Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
     }
 
@@ -284,7 +280,6 @@ public partial class ExerciseExecutionPage : ContentPage
 
         try
         {
-            // BIP NATIVO DO ANDROID (Som de notificação do sistema)
 #if ANDROID
             var uri = Android.Media.RingtoneManager.GetDefaultUri(Android.Media.RingtoneType.Notification);
             var ringtone = Android.Media.RingtoneManager.GetRingtone(Android.App.Application.Context, uri);
@@ -316,12 +311,17 @@ public partial class ExerciseExecutionPage : ContentPage
         TimerFinished();
     }
 
-    private void OnGifTapped(object sender, TappedEventArgs e)
+    // O Título agora abre o GIF
+    private void OnTitleTapped(object sender, TappedEventArgs e)
     {
         if (!string.IsNullOrEmpty(_currentGifUrl))
         {
             PopupGif.Source = ImageSource.FromUri(new Uri(ApiService.GetAbsoluteUrl(_currentGifUrl)));
             GifPopupOverlay.IsVisible = true;
+        }
+        else
+        {
+            DisplayAlertAsync("Sem Imagem", "Nenhuma imagem cadastrada para este exercício.", "OK");
         }
     }
 
