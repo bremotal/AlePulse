@@ -15,10 +15,8 @@ public partial class ExerciseExecutionPage : ContentPage
     // Variáveis ESTÁTICAS: Guardam o tempo mesmo se a tela for fechada
     private static bool _isTimerRunning = false;
     private static DateTime _restEndTime;
-    private static System.Threading.Timer? _backgroundTimer;
 
     private int _remainingSeconds;
-    private bool _isPageActive = false;
     private DateTime _workoutStartTime;
 
     private string? _currentGifUrl;
@@ -79,8 +77,8 @@ public partial class ExerciseExecutionPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        _isPageActive = true;
 
+        // Se o timer estava rodando em segundo plano, RETOMA a animação visual na tela
         if (_isTimerRunning)
         {
             var remaining = _restEndTime - DateTime.Now;
@@ -93,16 +91,11 @@ public partial class ExerciseExecutionPage : ContentPage
                 _remainingSeconds = (int)Math.Ceiling(remaining.TotalSeconds);
                 RestTimerBorder.IsVisible = true;
                 UpdateTimerLabel();
+                StartUiTimer(); // Liga o motor visual de novo!
             }
         }
 
         await LoadHistory();
-    }
-
-    protected override void OnDisappearing()
-    {
-        base.OnDisappearing();
-        _isPageActive = false;
     }
 
     private async Task LoadHistory()
@@ -252,46 +245,36 @@ public partial class ExerciseExecutionPage : ContentPage
         }
     }
 
-    // --- LÓGICA DO CRONÔMETRO EM BACKGROUND ---
+    // --- LÓGICA DO CRONÔMETRO PERSISTENTE ---
 
     private void StartRestTimer(int seconds)
     {
         _isTimerRunning = true;
         _restEndTime = DateTime.Now.AddSeconds(seconds);
+        RestTimerBorder.IsVisible = true;
+        StartUiTimer();
+    }
 
-        // Atualiza a UI imediatamente na main thread
-        MainThread.BeginInvokeOnMainThread(() =>
+    private void StartUiTimer()
+    {
+        // Cancela o timer visual anterior se existir (evita duplicateds)
+        Device.StartTimer(TimeSpan.FromSeconds(1), () =>
         {
-            RestTimerBorder.IsVisible = true;
-            UpdateTimerLabel();
-        });
-
-        // Inicia o timer em uma thread de background separada
-        _backgroundTimer?.Dispose();
-        _backgroundTimer = new System.Threading.Timer(state =>
-        {
-            if (!_isTimerRunning) return;
+            if (!_isTimerRunning) return false; // Se o descanso acabou, para de rodar
 
             var remaining = _restEndTime - DateTime.Now;
 
             if (remaining.TotalSeconds <= 0)
             {
-                _isTimerRunning = false;
-                _backgroundTimer?.Dispose();
-
-                // Chama a finalização na Main Thread para poder vibrar e tocar som
-                MainThread.BeginInvokeOnMainThread(() => TimerFinished());
-                return;
+                TimerFinished(); // Vibra e toca o som
+                return false;
             }
 
-            // Se a tela estiver aberta, atualiza os números
-            if (_isPageActive)
-            {
-                _remainingSeconds = (int)Math.Ceiling(remaining.TotalSeconds);
-                MainThread.BeginInvokeOnMainThread(() => UpdateTimerLabel());
-            }
+            _remainingSeconds = (int)Math.Ceiling(remaining.TotalSeconds);
+            UpdateTimerLabel();
 
-        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+            return true; // Continua atualizando a tela a cada 1 segundo
+        });
     }
 
     private void UpdateTimerLabel()
