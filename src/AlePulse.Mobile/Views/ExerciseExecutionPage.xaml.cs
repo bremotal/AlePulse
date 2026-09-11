@@ -2,6 +2,11 @@ using AlePulse.Mobile.Models;
 using AlePulse.Mobile.Services;
 using System.Globalization;
 
+#if ANDROID
+using AndroidX.Core.App;
+using Android.Content;
+#endif
+
 namespace AlePulse.Mobile.Views;
 
 public partial class ExerciseExecutionPage : ContentPage
@@ -12,7 +17,6 @@ public partial class ExerciseExecutionPage : ContentPage
     private Guid? _editingSetId = null;
     private readonly bool _isSingleExercise;
 
-    // Variáveis ESTÁTICAS: Guardam o tempo mesmo se a tela for fechada
     private static bool _isTimerRunning = false;
     private static DateTime _restEndTime;
 
@@ -78,7 +82,6 @@ public partial class ExerciseExecutionPage : ContentPage
     {
         base.OnAppearing();
 
-        // Se o timer estava rodando em segundo plano, RETOMA a animação visual na tela
         if (_isTimerRunning)
         {
             var remaining = _restEndTime - DateTime.Now;
@@ -91,7 +94,7 @@ public partial class ExerciseExecutionPage : ContentPage
                 _remainingSeconds = (int)Math.Ceiling(remaining.TotalSeconds);
                 RestTimerBorder.IsVisible = true;
                 UpdateTimerLabel();
-                StartUiTimer(); // Liga o motor visual de novo!
+                StartUiTimer();
             }
         }
 
@@ -257,23 +260,21 @@ public partial class ExerciseExecutionPage : ContentPage
 
     private void StartUiTimer()
     {
-        // Cancela o timer visual anterior se existir (evita duplicateds)
         Device.StartTimer(TimeSpan.FromSeconds(1), () =>
         {
-            if (!_isTimerRunning) return false; // Se o descanso acabou, para de rodar
+            if (!_isTimerRunning) return false;
 
             var remaining = _restEndTime - DateTime.Now;
 
             if (remaining.TotalSeconds <= 0)
             {
-                TimerFinished(); // Vibra e toca o som
+                TimerFinished();
                 return false;
             }
 
             _remainingSeconds = (int)Math.Ceiling(remaining.TotalSeconds);
             UpdateTimerLabel();
-
-            return true; // Continua atualizando a tela a cada 1 segundo
+            return true;
         });
     }
 
@@ -291,12 +292,38 @@ public partial class ExerciseExecutionPage : ContentPage
 
         try
         {
-#if ANDROID
-            var uri = Android.Media.RingtoneManager.GetDefaultUri(Android.Media.RingtoneType.Notification);
-            var ringtone = Android.Media.RingtoneManager.GetRingtone(Android.App.Application.Context, uri);
-            ringtone?.Play();
-#endif
+            // Vibra o celular
             Vibration.Default.Vibrate(TimeSpan.FromSeconds(1));
+
+#if ANDROID
+            // NOTIFICAÇÃO NATIVA PARA SMARTWATCH (Wear OS)
+            var context = Android.App.Application.Context;
+            var channelId = "alepulse_rest_timer";
+
+            var notificationManager = (Android.App.NotificationManager)context.GetSystemService(Context.NotificationService);
+
+            // Cria o canal de notificação (necessário para Android 8.0+)
+            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+            {
+                var channel = new Android.App.NotificationChannel(channelId, "Cronômetro de Descanso", Android.App.NotificationImportance.High);
+                channel.EnableVibration(true);
+                channel.EnableLights(true);
+                channel.SetBypassDnd(true); // Avisa mesmo no modo não perturbe
+                notificationManager.CreateNotificationChannel(channel);
+            }
+
+            // Constrói a notificação
+            var builder = new NotificationCompat.Builder(context, channelId)
+                .SetContentTitle("Descanso Finalizado! 💪")
+                .SetContentText("Hora de voltar para o treino!")
+                .SetSmallIcon(Android.Resource.Drawable.IcDialogInfo) // Ícone do sistema
+                .SetPriority(NotificationCompat.PriorityHigh) // Alta prioridade espelha para o relógio
+                .SetVibrate(new long[] { 0, 1000, 500, 1000 }) // Vibrar 1s, pausa 0.5s, vibrar 1s
+                .SetAutoCancel(true);
+
+            // Dispara a notificação
+            notificationManager.Notify(1001, builder.Build());
+#endif
         }
         catch { }
     }
