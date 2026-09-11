@@ -12,11 +12,13 @@ public partial class ExerciseExecutionPage : ContentPage
     private Guid? _editingSetId = null;
     private readonly bool _isSingleExercise;
 
-    private int _remainingSeconds;
-    private bool _isTimerRunning;
-    private DateTime _workoutStartTime;
-    private DateTime _restEndTime;
+    // Variáveis ESTÁTICAS: Guardam o tempo mesmo se a tela for fechada
+    private static bool _isTimerRunning = false;
+    private static DateTime _restEndTime;
 
+    private int _remainingSeconds;
+    private bool _isPageActive = false; // Evita erro de UI quando a tela está fechada
+    private DateTime _workoutStartTime;
     private string? _currentGifUrl;
 
     public ExerciseExecutionPage(Guid workoutId, List<WorkoutExerciseDto> exercises, bool isSingleExercise = false)
@@ -75,22 +77,32 @@ public partial class ExerciseExecutionPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        _isPageActive = true; // A tela está aberta
 
+        // Se o timer estava rodando em segundo plano, atualiza a UI
         if (_isTimerRunning)
         {
             var remaining = _restEndTime - DateTime.Now;
             if (remaining.TotalSeconds <= 0)
             {
-                TimerFinished();
+                TimerFinished(); // Se já passou o tempo enquanto estava fora, finaliza e vibra
             }
             else
             {
                 _remainingSeconds = (int)Math.Ceiling(remaining.TotalSeconds);
+                RestTimerBorder.IsVisible = true;
                 UpdateTimerLabel();
+                StartUiTimer(); // Retoma a atualização visual do cronômetro
             }
         }
 
         await LoadHistory();
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        _isPageActive = false; // A tela fechou, mas o timer estático continua se precisar
     }
 
     private async Task LoadHistory()
@@ -117,7 +129,6 @@ public partial class ExerciseExecutionPage : ContentPage
 
             if (!_editingSetId.HasValue)
             {
-                // FIX: Conta apenas as séries feitas HOJE
                 var todaySets = history.Where(x => x.CompletedAt.Date == DateTime.Today).ToList();
                 if (todaySets.Count > 0)
                 {
@@ -193,7 +204,6 @@ public partial class ExerciseExecutionPage : ContentPage
 
     private void OnExitClicked(object sender, EventArgs e)
     {
-        // FIX: Não para o timer ao sair. Ele continua em background e vibrará quando zerar.
         Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
     }
 
@@ -242,14 +252,21 @@ public partial class ExerciseExecutionPage : ContentPage
         }
     }
 
+    // --- LÓGICA DO CRONÔMETRO PERSISTENTE ---
+
     private void StartRestTimer(int seconds)
     {
         _isTimerRunning = true;
         _restEndTime = DateTime.Now.AddSeconds(seconds);
         RestTimerBorder.IsVisible = true;
+        StartUiTimer();
+    }
 
+    private void StartUiTimer()
+    {
         Device.StartTimer(TimeSpan.FromSeconds(1), () =>
         {
+            if (!_isPageActive) return false; // Para a UI se a tela fechou
             if (!_isTimerRunning) return false;
 
             var remaining = _restEndTime - DateTime.Now;
@@ -285,7 +302,6 @@ public partial class ExerciseExecutionPage : ContentPage
             var ringtone = Android.Media.RingtoneManager.GetRingtone(Android.App.Application.Context, uri);
             ringtone?.Play();
 #endif
-
             Vibration.Default.Vibrate(TimeSpan.FromSeconds(1));
         }
         catch { }
@@ -311,7 +327,6 @@ public partial class ExerciseExecutionPage : ContentPage
         TimerFinished();
     }
 
-    // O Título agora abre o GIF
     private void OnTitleTapped(object sender, TappedEventArgs e)
     {
         if (!string.IsNullOrEmpty(_currentGifUrl))
