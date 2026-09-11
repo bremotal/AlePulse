@@ -21,7 +21,6 @@ public class UsersController : ControllerBase
         _authService = authService;
     }
 
-    // Método privado para extrair o ID do usuário do Token JWT
     private Guid GetUserId()
     {
         var claim = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -74,7 +73,15 @@ public class UsersController : ControllerBase
         var user = await _userRepository.GetByIdAsync(GetUserId());
         if (user == null) return NotFound();
 
-        return Ok(new { user.Name, user.Email });
+        // Retorna os dados do perfil junto com os dados do usuário
+        return Ok(new
+        {
+            user.Name,
+            user.Email,
+            Weight = user.Profile?.Weight,
+            Height = user.Profile?.Height,
+            TrainingGoal = user.Profile?.TrainingGoal
+        });
     }
 
     [Authorize]
@@ -84,13 +91,15 @@ public class UsersController : ControllerBase
         var user = await _userRepository.GetByIdAsync(GetUserId());
         if (user == null) return NotFound();
 
-        // Verifica se o e-mail novo não pertence a outra pessoa
-        var existingUser = await _userRepository.GetByEmailAsync(dto.Email);
-        if (existingUser != null && existingUser.Id != user.Id)
-            return Conflict("Este e-mail já está em uso por outra conta.");
-
         user.Name = dto.Name;
         user.Email = dto.Email;
+
+        // Atualiza ou cria o perfil do usuário
+        user.Profile ??= new UserProfile { UserId = user.Id };
+
+        if (dto.Weight.HasValue) user.Profile.Weight = dto.Weight.Value;
+        if (dto.Height.HasValue) user.Profile.Height = dto.Height.Value;
+        if (!string.IsNullOrEmpty(dto.TrainingGoal)) user.Profile.TrainingGoal = dto.TrainingGoal;
 
         await _userRepository.UpdateUserAsync(user);
         return NoContent();

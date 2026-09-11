@@ -265,11 +265,16 @@ public static class ApiService
         return null;
     }
 
-    public static async Task<bool> UpdateProfileAsync(string name, string email)
+    public static async Task<bool> UpdateProfileAsync(string name, string email, decimal? weight, decimal? height, string? goal)
     {
-        var dto = new { name, email };
+        // Envia os dados físicos junto com o nome e email
+        var dto = new { name, email, weight, height, trainingGoal = goal };
         var response = await _client.PutAsJsonAsync("/api/Users/update-profile", dto);
-        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+
+        if (!response.IsSuccessStatusCode)
+        {
+            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        }
         return response.IsSuccessStatusCode;
     }
 

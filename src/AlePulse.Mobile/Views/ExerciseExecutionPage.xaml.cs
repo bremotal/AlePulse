@@ -19,6 +19,7 @@ public partial class ExerciseExecutionPage : ContentPage
     private int _remainingSeconds;
     private bool _isPageActive = false; // Evita erro de UI quando a tela está fechada
     private DateTime _workoutStartTime;
+
     private string? _currentGifUrl;
 
     public ExerciseExecutionPage(Guid workoutId, List<WorkoutExerciseDto> exercises, bool isSingleExercise = false)
@@ -92,7 +93,7 @@ public partial class ExerciseExecutionPage : ContentPage
                 _remainingSeconds = (int)Math.Ceiling(remaining.TotalSeconds);
                 RestTimerBorder.IsVisible = true;
                 UpdateTimerLabel();
-                StartUiTimer(); // Retoma a atualização visual do cronômetro
+                // Não chamamos StartUiTimer() aqui pois ele já está rodando em background!
             }
         }
 
@@ -102,7 +103,7 @@ public partial class ExerciseExecutionPage : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        _isPageActive = false; // A tela fechou, mas o timer estático continua se precisar
+        _isPageActive = false; // A tela fechou, mas o timer estático continua
     }
 
     private async Task LoadHistory()
@@ -266,20 +267,24 @@ public partial class ExerciseExecutionPage : ContentPage
     {
         Device.StartTimer(TimeSpan.FromSeconds(1), () =>
         {
-            if (!_isPageActive) return false; // Para a UI se a tela fechou
-            if (!_isTimerRunning) return false;
+            if (!_isTimerRunning) return false; // Para se o timer foi cancelado
 
             var remaining = _restEndTime - DateTime.Now;
 
             if (remaining.TotalSeconds <= 0)
             {
-                TimerFinished();
+                TimerFinished(); // Vibra e toca o som MESMO se a tela estiver fechada!
                 return false;
             }
 
-            _remainingSeconds = (int)Math.Ceiling(remaining.TotalSeconds);
-            UpdateTimerLabel();
-            return true;
+            // Só atualiza o número na tela se a página estiver aberta
+            if (_isPageActive)
+            {
+                _remainingSeconds = (int)Math.Ceiling(remaining.TotalSeconds);
+                UpdateTimerLabel();
+            }
+
+            return true; // Continua rodando em background!
         });
     }
 
