@@ -11,11 +11,12 @@ public class WorkoutDetailDto
 public class WorkoutExerciseDto
 {
     public Guid Id { get; set; }
-    public Guid ExerciseId { get; set; } // Adicionado
+    public Guid ExerciseId { get; set; }
     public ExerciseDto? Exercise { get; set; }
     public int Sets { get; set; }
     public int Repetitions { get; set; }
     public decimal Weight { get; set; }
     public int RestSeconds { get; set; }
-    public bool IsCompletedToday { get; set; } // Adicionado
+    public bool IsCompletedToday { get; set; }
+    public int Order { get; set; }
 }

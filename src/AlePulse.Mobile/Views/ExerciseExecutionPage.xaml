@@ -61,18 +61,18 @@
             </VerticalStackLayout>
         </Border>
 
-        <!-- CRONÔMETRO DE DESCANSO -->
-        <Border Grid.Row="3" x:Name="RestTimerBorder" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#FFF3E0}" Stroke="#FF6A00" Padding="15" Margin="0,0,0,15" IsVisible="False">
+        <!-- CRONÔMETRO DE DESCANSO (Reduzido) -->
+        <Border Grid.Row="3" x:Name="RestTimerBorder" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#FFF3E0}" Stroke="#FF6A00" Padding="10" Margin="0,0,0,10" IsVisible="False">
             <Border.StrokeShape>
-                <RoundRectangle CornerRadius="15" />
+                <RoundRectangle CornerRadius="10" />
             </Border.StrokeShape>
-            <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
-                <Label Text="DESCANSO" TextColor="#FF6A00" FontAttributes="Bold" HorizontalOptions="Center"/>
-                <Label x:Name="TimerLabel" Text="00:00" FontSize="48" FontAttributes="Bold" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" HorizontalOptions="Center"/>
-                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                    <Button Text="-15s" BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" CornerRadius="10" Clicked="OnMinus15Clicked"/>
-                    <Button Text="Pular" BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" CornerRadius="10" Clicked="OnSkipRestClicked"/>
-                    <Button Text="+15s" BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" CornerRadius="10" Clicked="OnPlus15Clicked"/>
+            <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                <Label Text="DESCANSO" TextColor="#FF6A00" FontAttributes="Bold" HorizontalOptions="Center" FontSize="12"/>
+                <Label x:Name="TimerLabel" Text="00:00" FontSize="24" FontAttributes="Bold" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" HorizontalOptions="Center"/>
+                <HorizontalStackLayout Spacing="5" HorizontalOptions="Center">
+                    <Button Text="-15s" FontSize="12" BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" CornerRadius="8" Clicked="OnMinus15Clicked"/>
+                    <Button Text="Pular" FontSize="12" BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" CornerRadius="8" Clicked="OnSkipRestClicked"/>
+                    <Button Text="+15s" FontSize="12" BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" CornerRadius="8" Clicked="OnPlus15Clicked"/>
                 </HorizontalStackLayout>
             </VerticalStackLayout>
         </Border>

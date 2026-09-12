@@ -31,20 +31,24 @@
                             <RoundRectangle CornerRadius="15" />
                         </Border.StrokeShape>
 
-                        <!-- Grid com 5 colunas: Dados, Check, Upload, Editar, Excluir -->
-                        <Grid ColumnDefinitions="*, Auto, Auto, Auto, Auto" RowDefinitions="Auto, Auto">
+                        <!-- Grid com 7 colunas: Up, Down, Dados, Check, Upload, Editar, Excluir -->
+                        <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto, Auto, Auto" RowDefinitions="Auto, Auto">
 
-                            <VerticalStackLayout Grid.Column="0" Spacing="5">
+                            <!-- SETAS DE REORDENAÇÃO -->
+                            <Button Grid.Column="0" Text="⬆" FontSize="16" BackgroundColor="Transparent" TextColor="#E0E0E0" WidthRequest="35" HeightRequest="35" Clicked="OnMoveUpClicked" />
+                            <Button Grid.Column="1" Text="⬇" FontSize="16" BackgroundColor="Transparent" TextColor="#E0E0E0" WidthRequest="35" HeightRequest="35" Clicked="OnMoveDownClicked" />
+
+                            <VerticalStackLayout Grid.Column="2" Spacing="5">
                                 <Label Text="{Binding Exercise.Name}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" FontSize="20" FontAttributes="Bold" />
                                 <Label Text="{Binding Description}" TextColor="{AppThemeBinding Dark=#888888, Light=#666666}" FontSize="14" />
                             </VerticalStackLayout>
 
-                            <!-- CHECK VERDE DE TREINO FEITO -->
-                            <Label Grid.Column="1" Text="✅" FontSize="20" VerticalOptions="Center" Margin="0,0,10,0" IsVisible="{Binding IsCompletedToday}" />
+                            <!-- CHECK VERDE -->
+                            <Label Grid.Column="3" Text="✅" FontSize="20" VerticalOptions="Center" Margin="0,0,5,0" IsVisible="{Binding IsCompletedToday}" />
 
-                            <Button Grid.Column="2" Text="📷" BackgroundColor="Transparent" TextColor="#FF6A00" WidthRequest="45" HeightRequest="45" Clicked="OnUploadImageClicked" />
-                            <Button Grid.Column="3" Text="✏️" BackgroundColor="Transparent" TextColor="#FF6A00" WidthRequest="45" HeightRequest="45" Clicked="OnEditExerciseClicked" />
-                            <Button Grid.Column="4" Text="🗑️" BackgroundColor="Transparent" TextColor="Red" WidthRequest="45" HeightRequest="45" Clicked="OnDeleteExerciseClicked" />
+                            <Button Grid.Column="4" Text="📷" BackgroundColor="Transparent" TextColor="#FF6A00" WidthRequest="40" HeightRequest="40" Clicked="OnUploadImageClicked" />
+                            <Button Grid.Column="5" Text="✏️" BackgroundColor="Transparent" TextColor="#FF6A00" WidthRequest="40" HeightRequest="40" Clicked="OnEditExerciseClicked" />
+                            <Button Grid.Column="6" Text="🗑️" BackgroundColor="Transparent" TextColor="Red" WidthRequest="40" HeightRequest="40" Clicked="OnDeleteExerciseClicked" />
                         </Grid>
                     </Border>
                 </DataTemplate>

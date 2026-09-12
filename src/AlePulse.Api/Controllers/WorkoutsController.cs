@@ -134,4 +134,34 @@ public class WorkoutsController : ControllerBase
 
         return NoContent();
     }
+   
+    [HttpPut("{workoutId}/exercises/{exerciseId}/move")]
+    public async Task<IActionResult> MoveExercise(Guid workoutId, Guid exerciseId, [FromQuery] string direction)
+    {
+        var workout = await _workoutRepository.GetByIdAsync(workoutId);
+        if (workout == null || workout.UserId != GetUserId()) return NotFound("Treino não encontrado.");
+
+        var current = workout.Exercises.FirstOrDefault(e => e.Id == exerciseId);
+        if (current == null) return NotFound("Exercício não encontrado.");
+
+        var orderedExercises = workout.Exercises.OrderBy(e => e.Order).ToList();
+        var currentIndex = orderedExercises.IndexOf(current);
+
+        WorkoutExercise? swapTarget = null;
+        if (direction == "up" && currentIndex > 0)
+            swapTarget = orderedExercises[currentIndex - 1];
+        else if (direction == "down" && currentIndex < orderedExercises.Count - 1)
+            swapTarget = orderedExercises[currentIndex + 1];
+
+        if (swapTarget != null)
+        {
+            var tempOrder = current.Order;
+            current.Order = swapTarget.Order;
+            swapTarget.Order = tempOrder;
+            await _workoutRepository.SaveChangesAsync();
+        }
+
+        return Ok();
+    }
+
 }

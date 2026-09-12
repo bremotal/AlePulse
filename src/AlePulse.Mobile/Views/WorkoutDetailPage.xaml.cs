@@ -33,7 +33,10 @@ public partial class WorkoutDetailPage : ContentPage
 
                 if (workout.Exercises != null)
                 {
-                    foreach (var ex in workout.Exercises)
+                    // Garante que a lista sempre venha ordenada pelo campo Order
+                    var orderedExercises = workout.Exercises.OrderBy(e => e.Order).ToList();
+
+                    foreach (var ex in orderedExercises)
                     {
                         var exerciseGuid = ex.ExerciseId != Guid.Empty
                             ? ex.ExerciseId
@@ -41,12 +44,12 @@ public partial class WorkoutDetailPage : ContentPage
 
                         ex.IsCompletedToday = completedIds.Contains(exerciseGuid);
                     }
-                }
 
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    ExercisesList.ItemsSource = workout.Exercises;
-                });
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        ExercisesList.ItemsSource = orderedExercises;
+                    });
+                }
             }
         }
         catch (Exception ex)
@@ -111,6 +114,25 @@ public partial class WorkoutDetailPage : ContentPage
                 await ApiService.DeleteWorkoutExerciseAsync(_workoutId, exercise.Id);
                 await LoadWorkoutDetails();
             }
+        }
+    }
+
+    // NOVOS MÉTODOS DE REORDENAÇÃO
+    private async void OnMoveUpClicked(object sender, EventArgs e)
+    {
+        if (sender is Button button && button.BindingContext is WorkoutExerciseDto exercise)
+        {
+            bool success = await ApiService.MoveExerciseAsync(_workoutId, exercise.Id, "up");
+            if (success) await LoadWorkoutDetails();
+        }
+    }
+
+    private async void OnMoveDownClicked(object sender, EventArgs e)
+    {
+        if (sender is Button button && button.BindingContext is WorkoutExerciseDto exercise)
+        {
+            bool success = await ApiService.MoveExerciseAsync(_workoutId, exercise.Id, "down");
+            if (success) await LoadWorkoutDetails();
         }
     }
 

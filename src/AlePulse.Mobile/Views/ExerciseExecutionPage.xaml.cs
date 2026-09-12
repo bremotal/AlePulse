@@ -2,11 +2,6 @@ using AlePulse.Mobile.Models;
 using AlePulse.Mobile.Services;
 using System.Globalization;
 
-#if ANDROID
-using AndroidX.Core.App;
-using Android.Content;
-#endif
-
 namespace AlePulse.Mobile.Views;
 
 public partial class ExerciseExecutionPage : ContentPage
@@ -292,38 +287,8 @@ public partial class ExerciseExecutionPage : ContentPage
 
         try
         {
-            // Vibra o celular
+            // Voltamos apenas para a vibração, sem notificações do Android para evitar travamentos
             Vibration.Default.Vibrate(TimeSpan.FromSeconds(1));
-
-#if ANDROID
-            // NOTIFICAÇÃO NATIVA PARA SMARTWATCH (Wear OS)
-            var context = Android.App.Application.Context;
-            var channelId = "alepulse_rest_timer";
-
-            var notificationManager = (Android.App.NotificationManager)context.GetSystemService(Context.NotificationService);
-
-            // Cria o canal de notificação (necessário para Android 8.0+)
-            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
-            {
-                var channel = new Android.App.NotificationChannel(channelId, "Cronômetro de Descanso", Android.App.NotificationImportance.High);
-                channel.EnableVibration(true);
-                channel.EnableLights(true);
-                channel.SetBypassDnd(true); // Avisa mesmo no modo não perturbe
-                notificationManager.CreateNotificationChannel(channel);
-            }
-
-            // Constrói a notificação
-            var builder = new NotificationCompat.Builder(context, channelId)
-                .SetContentTitle("Descanso Finalizado! 💪")
-                .SetContentText("Hora de voltar para o treino!")
-                .SetSmallIcon(Android.Resource.Drawable.IcDialogInfo) // Ícone do sistema
-                .SetPriority(NotificationCompat.PriorityHigh) // Alta prioridade espelha para o relógio
-                .SetVibrate(new long[] { 0, 1000, 500, 1000 }) // Vibrar 1s, pausa 0.5s, vibrar 1s
-                .SetAutoCancel(true);
-
-            // Dispara a notificação
-            notificationManager.Notify(1001, builder.Build());
-#endif
         }
         catch { }
     }

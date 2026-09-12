@@ -94,14 +94,19 @@ public class UsersController : ControllerBase
         user.Name = dto.Name;
         user.Email = dto.Email;
 
-        // Atualiza ou cria o perfil do usuário
-        user.Profile ??= new UserProfile { UserId = user.Id };
+        // Lógica simplificada e segura para criar/atualizar o perfil
+        if (user.Profile == null)
+        {
+            user.Profile = new UserProfile { UserId = user.Id };
+        }
 
-        if (dto.Weight.HasValue) user.Profile.Weight = dto.Weight.Value;
-        if (dto.Height.HasValue) user.Profile.Height = dto.Height.Value;
-        if (!string.IsNullOrEmpty(dto.TrainingGoal)) user.Profile.TrainingGoal = dto.TrainingGoal;
+        user.Profile.Weight = dto.Weight ?? user.Profile.Weight;
+        user.Profile.Height = dto.Height ?? user.Profile.Height;
+        user.Profile.TrainingGoal = dto.TrainingGoal ?? user.Profile.TrainingGoal;
 
         await _userRepository.UpdateUserAsync(user);
+        await _userRepository.SaveChangesAsync();
+
         return NoContent();
     }
 

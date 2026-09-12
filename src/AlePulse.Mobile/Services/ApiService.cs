@@ -167,7 +167,16 @@ public static class ApiService
         if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
         return response.IsSuccessStatusCode;
     }
-
+    public static async Task<bool> MoveExerciseAsync(Guid workoutId, Guid exerciseId, string direction)
+    {
+        var response = await _client.PutAsync($"/api/Workouts/{workoutId}/exercises/{exerciseId}/move?direction={direction}", null);
+        if (!response.IsSuccessStatusCode)
+        {
+            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        }
+        return response.IsSuccessStatusCode;
+    }
+    
     // --- MÉTODOS DE EXERCÍCIOS ---
 
     public static async Task<List<Models.ExerciseDto>> GetExercisesAsync()
