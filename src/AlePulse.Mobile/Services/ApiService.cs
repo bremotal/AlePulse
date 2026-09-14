@@ -167,16 +167,19 @@ public static class ApiService
         if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
         return response.IsSuccessStatusCode;
     }
-    public static async Task<bool> MoveExerciseAsync(Guid workoutId, Guid exerciseId, string direction)
+
+    // NOVO: Reordenar exercícios via Drag and Drop
+    public static async Task<bool> ReorderExercisesAsync(Guid workoutId, List<Guid> exerciseIds)
     {
-        var response = await _client.PutAsync($"/api/Workouts/{workoutId}/exercises/{exerciseId}/move?direction={direction}", null);
+        var dto = new { exerciseIds };
+        var response = await _client.PutAsJsonAsync($"/api/Workouts/{workoutId}/exercises/reorder", dto);
         if (!response.IsSuccessStatusCode)
         {
             LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
         }
         return response.IsSuccessStatusCode;
     }
-    
+
     // --- MÉTODOS DE EXERCÍCIOS ---
 
     public static async Task<List<Models.ExerciseDto>> GetExercisesAsync()
@@ -198,6 +201,16 @@ public static class ApiService
             return await response.Content.ReadFromJsonAsync<Models.ExerciseDto>();
         }
         return null;
+    }
+
+    public static async Task<bool> DeleteExerciseAsync(Guid exerciseId)
+    {
+        var response = await _client.DeleteAsync($"/api/Exercises/{exerciseId}");
+        if (!response.IsSuccessStatusCode)
+        {
+            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        }
+        return response.IsSuccessStatusCode;
     }
 
     public static async Task<bool> UploadExerciseImageAsync(Guid exerciseId, FileResult file)
@@ -223,23 +236,16 @@ public static class ApiService
         return new List<Models.ExerciseSetDto>();
     }
 
-    // NOVO MÉTODO: Buscar exercícios feitos hoje
     public static async Task<List<Guid>> GetCompletedExercisesTodayAsync(Guid workoutId)
     {
-        try
+        var response = await _client.GetAsync($"/api/History/completed-today/{workoutId}");
+        if (response.IsSuccessStatusCode)
         {
-            var response = await _client.GetAsync($"/api/History/completed-today/{workoutId}");
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<List<Guid>>() ?? new List<Guid>();
-            }
-        }
-        catch
-        {
-            // Se a nuvem der erro ou retornar formato errado, ignora e retorna lista vazia
+            return await response.Content.ReadFromJsonAsync<List<Guid>>() ?? new List<Guid>();
         }
         return new List<Guid>();
     }
+
     public static async Task<bool> LogSetAsync(Guid workoutId, Guid exerciseId, int setNumber, decimal weight, int reps)
     {
         var dto = new { setNumber, weight, repetitions = reps };
@@ -276,7 +282,6 @@ public static class ApiService
 
     public static async Task<bool> UpdateProfileAsync(string name, string email, decimal? weight, decimal? height, string? goal)
     {
-        // Envia os dados físicos junto com o nome e email
         var dto = new { name, email, weight, height, trainingGoal = goal };
         var response = await _client.PutAsJsonAsync("/api/Users/update-profile", dto);
 
@@ -291,13 +296,7 @@ public static class ApiService
     {
         var dto = new { currentPassword, newPassword };
         var response = await _client.PutAsJsonAsync("/api/Users/change-password", dto);
-        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
-        return response.IsSuccessStatusCode;
-    }
-    // NOVO MÉTODO: Excluir exercício da biblioteca
-    public static async Task<bool> DeleteExerciseAsync(Guid exerciseId)
-    {
-        var response = await _client.DeleteAsync($"/api/Exercises/{exerciseId}");
+
         if (!response.IsSuccessStatusCode)
         {
             LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";

@@ -1,66 +1,250 @@
 <?xml version="1.0" encoding="utf-8" ?>
+
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="AlePulse.Mobile.Views.WorkoutDetailPage"
              BackgroundColor="{AppThemeBinding Dark=#121212, Light=#F9F9F9}"
              Title="Detalhes do Treino">
 
-    <Grid RowDefinitions="Auto, Auto, *, Auto" Padding="20">
+    <Grid RowDefinitions="Auto, Auto, *, Auto"
+          Padding="20">
 
-        <!-- Cabeçalho do Treino -->
-        <VerticalStackLayout Grid.Row="0" Spacing="5" Margin="0,20,0,20">
-            <Label x:Name="WorkoutNameLabel" FontSize="28" FontAttributes="Bold" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" />
-            <Label x:Name="WorkoutDescLabel" FontSize="16" TextColor="{AppThemeBinding Dark=#E0E0E0, Light=#666666}" />
+        <!-- ====================================================== -->
+        <!-- CABEÇALHO DO TREINO                                    -->
+        <!-- ====================================================== -->
+
+        <VerticalStackLayout Grid.Row="0"
+                             Spacing="5"
+                             Margin="0,20,0,20">
+
+            <Label x:Name="WorkoutNameLabel"
+                   FontSize="28"
+                   FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" />
+
+            <Label x:Name="WorkoutDescLabel"
+                   FontSize="16"
+                   TextColor="{AppThemeBinding Dark=#E0E0E0, Light=#666666}" />
+
         </VerticalStackLayout>
 
-        <BoxView Grid.Row="1" HeightRequest="1" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}" Margin="0,0,0,20" />
 
-        <!-- Lista de Exercícios do Treino -->
-        <CollectionView x:Name="ExercisesList" Grid.Row="2" BackgroundColor="Transparent">
+        <!-- ====================================================== -->
+        <!-- SEPARADOR                                               -->
+        <!-- ====================================================== -->
+
+        <BoxView Grid.Row="1"
+                 HeightRequest="1"
+                 BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}"
+                 Margin="0,0,0,20" />
+
+
+        <!-- ====================================================== -->
+        <!-- LISTA DE EXERCÍCIOS                                    -->
+        <!-- ====================================================== -->
+
+        <CollectionView x:Name="ExercisesList"
+                        Grid.Row="2"
+                        BackgroundColor="Transparent">
+
             <CollectionView.EmptyView>
-                <Label Text="Nenhum exercício adicionado a este treino." TextColor="{AppThemeBinding Dark=#888888, Light=#666666}" FontSize="16" HorizontalOptions="Center" Margin="0,50,0,0" />
+
+                <Label Text="Nenhum exercício adicionado a este treino."
+                       TextColor="{AppThemeBinding Dark=#888888, Light=#666666}"
+                       FontSize="16"
+                       HorizontalOptions="Center"
+                       Margin="0,50,0,0" />
+
             </CollectionView.EmptyView>
 
+
             <CollectionView.ItemTemplate>
+
                 <DataTemplate>
-                    <Border BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" Stroke="{AppThemeBinding Dark=#2B2B2B, Light=#EEEEEE}" Margin="0,0,0,15" Padding="15">
+
+                    <!-- ================================================== -->
+                    <!-- CARD DO EXERCÍCIO                                  -->
+                    <!-- ================================================== -->
+
+                    <Border BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}"
+
+                            Stroke="{AppThemeBinding Dark=#2B2B2B, Light=#EEEEEE}"
+
+                            StrokeThickness="1"
+
+                            Margin="0,0,0,15"
+
+                            Padding="15">
+
+                        <!-- ================================================== -->
+                        <!-- GESTOS                                             -->
+                        <!-- ================================================== -->
+
                         <Border.GestureRecognizers>
+
+                            <!-- Abrir exercício -->
                             <TapGestureRecognizer Tapped="OnExerciseTapped" />
+
+                            <!-- Iniciar arraste -->
+                            <DragGestureRecognizer CanDrag="True"
+                                                    DragStarting="OnDragStarting" />
+
+                            <!-- Receber exercício arrastado -->
+                            <DropGestureRecognizer AllowDrop="True"
+                                                    Drop="OnDrop" />
+
                         </Border.GestureRecognizers>
+
+
+                        <!-- Cantos arredondados -->
+
                         <Border.StrokeShape>
+
                             <RoundRectangle CornerRadius="15" />
+
                         </Border.StrokeShape>
 
-                        <!-- Grid com 7 colunas: Up, Down, Dados, Check, Upload, Editar, Excluir -->
-                        <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto, Auto, Auto" RowDefinitions="Auto, Auto">
 
-                            <!-- SETAS DE REORDENAÇÃO -->
-                            <Button Grid.Column="0" Text="⬆" FontSize="16" BackgroundColor="Transparent" TextColor="#E0E0E0" WidthRequest="35" HeightRequest="35" Clicked="OnMoveUpClicked" />
-                            <Button Grid.Column="1" Text="⬇" FontSize="16" BackgroundColor="Transparent" TextColor="#E0E0E0" WidthRequest="35" HeightRequest="35" Clicked="OnMoveDownClicked" />
+                        <!-- ================================================== -->
+                        <!-- CONTEÚDO                                            -->
+                        <!-- ================================================== -->
 
-                            <VerticalStackLayout Grid.Column="2" Spacing="5">
-                                <Label Text="{Binding Exercise.Name}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" FontSize="20" FontAttributes="Bold" />
-                                <Label Text="{Binding Description}" TextColor="{AppThemeBinding Dark=#888888, Light=#666666}" FontSize="14" />
+                        <Grid ColumnDefinitions="*, Auto, Auto, Auto, Auto"
+                              RowDefinitions="Auto, Auto">
+
+
+                            <!-- ================================================== -->
+                            <!-- DADOS DO EXERCÍCIO                               -->
+                            <!-- ================================================== -->
+
+                            <VerticalStackLayout Grid.Column="0"
+                                                 Spacing="5">
+
+                                <Label Text="{Binding Exercise.Name}"
+                                       TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}"
+                                       FontSize="20"
+                                       FontAttributes="Bold" />
+
+                                <Label Text="{Binding Description}"
+                                       TextColor="{AppThemeBinding Dark=#888888, Light=#666666}"
+                                       FontSize="14" />
+
                             </VerticalStackLayout>
 
-                            <!-- CHECK VERDE -->
-                            <Label Grid.Column="3" Text="✅" FontSize="20" VerticalOptions="Center" Margin="0,0,5,0" IsVisible="{Binding IsCompletedToday}" />
 
-                            <Button Grid.Column="4" Text="📷" BackgroundColor="Transparent" TextColor="#FF6A00" WidthRequest="40" HeightRequest="40" Clicked="OnUploadImageClicked" />
-                            <Button Grid.Column="5" Text="✏️" BackgroundColor="Transparent" TextColor="#FF6A00" WidthRequest="40" HeightRequest="40" Clicked="OnEditExerciseClicked" />
-                            <Button Grid.Column="6" Text="🗑️" BackgroundColor="Transparent" TextColor="Red" WidthRequest="40" HeightRequest="40" Clicked="OnDeleteExerciseClicked" />
+                            <!-- ================================================== -->
+                            <!-- CHECK DE TREINO CONCLUÍDO                         -->
+                            <!-- ================================================== -->
+
+                            <Label Grid.Column="1"
+                                   Text="✅"
+                                   FontSize="20"
+                                   VerticalOptions="Center"
+                                   Margin="0,0,10,0"
+                                   IsVisible="{Binding IsCompletedToday}" />
+
+
+                            <!-- ================================================== -->
+                            <!-- UPLOAD DE IMAGEM                                  -->
+                            <!-- ================================================== -->
+
+                            <Button Grid.Column="2"
+                                    Text="📷"
+                                    BackgroundColor="Transparent"
+                                    TextColor="#FF6A00"
+                                    WidthRequest="40"
+                                    HeightRequest="40"
+                                    Clicked="OnUploadImageClicked" />
+
+
+                            <!-- ================================================== -->
+                            <!-- EDITAR EXERCÍCIO                                 -->
+                            <!-- ================================================== -->
+
+                            <Button Grid.Column="3"
+                                    Text="✏️"
+                                    BackgroundColor="Transparent"
+                                    TextColor="#FF6A00"
+                                    WidthRequest="40"
+                                    HeightRequest="40"
+                                    Clicked="OnEditExerciseClicked" />
+
+
+                            <!-- ================================================== -->
+                            <!-- EXCLUIR EXERCÍCIO                                -->
+                            <!-- ================================================== -->
+
+                            <Button Grid.Column="4"
+                                    Text="🗑️"
+                                    BackgroundColor="Transparent"
+                                    TextColor="Red"
+                                    WidthRequest="40"
+                                    HeightRequest="40"
+                                    Clicked="OnDeleteExerciseClicked" />
+
                         </Grid>
+
                     </Border>
+
                 </DataTemplate>
+
             </CollectionView.ItemTemplate>
+
         </CollectionView>
 
-        <!-- Rodapé -->
-        <Grid Grid.Row="3" ColumnDefinitions="*, *, *" ColumnSpacing="10">
-            <Button Grid.Column="0" Text="VOLTAR" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" CornerRadius="10" HeightRequest="50" Clicked="OnBackClicked" />
-            <Button Grid.Column="1" Text="+ EXERCÍCIO" BackgroundColor="Transparent" TextColor="#FF6A00" BorderColor="#FF6A00" BorderWidth="2" CornerRadius="10" HeightRequest="50" Clicked="OnAddExerciseClicked" />
-            <Button Grid.Column="2" Text="INICIAR" BackgroundColor="#FF6A00" TextColor="#FFFFFF" FontAttributes="Bold" CornerRadius="10" HeightRequest="50" Clicked="OnStartWorkoutClicked" />
+
+        <!-- ====================================================== -->
+        <!-- RODAPÉ                                                  -->
+        <!-- ====================================================== -->
+
+        <Grid Grid.Row="3"
+              ColumnDefinitions="*, *, *"
+              ColumnSpacing="10">
+
+
+            <!-- ================================================== -->
+            <!-- VOLTAR                                              -->
+            <!-- ================================================== -->
+
+            <Button Grid.Column="0"
+                    Text="VOLTAR"
+                    BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}"
+                    TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}"
+                    CornerRadius="10"
+                    HeightRequest="50"
+                    Clicked="OnBackClicked" />
+
+
+            <!-- ================================================== -->
+            <!-- ADICIONAR EXERCÍCIO                                 -->
+            <!-- ================================================== -->
+
+            <Button Grid.Column="1"
+                    Text="+ EXERCÍCIO"
+                    BackgroundColor="Transparent"
+                    TextColor="#FF6A00"
+                    BorderColor="#FF6A00"
+                    BorderWidth="2"
+                    CornerRadius="10"
+                    HeightRequest="50"
+                    Clicked="OnAddExerciseClicked" />
+
+
+            <!-- ================================================== -->
+            <!-- INICIAR TREINO                                      -->
+            <!-- ================================================== -->
+
+            <Button Grid.Column="2"
+                    Text="INICIAR"
+                    BackgroundColor="#FF6A00"
+                    TextColor="#FFFFFF"
+                    FontAttributes="Bold"
+                    CornerRadius="10"
+                    HeightRequest="50"
+                    Clicked="OnStartWorkoutClicked" />
+
         </Grid>
 
     </Grid>
+
 </ContentPage>

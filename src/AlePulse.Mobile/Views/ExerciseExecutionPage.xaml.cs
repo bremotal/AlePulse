@@ -287,7 +287,14 @@ public partial class ExerciseExecutionPage : ContentPage
 
         try
         {
-            // Voltamos apenas para a vibração, sem notificações do Android para evitar travamentos
+            // BIP NATIVO DO ANDROID (Som de notificação do sistema)
+#if ANDROID
+            var uri = Android.Media.RingtoneManager.GetDefaultUri(Android.Media.RingtoneType.Notification);
+            var ringtone = Android.Media.RingtoneManager.GetRingtone(Android.App.Application.Context, uri);
+            ringtone?.Play();
+#endif
+
+            // Vibra o celular
             Vibration.Default.Vibrate(TimeSpan.FromSeconds(1));
         }
         catch { }
