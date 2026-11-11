@@ -21,14 +21,20 @@ public partial class WorkoutSummaryPage : ContentPage
     {
         base.OnAppearing();
 
-        // Formata o tempo (ex: 01:05)
-        TimeLabel.Text = _duration.ToString(@"mm\:ss");
+        TimeLabel.Text = _duration.TotalHours >= 1
+            ? _duration.ToString(@"hh\:mm\:ss")
+            : _duration.ToString(@"mm\:ss");
 
-        // Calcula o Volume Total (Soma de Peso x Repetições de todas as séries de hoje)
         decimal totalVolume = 0;
         foreach (var ex in _exercises)
         {
-            var history = await ApiService.GetHistoryAsync(ex.Exercise!.Id);
+            var exerciseId = ex.ExerciseId != Guid.Empty
+                ? ex.ExerciseId
+                : (ex.Exercise?.Id ?? Guid.Empty);
+
+            if (exerciseId == Guid.Empty) continue;
+
+            var history = await ApiService.GetHistoryAsync(exerciseId);
             var todaySets = history.Where(x => x.CompletedAt.Date == DateTime.Now.Date);
 
             foreach (var set in todaySets)
@@ -42,7 +48,7 @@ public partial class WorkoutSummaryPage : ContentPage
 
     private void OnBackHomeClicked(object sender, EventArgs e)
     {
-        // Alterado para voltar para a tela de Fichas
+
         Application.Current!.MainPage = new ProgramsPage();
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using AlePulse.Application.DTOs;
 using AlePulse.Application.Interfaces;
 using AlePulse.Infrastructure.Persistence;
@@ -72,7 +72,6 @@ public class HistoryController : ControllerBase
         }
     }
 
-    // ENDPOINT: Buscar quais exercícios do treino já foram feitos hoje
     [HttpGet("completed-today/{workoutId}")]
     public async Task<IActionResult> GetCompletedExercisesToday(Guid workoutId)
     {

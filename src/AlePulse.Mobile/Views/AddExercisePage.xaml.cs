@@ -22,14 +22,12 @@ public partial class AddExercisePage : ContentPage
         ExerciseList.ItemsSource = _allExercises;
     }
 
-    // Lógica de pesquisa
     private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
     {
         var keyword = e.NewTextValue.ToLower();
         ExerciseList.ItemsSource = _allExercises.Where(ex => ex.Name.ToLower().Contains(keyword)).ToList();
     }
 
-    // Lógica de seleção na lista
     private void OnExerciseSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         _selectedExercise = e.CurrentSelection.FirstOrDefault() as ExerciseDto;
@@ -82,7 +80,6 @@ public partial class AddExercisePage : ContentPage
         Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
     }
 
-    // Excluir da biblioteca
     private async void OnDeleteFromLibraryClicked(object sender, EventArgs e)
     {
         if (_selectedExercise == null)

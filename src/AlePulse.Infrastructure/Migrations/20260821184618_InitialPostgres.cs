@@ -1,14 +1,14 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace AlePulse.Infrastructure.Migrations
 {
-    /// <inheritdoc />
+
     public partial class InitialPostgres : Migration
     {
-        /// <inheritdoc />
+
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -280,7 +280,6 @@ namespace AlePulse.Infrastructure.Migrations
                 column: "WorkoutId");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

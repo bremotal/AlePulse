@@ -1,4 +1,4 @@
-﻿namespace AlePulse.Application.DTOs;
+namespace AlePulse.Application.DTOs;
 
 public class CreateWorkoutProgramDto
 {

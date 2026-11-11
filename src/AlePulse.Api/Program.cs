@@ -11,11 +11,9 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Configuração do Banco de Dados
 builder.Services.AddDbContext<AlePulseDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 2. Injeção de Dependência dos Repositórios e Serviços
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -23,14 +21,12 @@ builder.Services.AddScoped<IWorkoutRepository, WorkoutRepository>();
 builder.Services.AddScoped<IWorkoutSessionRepository, WorkoutSessionRepository>();
 builder.Services.AddScoped<IWorkoutProgramRepository, WorkoutProgramRepository>();
 
-// 3. Registra os Controllers
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
-// 4. Configuração do Swagger UI com JWT
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -61,7 +57,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// 5. Configuração do JWT (Autenticação)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -76,11 +71,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-// 6. Habilita o Swagger na aplicação
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// 7. Configuração para servir as imagens dos exercícios (Corrigido para Render/Linux)
 var wwwrootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot");
 if (!Directory.Exists(wwwrootPath))
 {
@@ -93,11 +86,9 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = ""
 });
 
-// 8. Diz à API para usar Autenticação e Autorização
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 9. Diz à API para usar as rotas dos Controllers
 app.MapControllers();
 
 app.Run();

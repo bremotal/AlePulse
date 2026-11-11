@@ -5,24 +5,16 @@
              BackgroundColor="{AppThemeBinding Dark=#121212, Light=#F9F9F9}"
              Title="Treino Ativo">
 
-    <Grid RowDefinitions="Auto, Auto, Auto, Auto, *, Auto" Padding="20">
+    <Grid RowDefinitions="Auto, Auto, Auto, *, Auto" Padding="20">
 
-        <!-- Navegação entre Exercícios -->
-        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" Margin="0,20,0,15">
+        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto, Auto" Margin="0,20,0,15">
             <Button Grid.Column="0" Text="‹" FontSize="24" FontAttributes="Bold" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" WidthRequest="50" CornerRadius="25" Clicked="OnPrevClicked"/>
-            <Picker Grid.Column="1" x:Name="ExercisePicker" Title="Trocar Exercício" TitleColor="#888888" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" HorizontalOptions="Center" BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" ItemDisplayBinding="{Binding Exercise.Name}" SelectedIndexChanged="OnExerciseChanged"/>
+            <Picker Grid.Column="1" x:Name="ExercisePicker" Title="Trocar Exercício" TitleColor="#888888" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" FontSize="26" FontAttributes="Bold" HorizontalOptions="Center" BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" ItemDisplayBinding="{Binding Exercise.Name}" SelectedIndexChanged="OnExerciseChanged"/>
             <Button Grid.Column="2" Text="›" FontSize="24" FontAttributes="Bold" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" WidthRequest="50" CornerRadius="25" Clicked="OnNextClicked"/>
+            <Button Grid.Column="3" Text="🖼️" FontSize="20" BackgroundColor="Transparent" TextColor="#FF6A00" WidthRequest="44" HeightRequest="44" Margin="5,0,0,0" Clicked="OnViewImageClicked"/>
         </Grid>
 
-        <!-- Título Clicável (Abre a imagem) -->
-        <Label Grid.Row="1" x:Name="TitleLabel" FontSize="28" FontAttributes="Bold" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" HorizontalOptions="Center" Margin="0,0,0,20" TextDecorations="Underline">
-            <Label.GestureRecognizers>
-                <TapGestureRecognizer Tapped="OnTitleTapped"/>
-            </Label.GestureRecognizers>
-        </Label>
-
-        <!-- Registro da Série Atual -->
-        <Border Grid.Row="2" BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" Stroke="{AppThemeBinding Dark=#2B2B2B, Light=#EEEEEE}" Padding="15" Margin="0,0,0,15">
+        <Border Grid.Row="1" BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" Stroke="{AppThemeBinding Dark=#2B2B2B, Light=#EEEEEE}" Padding="15" Margin="0,0,0,15">
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="15" />
             </Border.StrokeShape>
@@ -61,8 +53,7 @@
             </VerticalStackLayout>
         </Border>
 
-        <!-- CRONÔMETRO DE DESCANSO (Área reduzida, fonte grande) -->
-        <Border Grid.Row="3" x:Name="RestTimerBorder" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#FFF3E0}" Stroke="#FF6A00" Padding="5" Margin="0,0,0,10" IsVisible="False">
+        <Border Grid.Row="2" x:Name="RestTimerBorder" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#FFF3E0}" Stroke="#FF6A00" Padding="5" Margin="0,0,0,10" IsVisible="False">
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="10" />
             </Border.StrokeShape>
@@ -77,8 +68,7 @@
             </VerticalStackLayout>
         </Border>
 
-        <!-- Histórico Agrupado por Dia -->
-        <CollectionView Grid.Row="4" x:Name="HistoryList" BackgroundColor="Transparent" IsGrouped="True">
+        <CollectionView Grid.Row="3" x:Name="HistoryList" BackgroundColor="Transparent" IsGrouped="True">
             <CollectionView.EmptyView>
                 <Label Text="Sem histórico ainda." TextColor="#888888" HorizontalOptions="Center"/>
             </CollectionView.EmptyView>
@@ -115,8 +105,7 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <!-- Rodapé com opções de Sair e Próximo/Finalizar -->
-        <Grid Grid.Row="5" ColumnDefinitions="*, *" ColumnSpacing="15">
+        <Grid Grid.Row="4" ColumnDefinitions="*, *" ColumnSpacing="15">
             <Button Grid.Column="0"
                     Text="SAIR"
                     BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}"
@@ -136,8 +125,7 @@
                     Clicked="OnNextOrFinishClicked" />
         </Grid>
 
-        <!-- POPUP DE TELA CHEIA DO GIF -->
-        <Grid Grid.RowSpan="6" x:Name="GifPopupOverlay" BackgroundColor="#CC000000" IsVisible="False">
+        <Grid Grid.RowSpan="5" x:Name="GifPopupOverlay" BackgroundColor="#CC000000" IsVisible="False">
             <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="20">
                 <Image x:Name="PopupGif" IsAnimationPlaying="True" HeightRequest="400" WidthRequest="400" Aspect="AspectFit"/>
                 <Button Text="FECHAR" BackgroundColor="#FF6A00" TextColor="#FFFFFF" CornerRadius="20" Clicked="OnClosePopupClicked"/>

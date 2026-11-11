@@ -1,4 +1,4 @@
-﻿namespace AlePulse.Mobile;
+namespace AlePulse.Mobile;
 
 public partial class AppShell : Shell
 {

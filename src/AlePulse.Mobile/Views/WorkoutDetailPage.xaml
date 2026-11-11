@@ -9,9 +9,9 @@
     <Grid RowDefinitions="Auto, Auto, *, Auto"
           Padding="20">
 
-        <!-- ====================================================== -->
-        <!-- CABEÇALHO DO TREINO                                    -->
-        <!-- ====================================================== -->
+        
+        
+        
 
         <VerticalStackLayout Grid.Row="0"
                              Spacing="5"
@@ -28,20 +28,18 @@
 
         </VerticalStackLayout>
 
-
-        <!-- ====================================================== -->
-        <!-- SEPARADOR                                               -->
-        <!-- ====================================================== -->
+        
+        
+        
 
         <BoxView Grid.Row="1"
                  HeightRequest="1"
                  BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}"
                  Margin="0,0,0,20" />
 
-
-        <!-- ====================================================== -->
-        <!-- LISTA DE EXERCÍCIOS                                    -->
-        <!-- ====================================================== -->
+        
+        
+        
 
         <CollectionView x:Name="ExercisesList"
                         Grid.Row="2"
@@ -57,14 +55,13 @@
 
             </CollectionView.EmptyView>
 
-
             <CollectionView.ItemTemplate>
 
                 <DataTemplate>
 
-                    <!-- ================================================== -->
-                    <!-- CARD DO EXERCÍCIO                                  -->
-                    <!-- ================================================== -->
+                    
+                    
+                    
 
                     <Border BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}"
 
@@ -76,27 +73,26 @@
 
                             Padding="15">
 
-                        <!-- ================================================== -->
-                        <!-- GESTOS                                             -->
-                        <!-- ================================================== -->
+                        
+                        
+                        
 
                         <Border.GestureRecognizers>
 
-                            <!-- Abrir exercício -->
+                            
                             <TapGestureRecognizer Tapped="OnExerciseTapped" />
 
-                            <!-- Iniciar arraste -->
+                            
                             <DragGestureRecognizer CanDrag="True"
                                                     DragStarting="OnDragStarting" />
 
-                            <!-- Receber exercício arrastado -->
+                            
                             <DropGestureRecognizer AllowDrop="True"
                                                     Drop="OnDrop" />
 
                         </Border.GestureRecognizers>
 
-
-                        <!-- Cantos arredondados -->
+                        
 
                         <Border.StrokeShape>
 
@@ -104,18 +100,16 @@
 
                         </Border.StrokeShape>
 
-
-                        <!-- ================================================== -->
-                        <!-- CONTEÚDO                                            -->
-                        <!-- ================================================== -->
+                        
+                        
+                        
 
                         <Grid ColumnDefinitions="*, Auto, Auto, Auto, Auto"
                               RowDefinitions="Auto, Auto">
 
-
-                            <!-- ================================================== -->
-                            <!-- DADOS DO EXERCÍCIO                               -->
-                            <!-- ================================================== -->
+                            
+                            
+                            
 
                             <VerticalStackLayout Grid.Column="0"
                                                  Spacing="5">
@@ -131,10 +125,9 @@
 
                             </VerticalStackLayout>
 
-
-                            <!-- ================================================== -->
-                            <!-- CHECK DE TREINO CONCLUÍDO                         -->
-                            <!-- ================================================== -->
+                            
+                            
+                            
 
                             <Label Grid.Column="1"
                                    Text="✅"
@@ -143,10 +136,9 @@
                                    Margin="0,0,10,0"
                                    IsVisible="{Binding IsCompletedToday}" />
 
-
-                            <!-- ================================================== -->
-                            <!-- UPLOAD DE IMAGEM                                  -->
-                            <!-- ================================================== -->
+                            
+                            
+                            
 
                             <Button Grid.Column="2"
                                     Text="📷"
@@ -156,10 +148,9 @@
                                     HeightRequest="40"
                                     Clicked="OnUploadImageClicked" />
 
-
-                            <!-- ================================================== -->
-                            <!-- EDITAR EXERCÍCIO                                 -->
-                            <!-- ================================================== -->
+                            
+                            
+                            
 
                             <Button Grid.Column="3"
                                     Text="✏️"
@@ -169,10 +160,9 @@
                                     HeightRequest="40"
                                     Clicked="OnEditExerciseClicked" />
 
-
-                            <!-- ================================================== -->
-                            <!-- EXCLUIR EXERCÍCIO                                -->
-                            <!-- ================================================== -->
+                            
+                            
+                            
 
                             <Button Grid.Column="4"
                                     Text="🗑️"
@@ -192,19 +182,17 @@
 
         </CollectionView>
 
-
-        <!-- ====================================================== -->
-        <!-- RODAPÉ                                                  -->
-        <!-- ====================================================== -->
+        
+        
+        
 
         <Grid Grid.Row="3"
               ColumnDefinitions="*, *, *"
               ColumnSpacing="10">
 
-
-            <!-- ================================================== -->
-            <!-- VOLTAR                                              -->
-            <!-- ================================================== -->
+            
+            
+            
 
             <Button Grid.Column="0"
                     Text="VOLTAR"
@@ -214,10 +202,9 @@
                     HeightRequest="50"
                     Clicked="OnBackClicked" />
 
-
-            <!-- ================================================== -->
-            <!-- ADICIONAR EXERCÍCIO                                 -->
-            <!-- ================================================== -->
+            
+            
+            
 
             <Button Grid.Column="1"
                     Text="+ EXERCÍCIO"
@@ -229,12 +216,12 @@
                     HeightRequest="50"
                     Clicked="OnAddExerciseClicked" />
 
-
-            <!-- ================================================== -->
-            <!-- INICIAR TREINO                                      -->
-            <!-- ================================================== -->
+            
+            
+            
 
             <Button Grid.Column="2"
+                    x:Name="StartWorkoutBtn"
                     Text="INICIAR"
                     BackgroundColor="#FF6A00"
                     TextColor="#FFFFFF"

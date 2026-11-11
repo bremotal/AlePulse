@@ -1,4 +1,4 @@
-﻿using AlePulse.Application.DTOs;
+using AlePulse.Application.DTOs;
 using AlePulse.Application.Interfaces;
 using AlePulse.Application.Services;
 using AlePulse.Domain.Entities;
@@ -73,7 +73,6 @@ public class UsersController : ControllerBase
         var user = await _userRepository.GetByIdAsync(GetUserId());
         if (user == null) return NotFound();
 
-        // Retorna os dados do perfil junto com os dados do usuário
         return Ok(new
         {
             user.Name,
@@ -94,7 +93,6 @@ public class UsersController : ControllerBase
         user.Name = dto.Name;
         user.Email = dto.Email;
 
-        // Lógica simplificada e segura para criar/atualizar o perfil
         if (user.Profile == null)
         {
             user.Profile = new UserProfile { UserId = user.Id };

@@ -1,4 +1,4 @@
-﻿using Microsoft.Maui.Controls.Hosting;
+using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.Hosting;
 
 namespace AlePulse.Mobile;
@@ -15,8 +15,6 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
-
-        // Não precisamos registrar o plugin de áudio aqui anymore
 
         return builder.Build();
     }

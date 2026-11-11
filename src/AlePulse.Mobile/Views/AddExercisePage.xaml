@@ -10,10 +10,10 @@
 
             <Label Text="ESCOLHA O EXERCÍCIO" FontSize="20" FontAttributes="Bold" TextColor="#FFFFFF" Margin="0,20,0,10" />
 
-            <!-- BARRA DE PESQUISA -->
+            
             <SearchBar x:Name="SearchBar" Placeholder="Pesquisar exercício na biblioteca..." TextChanged="OnSearchTextChanged" BackgroundColor="#1E1E1E" TextColor="#FFFFFF" PlaceholderColor="#888888" />
 
-            <!-- LISTA DE EXERCÍCIOS FILTRÁVEL -->
+            
             <Border BackgroundColor="#1E1E1E" Stroke="#2B2B2B" HeightRequest="200" Margin="0,0,0,15">
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="10" />
@@ -88,7 +88,7 @@
                 <Button Grid.Column="1" Text="ADICIONAR" BackgroundColor="#FF6A00" TextColor="#FFFFFF" FontAttributes="Bold" CornerRadius="10" HeightRequest="50" Clicked="OnAddClicked" />
             </Grid>
 
-            <!-- Botão único de excluir -->
+            
             <Button Text="🗑️ EXCLUIR DA BIBLIOTECA" BackgroundColor="Transparent" TextColor="Red" FontSize="Micro" Padding="0,10,0,0" Clicked="OnDeleteFromLibraryClicked" />
         </VerticalStackLayout>
     </ScrollView>

@@ -11,16 +11,12 @@ public partial class ExerciseExecutionPage : ContentPage
     private int _currentIndex = 0;
     private Guid? _editingSetId = null;
     private readonly bool _isSingleExercise;
-
-    private static bool _isTimerRunning = false;
-    private static DateTime _restEndTime;
-
+    private readonly DateTime _openedAt = DateTime.Now;
     private int _remainingSeconds;
-    private DateTime _workoutStartTime;
 
     private string? _currentGifUrl;
 
-    public ExerciseExecutionPage(Guid workoutId, List<WorkoutExerciseDto> exercises, bool isSingleExercise = false)
+    public ExerciseExecutionPage(Guid workoutId, List<WorkoutExerciseDto> exercises, bool isSingleExercise = false, int startIndex = 0)
     {
         InitializeComponent();
         _workoutId = workoutId;
@@ -28,9 +24,7 @@ public partial class ExerciseExecutionPage : ContentPage
         _isSingleExercise = isSingleExercise;
 
         ExercisePicker.ItemsSource = _allExercises;
-        ChangeExercise(0);
-
-        _workoutStartTime = DateTime.Now;
+        ChangeExercise(startIndex);
     }
 
     private void ChangeExercise(int newIndex)
@@ -41,7 +35,6 @@ public partial class ExerciseExecutionPage : ContentPage
         var exercise = _allExercises[_currentIndex];
         ExercisePicker.SelectedIndex = _currentIndex;
 
-        TitleLabel.Text = exercise.Exercise?.Name ?? "Exercício";
         WeightEntry.Text = exercise.Weight.ToString();
         RepsEntry.Text = exercise.Repetitions.ToString();
 
@@ -57,6 +50,7 @@ public partial class ExerciseExecutionPage : ContentPage
         _editingSetId = null;
         SaveBtn.Text = "REGISTRAR SÉRIE";
 
+        SyncSessionIndex();
         LoadHistory();
 
         if (_isSingleExercise)
@@ -73,27 +67,62 @@ public partial class ExerciseExecutionPage : ContentPage
         }
     }
 
-    protected override async void OnAppearing()
+    private void SyncSessionIndex()
+    {
+        if (!_isSingleExercise && ActiveWorkoutSession.IsActive && ActiveWorkoutSession.WorkoutId == _workoutId)
+        {
+            ActiveWorkoutSession.SetCurrentIndex(_currentIndex);
+        }
+    }
+
+    protected override void OnAppearing()
     {
         base.OnAppearing();
 
-        if (_isTimerRunning)
-        {
-            var remaining = _restEndTime - DateTime.Now;
-            if (remaining.TotalSeconds <= 0)
-            {
-                TimerFinished();
-            }
-            else
-            {
-                _remainingSeconds = (int)Math.Ceiling(remaining.TotalSeconds);
-                RestTimerBorder.IsVisible = true;
-                UpdateTimerLabel();
-                StartUiTimer();
-            }
-        }
+        RestTimerService.Tick -= OnRestTick;
+        RestTimerService.Tick += OnRestTick;
+        RestTimerService.Finished -= OnRestFinished;
+        RestTimerService.Finished += OnRestFinished;
 
-        await LoadHistory();
+        SyncTimerUi();
+        SyncSessionIndex();
+
+        _ = LoadHistory();
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        RestTimerService.Tick -= OnRestTick;
+        RestTimerService.Finished -= OnRestFinished;
+    }
+
+    private void SyncTimerUi()
+    {
+        if (RestTimerService.IsRunning)
+        {
+            RestTimerBorder.IsVisible = true;
+            _remainingSeconds = RestTimerService.GetRemainingSeconds();
+            UpdateTimerLabel();
+        }
+        else
+        {
+            RestTimerBorder.IsVisible = false;
+            TimerLabel.Text = "00:00";
+        }
+    }
+
+    private void OnRestTick(int remainingSeconds)
+    {
+        RestTimerBorder.IsVisible = true;
+        _remainingSeconds = remainingSeconds;
+        UpdateTimerLabel();
+    }
+
+    private void OnRestFinished()
+    {
+        RestTimerBorder.IsVisible = false;
+        TimerLabel.Text = "00:00";
     }
 
     private async Task LoadHistory()
@@ -200,17 +229,23 @@ public partial class ExerciseExecutionPage : ContentPage
 
     private void OnNextOrFinishClicked(object sender, EventArgs e)
     {
-        if (_isSingleExercise || _currentIndex == _allExercises.Count - 1)
+        if (_isSingleExercise)
         {
-            if (_isSingleExercise)
+            Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
+            return;
+        }
+
+        if (_currentIndex == _allExercises.Count - 1)
+        {
+            bool sessionEnded = ActiveWorkoutSession.IsActive && ActiveWorkoutSession.WorkoutId == _workoutId;
+            TimeSpan duration = sessionEnded ? ActiveWorkoutSession.Elapsed : DateTime.Now - _openedAt;
+
+            if (sessionEnded)
             {
-                Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
+                ActiveWorkoutSession.Finish();
             }
-            else
-            {
-                TimeSpan duration = DateTime.Now - _workoutStartTime;
-                Application.Current!.MainPage = new WorkoutSummaryPage(duration, _allExercises, _workoutId);
-            }
+
+            Application.Current!.MainPage = new WorkoutSummaryPage(duration, _allExercises, _workoutId);
         }
         else
         {
@@ -243,34 +278,12 @@ public partial class ExerciseExecutionPage : ContentPage
         }
     }
 
-    // --- LÓGICA DO CRONÔMETRO PERSISTENTE ---
-
     private void StartRestTimer(int seconds)
     {
-        _isTimerRunning = true;
-        _restEndTime = DateTime.Now.AddSeconds(seconds);
+        RestTimerService.Start(seconds);
         RestTimerBorder.IsVisible = true;
-        StartUiTimer();
-    }
-
-    private void StartUiTimer()
-    {
-        Device.StartTimer(TimeSpan.FromSeconds(1), () =>
-        {
-            if (!_isTimerRunning) return false;
-
-            var remaining = _restEndTime - DateTime.Now;
-
-            if (remaining.TotalSeconds <= 0)
-            {
-                TimerFinished();
-                return false;
-            }
-
-            _remainingSeconds = (int)Math.Ceiling(remaining.TotalSeconds);
-            UpdateTimerLabel();
-            return true;
-        });
+        _remainingSeconds = RestTimerService.GetRemainingSeconds();
+        UpdateTimerLabel();
     }
 
     private void UpdateTimerLabel()
@@ -279,48 +292,22 @@ public partial class ExerciseExecutionPage : ContentPage
         TimerLabel.Text = time.ToString(@"mm\:ss");
     }
 
-    private void TimerFinished()
-    {
-        _isTimerRunning = false;
-        RestTimerBorder.IsVisible = false;
-        TimerLabel.Text = "00:00";
-
-        try
-        {
-            // BIP NATIVO DO ANDROID (Som de notificação do sistema)
-#if ANDROID
-            var uri = Android.Media.RingtoneManager.GetDefaultUri(Android.Media.RingtoneType.Notification);
-            var ringtone = Android.Media.RingtoneManager.GetRingtone(Android.App.Application.Context, uri);
-            ringtone?.Play();
-#endif
-
-            // Vibra o celular
-            Vibration.Default.Vibrate(TimeSpan.FromSeconds(1));
-        }
-        catch { }
-    }
-
     private void OnMinus15Clicked(object sender, EventArgs e)
     {
-        _restEndTime = _restEndTime.AddSeconds(-15);
-        _remainingSeconds = Math.Max(0, (int)Math.Ceiling((_restEndTime - DateTime.Now).TotalSeconds));
-        UpdateTimerLabel();
+        RestTimerService.AddSeconds(-15);
     }
 
     private void OnPlus15Clicked(object sender, EventArgs e)
     {
-        _restEndTime = _restEndTime.AddSeconds(15);
-        _remainingSeconds = (int)Math.Ceiling((_restEndTime - DateTime.Now).TotalSeconds);
-        UpdateTimerLabel();
+        RestTimerService.AddSeconds(15);
     }
 
     private void OnSkipRestClicked(object sender, EventArgs e)
     {
-        _remainingSeconds = 0;
-        TimerFinished();
+        RestTimerService.Skip();
     }
 
-    private void OnTitleTapped(object sender, TappedEventArgs e)
+    private void OnViewImageClicked(object sender, EventArgs e)
     {
         if (!string.IsNullOrEmpty(_currentGifUrl))
         {

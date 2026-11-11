@@ -17,16 +17,16 @@
                TextColor="#FF6A00"
                HorizontalOptions="Center" />
 
-        <Label Text="Parabéns! Você mais um passo mais perto do seu objetivo."
+        <Label Text="Parabéns! Você está um passo mais perto do seu objetivo."
                FontSize="16"
                TextColor="#E0E0E0"
                HorizontalOptions="Center"
                HorizontalTextAlignment="Center" />
 
-        <!-- Cards de Estatísticas -->
+        
         <Grid ColumnDefinitions="*, *" ColumnSpacing="20" Margin="0,30,0,0">
 
-            <!-- Tempo Total -->
+            
             <Border Grid.Column="0" BackgroundColor="#1E1E1E" Stroke="#2B2B2B" Padding="20">
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="15" />
@@ -37,7 +37,7 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Volume Total -->
+            
             <Border Grid.Column="1" BackgroundColor="#1E1E1E" Stroke="#2B2B2B" Padding="20">
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="15" />

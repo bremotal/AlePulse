@@ -1,4 +1,4 @@
-﻿namespace AlePulse.Mobile.Models;
+namespace AlePulse.Mobile.Models;
 
 public class ProfileDto
 {

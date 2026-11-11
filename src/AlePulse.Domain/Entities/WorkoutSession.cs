@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using AlePulse.Domain.Enums;
@@ -18,6 +18,5 @@ public class WorkoutSession : BaseEntity
     public SessionStatus Status { get; set; } = SessionStatus.InProgress;
     public string? Notes { get; set; }
 
-    // Relacionamento 1 para N
     public ICollection<ExerciseSet> Sets { get; set; } = new List<ExerciseSet>();
 }

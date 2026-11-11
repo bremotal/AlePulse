@@ -1,4 +1,4 @@
-﻿using System.Net.Http;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -70,8 +70,6 @@ public static class ApiService
         return response.IsSuccessStatusCode;
     }
 
-    // --- MÉTODOS DA FICHA (WORKOUT PROGRAM) ---
-
     public static async Task<List<Models.WorkoutProgramDto>> GetProgramsAsync()
     {
         var response = await _client.GetAsync("/api/WorkoutPrograms");
@@ -121,8 +119,6 @@ public static class ApiService
         return response.IsSuccessStatusCode;
     }
 
-    // --- MÉTODOS DE TREINOS (WORKOUTS) ---
-
     public static async Task<Models.WorkoutDetailDto?> GetWorkoutByIdAsync(Guid id)
     {
         var response = await _client.GetAsync($"/api/Workouts/{id}");
@@ -168,7 +164,6 @@ public static class ApiService
         return response.IsSuccessStatusCode;
     }
 
-    // NOVO: Reordenar exercícios via Drag and Drop
     public static async Task<bool> ReorderExercisesAsync(Guid workoutId, List<Guid> exerciseIds)
     {
         var dto = new { exerciseIds };
@@ -179,8 +174,6 @@ public static class ApiService
         }
         return response.IsSuccessStatusCode;
     }
-
-    // --- MÉTODOS DE EXERCÍCIOS ---
 
     public static async Task<List<Models.ExerciseDto>> GetExercisesAsync()
     {
@@ -224,8 +217,6 @@ public static class ApiService
         return response.IsSuccessStatusCode;
     }
 
-    // --- MÉTODOS DE HISTÓRICO E SÉRIES ---
-
     public static async Task<List<Models.ExerciseSetDto>> GetHistoryAsync(Guid exerciseId)
     {
         var response = await _client.GetAsync($"/api/History/{exerciseId}");
@@ -267,8 +258,6 @@ public static class ApiService
         if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
         return response.IsSuccessStatusCode;
     }
-
-    // --- MÉTODOS DE PERFIL ---
 
     public static async Task<Models.ProfileDto?> GetMyProfileAsync()
     {

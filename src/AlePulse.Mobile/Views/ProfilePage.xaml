@@ -7,13 +7,13 @@
 
     <Grid RowDefinitions="Auto, *, Auto" Padding="20">
 
-        <!-- Cabeçalho com Botão Voltar -->
+        
         <Grid Grid.Row="0" ColumnDefinitions="Auto, *">
             <Button Grid.Column="0" Text="‹ Voltar" BackgroundColor="Transparent" TextColor="#FF6A00" Clicked="OnBackClicked"/>
             <Label Grid.Column="1" Text="MEU PERFIL" FontSize="20" FontAttributes="Bold" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" VerticalOptions="Center" HorizontalOptions="Center" Margin="0,0,40,0"/>
         </Grid>
 
-        <!-- Dados do Usuário -->
+        
         <Border Grid.Row="1" BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" Stroke="{AppThemeBinding Dark=#2B2B2B, Light=#EEEEEE}" Padding="20" Margin="0,20,0,20" VerticalOptions="Start">
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="15" />
@@ -55,7 +55,7 @@
             </VerticalStackLayout>
         </Border>
 
-        <!-- Ações -->
+        
         <VerticalStackLayout Grid.Row="2" Spacing="15">
             <Button Text="EDITAR DADOS" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" CornerRadius="10" HeightRequest="50" Clicked="OnEditProfileClicked"/>
             <Button Text="ALTERAR SENHA" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" CornerRadius="10" HeightRequest="50" Clicked="OnChangePasswordClicked"/>

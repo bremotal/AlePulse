@@ -1,4 +1,4 @@
-﻿using AlePulse.Application.DTOs;
+using AlePulse.Application.DTOs;
 using AlePulse.Application.Interfaces;
 using AlePulse.Domain.Entities;
 using AlePulse.Domain.Enums;
@@ -26,12 +26,10 @@ public class WorkoutSessionRepository : IWorkoutSessionRepository
 
     public async Task LogSetAsync(Guid userId, Guid workoutId, Guid exerciseId, LogSetDto dto)
     {
-        // Define o início e o fim do dia de hoje em UTC
+
         var today = DateTime.UtcNow.Date;
         var tomorrow = today.AddDays(1);
 
-        // Busca se já existe uma sessão aberta hoje usando intervalo (>= e <)
-        // Isso evita o crash no PostgreSQL por usar .Date
         var session = await _context.WorkoutSessions
             .FirstOrDefaultAsync(s => s.WorkoutId == workoutId && s.UserId == userId && s.StartedAt >= today && s.StartedAt < tomorrow);
 

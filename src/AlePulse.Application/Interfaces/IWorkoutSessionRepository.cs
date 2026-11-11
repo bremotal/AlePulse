@@ -1,4 +1,4 @@
-﻿using AlePulse.Application.DTOs;
+using AlePulse.Application.DTOs;
 using AlePulse.Domain.Entities;
 
 namespace AlePulse.Application.Interfaces;

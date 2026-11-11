@@ -1,4 +1,4 @@
-﻿namespace AlePulse.Infrastructure;
+namespace AlePulse.Infrastructure;
 
 public class Class1
 {

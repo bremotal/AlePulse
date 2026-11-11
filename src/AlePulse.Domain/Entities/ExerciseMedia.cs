@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using AlePulse.Domain.Enums;
@@ -12,11 +12,10 @@ public class ExerciseMedia : BaseEntity
 
     public MediaType MediaType { get; set; }
 
-    // Preferência de demonstração (Masculina, Feminina, Neutra)
     public ExerciseRepresentation Representation { get; set; } = ExerciseRepresentation.Neutral;
 
     public string Url { get; set; } = string.Empty;
     public string? ThumbnailUrl { get; set; }
-    public int? Duration { get; set; } // Para vídeos, em segundos
-    public int SortOrder { get; set; } // Para ordenar as mídias na tela
+    public int? Duration { get; set; }
+    public int SortOrder { get; set; }
 }

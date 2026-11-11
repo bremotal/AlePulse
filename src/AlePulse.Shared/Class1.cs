@@ -1,4 +1,4 @@
-﻿namespace AlePulse.Shared;
+namespace AlePulse.Shared;
 
 public class Class1
 {

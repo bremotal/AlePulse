@@ -41,7 +41,7 @@ public partial class EditExercisePage : ContentPage
         }
         else
         {
-            // Mostra o erro exato que veio da API
+
             await DisplayAlertAsync("Erro API", $"Não foi possível atualizar.\n{ApiService.LastError}", "OK");
         }
     }

@@ -34,7 +34,7 @@ public partial class LoginPage : ContentPage
             if (!string.IsNullOrEmpty(token))
             {
                 ApiService.SetToken(token);
-                // MUDAMOS DE HomePage PARA ProgramsPage AQUI!
+
                 Application.Current!.MainPage = new ProgramsPage();
             }
             else

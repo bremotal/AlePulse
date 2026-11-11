@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -13,9 +13,9 @@ public class ExerciseSet : BaseEntity
     public Exercise Exercise { get; set; } = null!;
 
     public int SetNumber { get; set; }
-    public decimal Weight { get; set; } // Carga real realizada
-    public int Repetitions { get; set; } // Reps reais realizadas
-    public int RestSeconds { get; set; } // Descanso realizado
+    public decimal Weight { get; set; }
+    public int Repetitions { get; set; }
+    public int RestSeconds { get; set; }
 
     public DateTime? CompletedAt { get; set; }
     public bool IsCompleted { get; set; } = false;

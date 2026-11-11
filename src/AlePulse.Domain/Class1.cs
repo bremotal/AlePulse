@@ -1,4 +1,4 @@
-﻿namespace AlePulse.Domain;
+namespace AlePulse.Domain;
 
 public class Class1
 {

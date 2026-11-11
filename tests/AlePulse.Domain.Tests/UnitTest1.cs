@@ -1,4 +1,4 @@
-﻿namespace AlePulse.Domain.Tests;
+namespace AlePulse.Domain.Tests;
 
 public class UnitTest1
 {

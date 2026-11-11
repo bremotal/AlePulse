@@ -1,4 +1,4 @@
-﻿using AlePulse.Mobile.Views;
+using AlePulse.Mobile.Views;
 
 namespace AlePulse.Mobile;
 
@@ -8,7 +8,6 @@ public partial class App : Application
     {
         InitializeComponent();
 
-        // Captura erros que quebram o app em segundo plano
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
     }
@@ -18,7 +17,6 @@ public partial class App : Application
         return new Window(new LoginPage());
     }
 
-    // Mostra o erro na tela em vez de fechar o app silenciosamente
     private async void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
         var ex = e.ExceptionObject as Exception;
@@ -28,13 +26,12 @@ public partial class App : Application
         }
     }
 
-    // Mostra erros de tarefas assíncronas (como chamadas de API)
     private async void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
         if (MainPage != null)
         {
             await MainPage.DisplayAlertAsync("Erro Capturado (Task)", e.Exception.Message, "OK");
         }
-        e.SetObserved(); // Marca o erro como tratado para não fechar o app
+        e.SetObserved();
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using AlePulse.Domain.Enums;
@@ -13,17 +13,15 @@ public class UserProfile : BaseEntity
     public DateTime BirthDate { get; set; }
     public Sex Sex { get; set; }
 
-    public decimal Height { get; set; } // Em centímetros
-    public decimal Weight { get; set; } // Em kg
+    public decimal Height { get; set; }
+    public decimal Weight { get; set; }
 
-    public string ExperienceLevel { get; set; } = string.Empty; // Iniciante, Intermediário, Avançado
-    public string TrainingGoal { get; set; } = string.Empty; // Hipertrofia, Força, etc.
+    public string ExperienceLevel { get; set; } = string.Empty;
+    public string TrainingGoal { get; set; } = string.Empty;
 
-    public int TrainingFrequency { get; set; } // Dias por semana
+    public int TrainingFrequency { get; set; }
 
-    // Preferência de visualização da biblioteca
     public ExerciseRepresentation ExerciseRepresentationPreference { get; set; } = ExerciseRepresentation.Neutral;
 
-    // Avatar/Foto (Opcional)
     public string? AvatarUrl { get; set; }
 }

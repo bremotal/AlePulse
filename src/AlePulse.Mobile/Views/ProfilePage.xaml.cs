@@ -23,7 +23,6 @@ public partial class ProfilePage : ContentPage
             NameLabel.Text = profile.Name;
             EmailLabel.Text = profile.Email;
 
-            // Mostra os dados físicos (ou um traço se estiver vazio)
             WeightLabel.Text = profile.Weight.HasValue ? profile.Weight.Value.ToString("F1") : "---";
             HeightLabel.Text = profile.Height.HasValue ? profile.Height.Value.ToString("F0") : "---";
             GoalLabel.Text = !string.IsNullOrEmpty(profile.TrainingGoal) ? profile.TrainingGoal : "---";

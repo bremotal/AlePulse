@@ -1,4 +1,4 @@
-﻿using AlePulse.Application.Interfaces;
+using AlePulse.Application.Interfaces;
 using AlePulse.Domain.Entities;
 using AlePulse.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

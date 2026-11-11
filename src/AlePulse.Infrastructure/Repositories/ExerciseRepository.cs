@@ -1,4 +1,4 @@
-﻿using AlePulse.Application.Interfaces;
+using AlePulse.Application.Interfaces;
 using AlePulse.Domain.Entities;
 using AlePulse.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -39,7 +39,6 @@ public class ExerciseRepository : IExerciseRepository
         await _context.ExerciseMedias.AddAsync(media);
     }
 
-    // MÉTODO QUE FALTAVA:
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();

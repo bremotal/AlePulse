@@ -1,4 +1,4 @@
-﻿using AlePulse.Application.DTOs;
+using AlePulse.Application.DTOs;
 using AlePulse.Application.Interfaces;
 using AlePulse.Domain.Entities;
 using AlePulse.Domain.Enums;
@@ -41,7 +41,7 @@ public class ExercisesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateExerciseDto dto)
     {
-        // Impede criar exercício se já existir um com o mesmo nome
+
         var existingExercise = await _context.Exercises.FirstOrDefaultAsync(e => e.Name.ToLower() == dto.Name.ToLower());
         if (existingExercise != null)
             return Conflict("Já existe um exercício com este nome na biblioteca.");
@@ -69,7 +69,6 @@ public class ExercisesController : ControllerBase
         var exercise = await _exerciseRepository.GetByIdAsync(id);
         if (exercise == null) return NotFound("Exercício não encontrado.");
 
-        // Soft delete: marca como inativo em vez de apagar fisicamente
         exercise.IsActive = false;
         await _exerciseRepository.SaveChangesAsync();
 

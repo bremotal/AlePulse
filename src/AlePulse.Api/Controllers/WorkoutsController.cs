@@ -1,4 +1,4 @@
-﻿using AlePulse.Application.DTOs;
+using AlePulse.Application.DTOs;
 using AlePulse.Application.Interfaces;
 using AlePulse.Domain.Entities;
 using AlePulse.Infrastructure.Persistence;
@@ -27,10 +27,6 @@ public class WorkoutsController : ControllerBase
         _context = context;
     }
 
-    // ============================================================
-    // USUÁRIO LOGADO
-    // ============================================================
-
     private Guid GetUserId()
     {
         var claim =
@@ -40,11 +36,6 @@ public class WorkoutsController : ControllerBase
             ? Guid.Parse(claim.Value)
             : Guid.Empty;
     }
-
-
-    // ============================================================
-    // OBTER TREINO
-    // ============================================================
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
@@ -60,11 +51,6 @@ public class WorkoutsController : ControllerBase
 
         return Ok(workout);
     }
-
-
-    // ============================================================
-    // ATUALIZAR TREINO
-    // ============================================================
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateWorkout(
@@ -91,11 +77,6 @@ public class WorkoutsController : ControllerBase
         return NoContent();
     }
 
-
-    // ============================================================
-    // EXCLUIR TREINO
-    // ============================================================
-
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -115,11 +96,6 @@ public class WorkoutsController : ControllerBase
         return NoContent();
     }
 
-
-    // ============================================================
-    // ADICIONAR EXERCÍCIO AO TREINO
-    // ============================================================
-
     [HttpPost("{workoutId}/exercises")]
     public async Task<IActionResult> AddExercise(
         Guid workoutId,
@@ -135,7 +111,6 @@ public class WorkoutsController : ControllerBase
                 "Treino não encontrado.");
         }
 
-
         var exerciseToAdd =
             await _context.Exercises.FindAsync(
                 dto.ExerciseId);
@@ -146,7 +121,6 @@ public class WorkoutsController : ControllerBase
                 "Exercício não encontrado na biblioteca.");
         }
 
-
         var nameExists =
             workout.Exercises.Any(
                 e =>
@@ -155,23 +129,16 @@ public class WorkoutsController : ControllerBase
                     ==
                     exerciseToAdd.Name.ToLower());
 
-
         if (nameExists)
         {
             return Conflict(
                 "Você já adicionou um exercício com este nome neste treino.");
         }
 
-
-        // ========================================================
-        // PRÓXIMA POSIÇÃO
-        // ========================================================
-
         var nextOrder =
             workout.Exercises.Any()
                 ? workout.Exercises.Max(e => e.Order) + 1
                 : 1;
-
 
         var workoutExercise =
             new WorkoutExercise
@@ -191,48 +158,20 @@ public class WorkoutsController : ControllerBase
                 Order = nextOrder
             };
 
-
         await _workoutRepository
             .AddExerciseAsync(workoutExercise);
 
         await _workoutRepository
             .SaveChangesAsync();
 
-
         return Ok(workoutExercise);
     }
-
-
-    // ============================================================
-    // REORDENAR EXERCÍCIOS
-    // ============================================================
-    //
-    // Recebe:
-    //
-    // {
-    //     "exerciseIds": [
-    //         "id-exercicio-3",
-    //         "id-exercicio-1",
-    //         "id-exercicio-2"
-    //     ]
-    // }
-    //
-    // E grava:
-    //
-    // exercício 3 -> Order = 1
-    // exercício 1 -> Order = 2
-    // exercício 2 -> Order = 3
-    //
-    // ============================================================
 
     [HttpPut("{workoutId}/exercises/reorder")]
     public async Task<IActionResult> ReorderExercises(
         Guid workoutId,
         [FromBody] ReorderDto dto)
     {
-        // ========================================================
-        // VALIDAR DTO
-        // ========================================================
 
         if (dto == null ||
             dto.ExerciseIds == null ||
@@ -242,14 +181,8 @@ public class WorkoutsController : ControllerBase
                 "A lista de exercícios não pode estar vazia.");
         }
 
-
-        // ========================================================
-        // LOCALIZAR TREINO
-        // ========================================================
-
         var workout =
             await _workoutRepository.GetByIdAsync(workoutId);
-
 
         if (workout == null ||
             workout.UserId != GetUserId())
@@ -258,18 +191,8 @@ public class WorkoutsController : ControllerBase
                 "Treino não encontrado.");
         }
 
-
-        // ========================================================
-        // EXERCÍCIOS DO TREINO
-        // ========================================================
-
         var workoutExercises =
             workout.Exercises.ToList();
-
-
-        // ========================================================
-        // VALIDAR QUANTIDADE
-        // ========================================================
 
         if (dto.ExerciseIds.Count !=
             workoutExercises.Count)
@@ -278,11 +201,6 @@ public class WorkoutsController : ControllerBase
                 "A quantidade de exercícios recebida não corresponde aos exercícios do treino.");
         }
 
-
-        // ========================================================
-        // VALIDAR DUPLICADOS
-        // ========================================================
-
         if (dto.ExerciseIds.Distinct().Count() !=
             dto.ExerciseIds.Count)
         {
@@ -290,33 +208,21 @@ public class WorkoutsController : ControllerBase
                 "A lista contém exercícios duplicados.");
         }
 
-
-        // ========================================================
-        // VALIDAR SE TODOS OS IDs PERTENCEM AO TREINO
-        // ========================================================
-
         var workoutExerciseIds =
             workoutExercises
                 .Select(e => e.Id)
                 .ToHashSet();
-
 
         var invalidIds =
             dto.ExerciseIds
                 .Where(id => !workoutExerciseIds.Contains(id))
                 .ToList();
 
-
         if (invalidIds.Count > 0)
         {
             return BadRequest(
                 "Um ou mais exercícios não pertencem a este treino.");
         }
-
-
-        // ========================================================
-        // GRAVAR NOVA ORDEM
-        // ========================================================
 
         for (int i = 0;
              i < dto.ExerciseIds.Count;
@@ -325,36 +231,19 @@ public class WorkoutsController : ControllerBase
             var exerciseId =
                 dto.ExerciseIds[i];
 
-
             var exercise =
                 workoutExercises.First(
                     e => e.Id == exerciseId);
-
 
             exercise.Order =
                 i + 1;
         }
 
-
-        // ========================================================
-        // SALVAR NO BANCO
-        // ========================================================
-
         await _workoutRepository
             .SaveChangesAsync();
 
-
-        // ========================================================
-        // RETORNO
-        // ========================================================
-
         return NoContent();
     }
-
-
-    // ============================================================
-    // ATUALIZAR EXERCÍCIO
-    // ============================================================
 
     [HttpPut("{workoutId}/exercises/{exerciseId}")]
     public async Task<IActionResult> UpdateExercise(
@@ -372,18 +261,15 @@ public class WorkoutsController : ControllerBase
                 "Treino não encontrado.");
         }
 
-
         var exercise =
             workout.Exercises.FirstOrDefault(
                 e => e.Id == exerciseId);
-
 
         if (exercise == null)
         {
             return NotFound(
                 "Exercício não encontrado neste treino.");
         }
-
 
         exercise.Sets =
             dto.Sets;
@@ -397,18 +283,11 @@ public class WorkoutsController : ControllerBase
         exercise.RestSeconds =
             dto.RestSeconds;
 
-
         await _workoutRepository
             .UpdateExerciseAsync(exercise);
 
-
         return NoContent();
     }
-
-
-    // ============================================================
-    // EXCLUIR EXERCÍCIO DO TREINO
-    // ============================================================
 
     [HttpDelete("{workoutId}/exercises/{exerciseId}")]
     public async Task<IActionResult> DeleteExercise(
@@ -418,7 +297,6 @@ public class WorkoutsController : ControllerBase
         var workout =
             await _workoutRepository.GetByIdAsync(workoutId);
 
-
         if (workout == null ||
             workout.UserId != GetUserId())
         {
@@ -426,11 +304,9 @@ public class WorkoutsController : ControllerBase
                 "Treino não encontrado.");
         }
 
-
         var exerciseToRemove =
             workout.Exercises.FirstOrDefault(
                 e => e.Id == exerciseId);
-
 
         if (exerciseToRemove == null)
         {
@@ -438,15 +314,12 @@ public class WorkoutsController : ControllerBase
                 "Exercício não encontrado neste treino.");
         }
 
-
         await _workoutRepository
             .DeleteExerciseFromWorkoutAsync(
                 exerciseToRemove);
 
-
         await _workoutRepository
             .SaveChangesAsync();
-
 
         return NoContent();
     }

@@ -1,4 +1,4 @@
-﻿using AlePulse.Application.Interfaces;
+using AlePulse.Application.Interfaces;
 using AlePulse.Domain.Entities;
 using AlePulse.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +18,7 @@ public class WorkoutProgramRepository : IWorkoutProgramRepository
     {
         return await _context.WorkoutPrograms
             .Where(p => p.UserId == userId && p.IsActive)
-            .OrderByDescending(p => p.CreatedAt) // Ordena do mais novo para o mais velho
+            .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
     }
 
@@ -63,7 +63,7 @@ public class WorkoutProgramRepository : IWorkoutProgramRepository
     }
     public async Task<bool> WorkoutNameExistsForUserAsync(Guid userId, string name)
     {
-        // Verifica se já existe um treino com esse nome (ignorando maiúsculas/minúsculas) para o usuário
+
         return await _context.Workouts
             .AnyAsync(w => w.UserId == userId && w.Name.ToLower() == name.ToLower());
     }

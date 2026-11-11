@@ -7,29 +7,15 @@ public partial class WorkoutDetailPage : ContentPage
 {
     private readonly Guid _workoutId;
 
-    // ============================================================
-    // DRAG AND DROP
-    // ============================================================
-
-    // Exercício que está sendo arrastado
     private WorkoutExerciseDto? _draggedItem;
 
-    // Border correspondente ao exercício arrastado
     private Border? _draggedBorder;
 
-    // Brush original da borda
     private Brush? _originalStroke;
 
-    // Espessura original da borda
     private double _originalStrokeThickness = 1;
 
-    // Lista atual de exercícios
     private List<WorkoutExerciseDto> _currentExercises = new();
-
-
-    // ============================================================
-    // CONSTRUTOR
-    // ============================================================
 
     public WorkoutDetailPage(Guid workoutId)
     {
@@ -38,22 +24,22 @@ public partial class WorkoutDetailPage : ContentPage
         _workoutId = workoutId;
     }
 
-
-    // ============================================================
-    // APARECER NA TELA
-    // ============================================================
-
     protected override async void OnAppearing()
     {
         base.OnAppearing();
 
         await LoadWorkoutDetails();
+        UpdateStartButton();
     }
 
+    private void UpdateStartButton()
+    {
+        bool hasActiveSession =
+            ActiveWorkoutSession.IsActive &&
+            ActiveWorkoutSession.WorkoutId == _workoutId;
 
-    // ============================================================
-    // CARREGAR DETALHES DO TREINO
-    // ============================================================
+        StartWorkoutBtn.Text = hasActiveSession ? "CONTINUAR" : "INICIAR";
+    }
 
     private async Task LoadWorkoutDetails()
     {
@@ -72,50 +58,26 @@ public partial class WorkoutDetailPage : ContentPage
                 return;
             }
 
-
-            // ====================================================
-            // DADOS DO TREINO
-            // ====================================================
-
             WorkoutNameLabel.Text =
                 workout.Name ?? "Treino";
 
             WorkoutDescLabel.Text =
                 workout.Description ?? string.Empty;
 
-
-            // ====================================================
-            // EXERCÍCIOS CONCLUÍDOS HOJE
-            // ====================================================
-
             var completedIds =
                 await ApiService.GetCompletedExercisesTodayAsync(
                     _workoutId);
 
-
-            // ====================================================
-            // EXERCÍCIOS
-            // ====================================================
-
             if (workout.Exercises != null)
             {
-                // IMPORTANTE:
-                // Sempre respeita a propriedade Order salva
-                // no servidor.
 
                 var orderedExercises =
                     workout.Exercises
                            .OrderBy(e => e.Order)
                            .ToList();
 
-
                 _currentExercises =
                     orderedExercises;
-
-
-                // =================================================
-                // ATUALIZAR STATUS DE CONCLUSÃO
-                // =================================================
 
                 foreach (var ex in orderedExercises)
                 {
@@ -124,15 +86,9 @@ public partial class WorkoutDetailPage : ContentPage
                             ? ex.ExerciseId
                             : (ex.Exercise?.Id ?? Guid.Empty);
 
-
                     ex.IsCompletedToday =
                         completedIds.Contains(exerciseGuid);
                 }
-
-
-                // =================================================
-                // ATUALIZAR INTERFACE
-                // =================================================
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
@@ -161,11 +117,6 @@ public partial class WorkoutDetailPage : ContentPage
         }
     }
 
-
-    // ============================================================
-    // VOLTAR
-    // ============================================================
-
     private void OnBackClicked(
         object sender,
         EventArgs e)
@@ -174,11 +125,6 @@ public partial class WorkoutDetailPage : ContentPage
             new ProgramsPage();
     }
 
-
-    // ============================================================
-    // ADICIONAR EXERCÍCIO
-    // ============================================================
-
     private void OnAddExerciseClicked(
         object sender,
         EventArgs e)
@@ -186,11 +132,6 @@ public partial class WorkoutDetailPage : ContentPage
         Application.Current!.MainPage =
             new AddExercisePage(_workoutId);
     }
-
-
-    // ============================================================
-    // INICIAR TREINO
-    // ============================================================
 
     private async void OnStartWorkoutClicked(
         object sender,
@@ -202,24 +143,34 @@ public partial class WorkoutDetailPage : ContentPage
                 await ApiService.GetWorkoutByIdAsync(
                     _workoutId);
 
-
             if (workout?.Exercises != null &&
                 workout.Exercises.Count > 0)
             {
-                // IMPORTANTE:
-                // Também respeita a ordem salva no servidor.
-
                 var orderedExercises =
                     workout.Exercises
                            .OrderBy(e => e.Order)
                            .ToList();
 
+                if (ActiveWorkoutSession.IsActive &&
+                    ActiveWorkoutSession.WorkoutId == _workoutId)
+                {
+                    ActiveWorkoutSession.UpdateExercises(
+                        orderedExercises,
+                        ActiveWorkoutSession.CurrentIndex);
+                }
+                else
+                {
+                    ActiveWorkoutSession.Start(
+                        _workoutId,
+                        orderedExercises);
+                }
 
                 Application.Current!.MainPage =
                     new ExerciseExecutionPage(
                         _workoutId,
-                        orderedExercises,
-                        false);
+                        ActiveWorkoutSession.Exercises,
+                        false,
+                        ActiveWorkoutSession.CurrentIndex);
             }
             else
             {
@@ -238,11 +189,6 @@ public partial class WorkoutDetailPage : ContentPage
         }
     }
 
-
-    // ============================================================
-    // CLICAR NO EXERCÍCIO
-    // ============================================================
-
     private void OnExerciseTapped(
         object sender,
         TappedEventArgs e)
@@ -250,21 +196,16 @@ public partial class WorkoutDetailPage : ContentPage
         if (sender is Border border &&
             border.BindingContext is WorkoutExerciseDto exercise)
         {
+            var index = _currentExercises.IndexOf(exercise);
+
             Application.Current!.MainPage =
                 new ExerciseExecutionPage(
                     _workoutId,
-                    new List<WorkoutExerciseDto>
-                    {
-                        exercise
-                    },
-                    true);
+                    _currentExercises,
+                    true,
+                    index < 0 ? 0 : index);
         }
     }
-
-
-    // ============================================================
-    // EDITAR EXERCÍCIO
-    // ============================================================
 
     private void OnEditExerciseClicked(
         object sender,
@@ -280,11 +221,6 @@ public partial class WorkoutDetailPage : ContentPage
         }
     }
 
-
-    // ============================================================
-    // EXCLUIR EXERCÍCIO
-    // ============================================================
-
     private async void OnDeleteExerciseClicked(
         object sender,
         EventArgs e)
@@ -299,14 +235,12 @@ public partial class WorkoutDetailPage : ContentPage
                     "Sim",
                     "Não");
 
-
             if (confirm)
             {
                 bool success =
                     await ApiService.DeleteWorkoutExerciseAsync(
                         _workoutId,
                         exercise.Id);
-
 
                 if (success)
                 {
@@ -322,11 +256,6 @@ public partial class WorkoutDetailPage : ContentPage
             }
         }
     }
-
-
-    // ============================================================
-    // UPLOAD DE IMAGEM
-    // ============================================================
 
     private async void OnUploadImageClicked(
         object sender,
@@ -364,7 +293,6 @@ public partial class WorkoutDetailPage : ContentPage
                             }
                         });
 
-
                 var file =
                     await FilePicker.Default.PickAsync(
                         new PickOptions
@@ -376,16 +304,13 @@ public partial class WorkoutDetailPage : ContentPage
                                 customFileType
                         });
 
-
                 if (file == null)
                     return;
-
 
                 bool success =
                     await ApiService.UploadExerciseImageAsync(
                         exercise.Exercise!.Id,
                         file);
-
 
                 if (success)
                 {
@@ -414,11 +339,6 @@ public partial class WorkoutDetailPage : ContentPage
         }
     }
 
-
-    // ============================================================
-    // DRAG - INICIAR
-    // ============================================================
-
     private async void OnDragStarting(
         object sender,
         DragStartingEventArgs e)
@@ -429,26 +349,11 @@ public partial class WorkoutDetailPage : ContentPage
             return;
         }
 
-
-        // ========================================================
-        // GUARDAR ITEM
-        // ========================================================
-
         _draggedItem =
             exercise;
 
-
-        // ========================================================
-        // GUARDAR BORDER
-        // ========================================================
-
         _draggedBorder =
             border;
-
-
-        // ========================================================
-        // GUARDAR ESTADO ORIGINAL
-        // ========================================================
 
         _originalStroke =
             border.Stroke;
@@ -456,22 +361,12 @@ public partial class WorkoutDetailPage : ContentPage
         _originalStrokeThickness =
             border.StrokeThickness;
 
-
-        // ========================================================
-        // APLICAR DESTAQUE
-        // ========================================================
-
         border.Stroke =
             new SolidColorBrush(
                 Color.FromArgb("#FF6A00"));
 
         border.StrokeThickness =
             3;
-
-
-        // ========================================================
-        // ANIMAÇÃO
-        // ========================================================
 
         await Task.WhenAll(
             border.ScaleTo(
@@ -485,30 +380,19 @@ public partial class WorkoutDetailPage : ContentPage
                 Easing.CubicOut)
         );
 
-
         e.Handled = true;
     }
-
-
-    // ============================================================
-    // DRAG - RESTAURAR VISUAL
-    // ============================================================
 
     private async Task RestoreDraggedBorderAsync()
     {
         if (_draggedBorder == null)
             return;
 
-
         var border =
             _draggedBorder;
 
-
         try
         {
-            // ====================================================
-            // ANIMAÇÃO DE RETORNO
-            // ====================================================
 
             await Task.WhenAll(
                 border.ScaleTo(
@@ -522,11 +406,6 @@ public partial class WorkoutDetailPage : ContentPage
                     Easing.CubicInOut)
             );
 
-
-            // ====================================================
-            // RESTAURAR BORDA ORIGINAL
-            // ====================================================
-
             border.Stroke =
                 _originalStroke;
 
@@ -535,7 +414,6 @@ public partial class WorkoutDetailPage : ContentPage
         }
         catch
         {
-            // Segurança para garantir que o visual volte ao normal
 
             border.Scale = 1.0;
 
@@ -548,11 +426,6 @@ public partial class WorkoutDetailPage : ContentPage
                 _originalStrokeThickness;
         }
 
-
-        // ========================================================
-        // LIMPAR REFERÊNCIAS
-        // ========================================================
-
         _draggedBorder = null;
 
         _originalStroke = null;
@@ -560,18 +433,10 @@ public partial class WorkoutDetailPage : ContentPage
         _originalStrokeThickness = 1;
     }
 
-
-    // ============================================================
-    // DROP
-    // ============================================================
-
     private async void OnDrop(
         object sender,
         DropEventArgs e)
     {
-        // ========================================================
-        // VALIDAR DRAG
-        // ========================================================
 
         if (_draggedItem == null ||
             sender is not Element element ||
@@ -586,13 +451,7 @@ public partial class WorkoutDetailPage : ContentPage
             return;
         }
 
-
         e.Handled = true;
-
-
-        // ========================================================
-        // NÃO PERMITE SOLTAR SOBRE ELE MESMO
-        // ========================================================
 
         if (_draggedItem.Id == targetItem.Id)
         {
@@ -603,39 +462,18 @@ public partial class WorkoutDetailPage : ContentPage
             return;
         }
 
-
         try
         {
             var items =
                 _currentExercises;
 
-
-            // ====================================================
-            // 1. GUARDAR ITEM ARRASTADO
-            // ====================================================
-
             var draggedItem =
                 _draggedItem;
 
-
-            // ====================================================
-            // 2. REMOVER DA POSIÇÃO ORIGINAL
-            // ====================================================
-
             items.Remove(draggedItem);
-
-
-            // ====================================================
-            // 3. LOCALIZAR DESTINO
-            // ====================================================
 
             var targetIndex =
                 items.IndexOf(targetItem);
-
-
-            // ====================================================
-            // 4. INSERIR NA NOVA POSIÇÃO
-            // ====================================================
 
             if (targetIndex < 0)
             {
@@ -648,21 +486,11 @@ public partial class WorkoutDetailPage : ContentPage
                     draggedItem);
             }
 
-
-            // ====================================================
-            // 5. RECALCULAR ORDER
-            // ====================================================
-
             for (int i = 0; i < items.Count; i++)
             {
                 items[i].Order =
                     i + 1;
             }
-
-
-            // ====================================================
-            // 6. ATUALIZAR INTERFACE
-            // ====================================================
 
             ExercisesList.ItemsSource =
                 null;
@@ -670,20 +498,10 @@ public partial class WorkoutDetailPage : ContentPage
             ExercisesList.ItemsSource =
                 items;
 
-
-            // ====================================================
-            // 7. SALVAR NO SERVIDOR
-            // ====================================================
-
             bool success =
                 await ApiService.ReorderExercisesAsync(
                     _workoutId,
                     items.Select(ex => ex.Id).ToList());
-
-
-            // ====================================================
-            // 8. VERIFICAR RESULTADO DA API
-            // ====================================================
 
             if (!success)
             {
@@ -692,8 +510,6 @@ public partial class WorkoutDetailPage : ContentPage
                     $"Não foi possível salvar a nova ordem.\n\n{ApiService.LastError}",
                     "OK");
 
-
-                // Volta para a ordem realmente salva
                 await LoadWorkoutDetails();
             }
         }
@@ -704,25 +520,12 @@ public partial class WorkoutDetailPage : ContentPage
                 $"Não foi possível salvar a nova ordem:\n{ex.Message}",
                 "OK");
 
-
-            // ====================================================
-            // RESTAURAR ORDEM DO SERVIDOR
-            // ====================================================
-
             await LoadWorkoutDetails();
         }
         finally
         {
-            // ====================================================
-            // RESTAURAR VISUAL
-            // ====================================================
 
             await RestoreDraggedBorderAsync();
-
-
-            // ====================================================
-            // LIMPAR ITEM ARRASTADO
-            // ====================================================
 
             _draggedItem = null;
         }
