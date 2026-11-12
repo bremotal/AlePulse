@@ -1,3 +1,4 @@
+using AlePulse.Mobile.Services;
 using AlePulse.Mobile.Views;
 
 namespace AlePulse.Mobile;
@@ -7,9 +8,9 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
-
-        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-        TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+        CrashReportService.AddBreadcrumb("App iniciado");
+        AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+        TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
     }
 
     protected override Window CreateWindow(IActivationState? activationState)
@@ -17,21 +18,14 @@ public partial class App : Application
         return new Window(new LoginPage());
     }
 
-    private async void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    private void OnUnhandledException(object? sender, UnhandledExceptionEventArgs e)
     {
-        var ex = e.ExceptionObject as Exception;
-        if (ex != null && MainPage != null)
-        {
-            await MainPage.DisplayAlertAsync("Erro Capturado (App)", ex.Message, "OK");
-        }
+        CrashReportService.LogException("AppDomain.UnhandledException", e.ExceptionObject as Exception);
     }
 
-    private async void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
-        if (MainPage != null)
-        {
-            await MainPage.DisplayAlertAsync("Erro Capturado (Task)", e.Exception.Message, "OK");
-        }
+        CrashReportService.LogException("TaskScheduler.UnobservedTaskException", e.Exception);
         e.SetObserved();
     }
 }

@@ -29,7 +29,7 @@ public partial class ProgramDetailPage : ContentPage
         }
     }
 
-    private async void OnAddWorkoutClicked(object sender, EventArgs e)
+    private async void OnAddWorkoutClicked(object? sender, EventArgs e)
     {
         string name = await DisplayPromptAsync("Novo Treino", "Nome do treino (ex: Treino A - Peito):", "OK", "Cancelar");
         if (string.IsNullOrWhiteSpace(name)) return;
@@ -39,7 +39,7 @@ public partial class ProgramDetailPage : ContentPage
         if (success) await LoadWorkouts();
     }
 
-    private async void OnEditWorkoutClicked(object sender, EventArgs e)
+    private async void OnEditWorkoutClicked(object? sender, EventArgs e)
     {
         if (sender is Button btn && btn.BindingContext is WorkoutDto workout)
         {
@@ -52,7 +52,7 @@ public partial class ProgramDetailPage : ContentPage
         }
     }
 
-    private async void OnDeleteWorkoutClicked(object sender, EventArgs e)
+    private async void OnDeleteWorkoutClicked(object? sender, EventArgs e)
     {
         if (sender is Button btn && btn.BindingContext is WorkoutDto workout)
         {
@@ -65,16 +65,16 @@ public partial class ProgramDetailPage : ContentPage
         }
     }
 
-    private void OnWorkoutTapped(object sender, TappedEventArgs e)
+    private void OnWorkoutTapped(object? sender, TappedEventArgs e)
     {
         if (sender is Border border && border.BindingContext is WorkoutDto workout)
         {
-            Application.Current!.MainPage = new WorkoutDetailPage(workout.Id);
+            Application.Current!.Windows[0].Page = new WorkoutDetailPage(workout.Id);
         }
     }
 
-    private void OnBackClicked(object sender, EventArgs e)
+    private void OnBackClicked(object? sender, EventArgs e)
     {
-        Application.Current!.MainPage = new ProgramsPage();
+        Application.Current!.Windows[0].Page = new ProgramsPage();
     }
 }

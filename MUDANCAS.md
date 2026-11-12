@@ -1,4 +1,31 @@
-# AlePulse — Lista de Mudanças (v1.5)
+# AlePulse — Lista de Mudanças
+
+## v1.6 — Visual da tela inicial, botão da imagem e sistema de reporte de problemas
+
+### 1. Tela de boas-vindas centralizada
+- O título **BEM-VINDO AO ALEPULSE** agora fica **perfeitamente centralizado** na tela (o ícone de usuário saiu de cima e não empurra mais o título para o lado).
+- O botão redondo de **perfil (👤)** foi para o **rodapé, ao lado do botão SAIR DA CONTA**, com a mesma altura — um toque para acessar o perfil, sem interferir na mensagem principal.
+
+### 2. Botão de ver a imagem do exercício redesenhado
+- O botão com emoji 🖼️ foi substituído por um **círculo laranja com um ícone branco de imagem** (desenhado no app, `Resources/Images/photo_icon.png`), do mesmo tamanho dos botões de navegação, bem mais visível e com melhor acabamento. O comportamento continua o mesmo: abre o GIF/animação do exercício em tela cheia.
+
+### 3. O app agora registra travamentos e fechamentos inesperados (novo `Services/CrashReportService.cs`)
+- Captura global de erros: `AppDomain.UnhandledException`, `TaskScheduler.UnobservedTaskException` (App.xaml.cs) e **crashes Java do Android** (`MainApplication.cs` com handler próprio de uncaught exception).
+- Cada erro gera um **arquivo de registro** guardado no celular (`logs/crash-…log`) com data/hora, versão do app, modelo do celular, sistema, **as últimas ações antes do erro (breadcrumbs: telas abertas, descansos, treinos, erros de API)** e a exceção completa com stack trace.
+- O antigo handler que mostrava um alerta de erro na tela foi removido (esse alerta podia congelar o app num momento de crash) — agora tudo é gravado silenciosamente e o app segue estável.
+- Fontes prováveis de travamento blindadas: o **salvar/excluir série** agora captura falha de conexão (antes uma queda de internet ao salvar crashava o app em `async void`) e o **HttpClient da API ganhou timeout de 60s** (a API hospedada no Render pode demorar ~50s para acordar; antes ela podia "pendurar" a tela sem resposta nenhuma).
+
+### 4. Novo botão "Reportar um problema" (substitui o antigo "Informações de Debug" que não servia para nada)
+- Na tela de perfil, o botão 🛠️ **Informações de Debug** (que só mostrava um alerta vazio) foi substituído por 🔧 **Reportar um problema**, que abre a nova tela `ReportProblemPage`.
+- Lá o usuário descreve o que aconteceu (opcional), vê a **lista de registros automáticos detectados no celular** (pode abrir cada um para ver o detalhe) e envia tudo por **e-mail** — o app abre o cliente de e-mail com o relatório pronto (descrição + dados do dispositivo + todos os registros).
+- Fallbacks: se não houver app de e-mail, o relatório é **copiado para a área de transferência** para colar em qualquer mensagem.
+- **Ao reabrir o app depois de um crash**, a tela inicial pergunta *"Detectamos um fechamento inesperado… Deseja reportar agora?"* e leva direto para a tela de reporte (pergunta apenas uma vez por sessão).
+
+> ⚠️ **Para o desenvolvedor:** configure o e-mail de destino em `Services/CrashReportService.cs` → constante `SupportEmail` (está como `SEU-EMAIL-DE-SUPORTE-AQUI@GMAIL.COM`). Substitua pelo seu e-mail real antes de publicar — é para lá que os relatórios serão enviados.
+
+---
+
+# Histórico — v1.5
 
 Trabalho feito em cima do commit `a2afba4 (v1.4 - Drag and drop para reordenar exercicios)`.
 Nada do que já existia foi removido: beep, vibração, drag-and-drop, busca, perfil, histórico — tudo preservado.

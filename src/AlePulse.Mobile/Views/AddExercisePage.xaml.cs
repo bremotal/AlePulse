@@ -22,18 +22,18 @@ public partial class AddExercisePage : ContentPage
         ExerciseList.ItemsSource = _allExercises;
     }
 
-    private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+    private void OnSearchTextChanged(object? sender, TextChangedEventArgs e)
     {
         var keyword = e.NewTextValue.ToLower();
         ExerciseList.ItemsSource = _allExercises.Where(ex => ex.Name.ToLower().Contains(keyword)).ToList();
     }
 
-    private void OnExerciseSelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void OnExerciseSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         _selectedExercise = e.CurrentSelection.FirstOrDefault() as ExerciseDto;
     }
 
-    private async void OnAddClicked(object sender, EventArgs e)
+    private async void OnAddClicked(object? sender, EventArgs e)
     {
         Guid exerciseId = Guid.Empty;
 
@@ -67,7 +67,7 @@ public partial class AddExercisePage : ContentPage
         if (success)
         {
             await DisplayAlertAsync("Sucesso", "Exercício adicionado!", "OK");
-            Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
+            Application.Current!.Windows[0].Page = new WorkoutDetailPage(_workoutId);
         }
         else
         {
@@ -75,12 +75,12 @@ public partial class AddExercisePage : ContentPage
         }
     }
 
-    private void OnCancelClicked(object sender, EventArgs e)
+    private void OnCancelClicked(object? sender, EventArgs e)
     {
-        Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
+        Application.Current!.Windows[0].Page = new WorkoutDetailPage(_workoutId);
     }
 
-    private async void OnDeleteFromLibraryClicked(object sender, EventArgs e)
+    private async void OnDeleteFromLibraryClicked(object? sender, EventArgs e)
     {
         if (_selectedExercise == null)
         {

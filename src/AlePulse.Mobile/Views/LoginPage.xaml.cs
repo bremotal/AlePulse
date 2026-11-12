@@ -16,11 +16,11 @@ public partial class LoginPage : ContentPage
         bool isLogged = await ApiService.IsUserLoggedInAsync();
         if (isLogged)
         {
-            Application.Current!.MainPage = new ProgramsPage();
+            Application.Current!.Windows[0].Page = new ProgramsPage();
         }
     }
 
-    private async void OnLoginClicked(object sender, EventArgs e)
+    private async void OnLoginClicked(object? sender, EventArgs e)
     {
         ErrorLabel.IsVisible = false;
         LoginButton.IsVisible = false;
@@ -35,7 +35,7 @@ public partial class LoginPage : ContentPage
             {
                 ApiService.SetToken(token);
 
-                Application.Current!.MainPage = new ProgramsPage();
+                Application.Current!.Windows[0].Page = new ProgramsPage();
             }
             else
             {
@@ -56,8 +56,8 @@ public partial class LoginPage : ContentPage
         }
     }
 
-    private void OnRegisterClicked(object sender, EventArgs e)
+    private void OnRegisterClicked(object? sender, EventArgs e)
     {
-        Application.Current!.MainPage = new RegisterPage();
+        Application.Current!.Windows[0].Page = new RegisterPage();
     }
 }

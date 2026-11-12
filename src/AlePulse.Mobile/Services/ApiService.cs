@@ -14,8 +14,14 @@ public static class ApiService
     static ApiService()
     {
         var baseUrl = "https://alepulse-api.onrender.com";
-        _client = new HttpClient { BaseAddress = new Uri(baseUrl) };
+        _client = new HttpClient { BaseAddress = new Uri(baseUrl), Timeout = TimeSpan.FromSeconds(60) };
         _client.DefaultRequestHeaders.Add("ngrok-skip-browser-warning", "69420");
+    }
+
+    private static void SetLastError(string message)
+    {
+        LastError = message;
+        CrashReportService.AddBreadcrumb($"API erro: {message[..Math.Min(150, message.Length)]}");
     }
 
     public static string GetAbsoluteUrl(string relativeUrl)
@@ -75,9 +81,9 @@ public static class ApiService
         var response = await _client.GetAsync("/api/WorkoutPrograms");
         if (response.IsSuccessStatusCode)
         {
-            return await response.Content.ReadFromJsonAsync<List<Models.WorkoutProgramDto>>();
+            return await response.Content.ReadFromJsonAsync<List<Models.WorkoutProgramDto>>() ?? [];
         }
-        return new List<Models.WorkoutProgramDto>();
+        return [];
     }
 
     public static async Task<Models.WorkoutProgramDto?> GetProgramByIdAsync(Guid id)
@@ -94,7 +100,7 @@ public static class ApiService
     {
         var dto = new { name, description };
         var response = await _client.PostAsJsonAsync("/api/WorkoutPrograms", dto);
-        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        if (!response.IsSuccessStatusCode) SetLastError($"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
         return response.IsSuccessStatusCode;
     }
 
@@ -115,7 +121,7 @@ public static class ApiService
     {
         var dto = new { name, description };
         var response = await _client.PostAsJsonAsync($"/api/WorkoutPrograms/{programId}/workouts", dto);
-        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        if (!response.IsSuccessStatusCode) SetLastError($"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
         return response.IsSuccessStatusCode;
     }
 
@@ -146,7 +152,7 @@ public static class ApiService
     {
         var dto = new { exerciseId, sets, repetitions = reps, weight, restSeconds = rest };
         var response = await _client.PostAsJsonAsync($"/api/Workouts/{workoutId}/exercises", dto);
-        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        if (!response.IsSuccessStatusCode) SetLastError($"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
         return response.IsSuccessStatusCode;
     }
 
@@ -160,7 +166,7 @@ public static class ApiService
     {
         var dto = new { sets, repetitions = reps, weight, restSeconds = rest };
         var response = await _client.PutAsJsonAsync($"/api/Workouts/{workoutId}/exercises/{exerciseId}", dto);
-        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        if (!response.IsSuccessStatusCode) SetLastError($"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
         return response.IsSuccessStatusCode;
     }
 
@@ -170,7 +176,7 @@ public static class ApiService
         var response = await _client.PutAsJsonAsync($"/api/Workouts/{workoutId}/exercises/reorder", dto);
         if (!response.IsSuccessStatusCode)
         {
-            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+            SetLastError($"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
         }
         return response.IsSuccessStatusCode;
     }
@@ -180,9 +186,9 @@ public static class ApiService
         var response = await _client.GetAsync("/api/Exercises");
         if (response.IsSuccessStatusCode)
         {
-            return await response.Content.ReadFromJsonAsync<List<Models.ExerciseDto>>();
+            return await response.Content.ReadFromJsonAsync<List<Models.ExerciseDto>>() ?? [];
         }
-        return new List<Models.ExerciseDto>();
+        return [];
     }
 
     public static async Task<Models.ExerciseDto?> CreateExerciseAsync(string name)
@@ -201,7 +207,7 @@ public static class ApiService
         var response = await _client.DeleteAsync($"/api/Exercises/{exerciseId}");
         if (!response.IsSuccessStatusCode)
         {
-            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+            SetLastError($"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
         }
         return response.IsSuccessStatusCode;
     }
@@ -213,7 +219,7 @@ public static class ApiService
         content.Add(new StreamContent(stream), "file", file.FileName);
 
         var response = await _client.PostAsync($"/api/Exercises/{exerciseId}/media/upload", content);
-        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        if (!response.IsSuccessStatusCode) SetLastError($"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
         return response.IsSuccessStatusCode;
     }
 
@@ -222,9 +228,9 @@ public static class ApiService
         var response = await _client.GetAsync($"/api/History/{exerciseId}");
         if (response.IsSuccessStatusCode)
         {
-            return await response.Content.ReadFromJsonAsync<List<Models.ExerciseSetDto>>();
+            return await response.Content.ReadFromJsonAsync<List<Models.ExerciseSetDto>>() ?? [];
         }
-        return new List<Models.ExerciseSetDto>();
+        return [];
     }
 
     public static async Task<List<Guid>> GetCompletedExercisesTodayAsync(Guid workoutId)
@@ -232,9 +238,9 @@ public static class ApiService
         var response = await _client.GetAsync($"/api/History/completed-today/{workoutId}");
         if (response.IsSuccessStatusCode)
         {
-            return await response.Content.ReadFromJsonAsync<List<Guid>>() ?? new List<Guid>();
+            return await response.Content.ReadFromJsonAsync<List<Guid>>() ?? [];
         }
-        return new List<Guid>();
+        return [];
     }
 
     public static async Task<bool> LogSetAsync(Guid workoutId, Guid exerciseId, int setNumber, decimal weight, int reps)
@@ -248,14 +254,14 @@ public static class ApiService
     {
         var dto = new { setNumber, weight, repetitions = reps };
         var response = await _client.PutAsJsonAsync($"/api/History/{setId}", dto);
-        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        if (!response.IsSuccessStatusCode) SetLastError($"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
         return response.IsSuccessStatusCode;
     }
 
     public static async Task<bool> DeleteSetAsync(Guid setId)
     {
         var response = await _client.DeleteAsync($"/api/History/{setId}");
-        if (!response.IsSuccessStatusCode) LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+        if (!response.IsSuccessStatusCode) SetLastError($"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
         return response.IsSuccessStatusCode;
     }
 
@@ -276,7 +282,7 @@ public static class ApiService
 
         if (!response.IsSuccessStatusCode)
         {
-            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+            SetLastError($"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
         }
         return response.IsSuccessStatusCode;
     }
@@ -288,7 +294,7 @@ public static class ApiService
 
         if (!response.IsSuccessStatusCode)
         {
-            LastError = $"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}";
+            SetLastError($"{response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
         }
         return response.IsSuccessStatusCode;
     }

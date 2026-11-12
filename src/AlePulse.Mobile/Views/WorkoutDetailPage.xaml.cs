@@ -118,23 +118,23 @@ public partial class WorkoutDetailPage : ContentPage
     }
 
     private void OnBackClicked(
-        object sender,
+        object? sender,
         EventArgs e)
     {
-        Application.Current!.MainPage =
+        Application.Current!.Windows[0].Page =
             new ProgramsPage();
     }
 
     private void OnAddExerciseClicked(
-        object sender,
+        object? sender,
         EventArgs e)
     {
-        Application.Current!.MainPage =
+        Application.Current!.Windows[0].Page =
             new AddExercisePage(_workoutId);
     }
 
     private async void OnStartWorkoutClicked(
-        object sender,
+        object? sender,
         EventArgs e)
     {
         try
@@ -165,7 +165,7 @@ public partial class WorkoutDetailPage : ContentPage
                         orderedExercises);
                 }
 
-                Application.Current!.MainPage =
+                Application.Current!.Windows[0].Page =
                     new ExerciseExecutionPage(
                         _workoutId,
                         ActiveWorkoutSession.Exercises,
@@ -190,7 +190,7 @@ public partial class WorkoutDetailPage : ContentPage
     }
 
     private void OnExerciseTapped(
-        object sender,
+        object? sender,
         TappedEventArgs e)
     {
         if (sender is Border border &&
@@ -198,7 +198,7 @@ public partial class WorkoutDetailPage : ContentPage
         {
             var index = _currentExercises.IndexOf(exercise);
 
-            Application.Current!.MainPage =
+            Application.Current!.Windows[0].Page =
                 new ExerciseExecutionPage(
                     _workoutId,
                     _currentExercises,
@@ -208,13 +208,13 @@ public partial class WorkoutDetailPage : ContentPage
     }
 
     private void OnEditExerciseClicked(
-        object sender,
+        object? sender,
         EventArgs e)
     {
         if (sender is Button button &&
             button.BindingContext is WorkoutExerciseDto exercise)
         {
-            Application.Current!.MainPage =
+            Application.Current!.Windows[0].Page =
                 new EditExercisePage(
                     _workoutId,
                     exercise);
@@ -222,7 +222,7 @@ public partial class WorkoutDetailPage : ContentPage
     }
 
     private async void OnDeleteExerciseClicked(
-        object sender,
+        object? sender,
         EventArgs e)
     {
         if (sender is Button button &&
@@ -258,7 +258,7 @@ public partial class WorkoutDetailPage : ContentPage
     }
 
     private async void OnUploadImageClicked(
-        object sender,
+        object? sender,
         EventArgs e)
     {
         if (sender is Button button &&
@@ -340,7 +340,7 @@ public partial class WorkoutDetailPage : ContentPage
     }
 
     private async void OnDragStarting(
-        object sender,
+        object? sender,
         DragStartingEventArgs e)
     {
         if (sender is not Border border ||
@@ -369,18 +369,17 @@ public partial class WorkoutDetailPage : ContentPage
             3;
 
         await Task.WhenAll(
-            border.ScaleTo(
+            border.ScaleToAsync(
                 1.03,
                 150,
                 Easing.CubicOut),
 
-            border.FadeTo(
+            border.FadeToAsync(
                 0.75,
                 150,
                 Easing.CubicOut)
         );
 
-        e.Handled = true;
     }
 
     private async Task RestoreDraggedBorderAsync()
@@ -395,12 +394,12 @@ public partial class WorkoutDetailPage : ContentPage
         {
 
             await Task.WhenAll(
-                border.ScaleTo(
+                border.ScaleToAsync(
                     1.0,
                     150,
                     Easing.CubicInOut),
 
-                border.FadeTo(
+                border.FadeToAsync(
                     1.0,
                     150,
                     Easing.CubicInOut)
@@ -434,7 +433,7 @@ public partial class WorkoutDetailPage : ContentPage
     }
 
     private async void OnDrop(
-        object sender,
+        object? sender,
         DropEventArgs e)
     {
 

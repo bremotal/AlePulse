@@ -15,6 +15,7 @@ public static class RestTimerService
     {
         _endTimeUtc = DateTime.UtcNow.AddSeconds(seconds);
         _running = true;
+        AddBreadcrumb($"Descanso iniciado: {seconds}s");
         EnsureTicker();
         EmitTick();
     }
@@ -45,7 +46,14 @@ public static class RestTimerService
         if (_tickerStarted) return;
         _tickerStarted = true;
 
-        Device.StartTimer(TimeSpan.FromSeconds(1), () =>
+        var dispatcher = Application.Current?.Windows.FirstOrDefault()?.Page?.Dispatcher;
+        if (dispatcher is null)
+        {
+            _tickerStarted = false;
+            return;
+        }
+
+        dispatcher.StartTimer(TimeSpan.FromSeconds(1), () =>
         {
             try
             {
@@ -88,6 +96,7 @@ public static class RestTimerService
 
     private static void EmitFinished()
     {
+        AddBreadcrumb("Descanso concluído");
         MainThread.BeginInvokeOnMainThread(() =>
         {
             try
@@ -106,6 +115,17 @@ public static class RestTimerService
             {
             }
         });
+    }
+
+    private static void AddBreadcrumb(string message)
+    {
+        try
+        {
+            CrashReportService.AddBreadcrumb(message);
+        }
+        catch
+        {
+        }
     }
 
     private static void PlayAlert()

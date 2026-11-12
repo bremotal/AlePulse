@@ -19,6 +19,7 @@ public static class ActiveWorkoutSession
         CurrentIndex = 0;
         StartTime = DateTime.Now;
         IsActive = true;
+        CrashReportService.AddBreadcrumb($"Treino iniciado ({exercises.Count} exercícios)");
     }
 
     public static void UpdateExercises(List<WorkoutExerciseDto> exercises, int keepIndex)
@@ -38,5 +39,6 @@ public static class ActiveWorkoutSession
         IsActive = false;
         Exercises = new List<WorkoutExerciseDto>();
         CurrentIndex = 0;
+        CrashReportService.AddBreadcrumb("Sessão de treino encerrada");
     }
 }

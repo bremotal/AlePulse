@@ -29,7 +29,7 @@ public partial class ProfilePage : ContentPage
         }
     }
 
-    private async void OnEditProfileClicked(object sender, EventArgs e)
+    private async void OnEditProfileClicked(object? sender, EventArgs e)
     {
         string newName = await DisplayPromptAsync("Editar Nome", "Digite seu nome:", "OK", "Cancelar", initialValue: NameLabel.Text);
         if (string.IsNullOrWhiteSpace(newName)) return;
@@ -57,7 +57,7 @@ public partial class ProfilePage : ContentPage
         }
     }
 
-    private async void OnChangePasswordClicked(object sender, EventArgs e)
+    private async void OnChangePasswordClicked(object? sender, EventArgs e)
     {
         string currentPass = await DisplayPromptAsync("Senha Atual", "Digite sua senha atual:", "OK", "Cancelar");
         if (string.IsNullOrWhiteSpace(currentPass)) return;
@@ -76,24 +76,19 @@ public partial class ProfilePage : ContentPage
         }
     }
 
-    private async void OnLogoutClicked(object sender, EventArgs e)
+    private async void OnLogoutClicked(object? sender, EventArgs e)
     {
         await ApiService.LogoutAsync();
-        Application.Current!.MainPage = new LoginPage();
+        Application.Current!.Windows[0].Page = new LoginPage();
     }
 
-    private void OnBackClicked(object sender, EventArgs e)
+    private void OnBackClicked(object? sender, EventArgs e)
     {
-        Application.Current!.MainPage = new ProgramsPage();
+        Application.Current!.Windows[0].Page = new ProgramsPage();
     }
 
-    private async void OnDebugClicked(object sender, EventArgs e)
+    private void OnReportClicked(object? sender, EventArgs e)
     {
-        var token = await SecureStorage.GetAsync("auth_token");
-        var lastError = ApiService.LastError ?? "Nenhum erro registrado.";
-
-        await DisplayAlertAsync("Debug Info",
-            $"Token: {(token != null ? token.Substring(0, 20) + "..." : "Nulo")}\n\n" +
-            $"Último Erro API:\n{lastError}", "OK");
+        Application.Current!.Windows[0].Page = new ReportProblemPage(fromProfile: true);
     }
 }

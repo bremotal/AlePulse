@@ -15,8 +15,8 @@
         <MauiXamlInflator>SourceGen</MauiXamlInflator>
         <ApplicationTitle>AlePulse</ApplicationTitle>
         <ApplicationId>com.alepulse.app</ApplicationId>
-        <ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
-        <ApplicationVersion>1</ApplicationVersion>
+        <ApplicationDisplayVersion>1.6.0</ApplicationDisplayVersion>
+        <ApplicationVersion>2</ApplicationVersion>
 
         <WindowsPackageType>None</WindowsPackageType>
 

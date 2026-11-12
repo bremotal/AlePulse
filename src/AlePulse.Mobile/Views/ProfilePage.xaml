@@ -61,7 +61,7 @@
             <Button Text="ALTERAR SENHA" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" CornerRadius="10" HeightRequest="50" Clicked="OnChangePasswordClicked"/>
             <Button Text="SAIR DA CONTA" BackgroundColor="#FF6A00" TextColor="#FFFFFF" FontAttributes="Bold" CornerRadius="10" HeightRequest="50" Clicked="OnLogoutClicked"/>
 
-            <Button Text="🛠️ Informações de Debug" BackgroundColor="Transparent" TextColor="#888888" FontSize="Micro" Padding="0,10,0,0" Clicked="OnDebugClicked" />
+            <Button Text="🔧 Reportar um problema" BackgroundColor="Transparent" TextColor="#888888" FontSize="12" Padding="0,10,0,0" Clicked="OnReportClicked" />
         </VerticalStackLayout>
 
     </Grid>

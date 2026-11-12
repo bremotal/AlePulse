@@ -51,7 +51,7 @@ public partial class ExerciseExecutionPage : ContentPage
         SaveBtn.Text = "REGISTRAR SÉRIE";
 
         SyncSessionIndex();
-        LoadHistory();
+        _ = LoadHistory();
 
         if (_isSingleExercise)
         {
@@ -86,6 +86,9 @@ public partial class ExerciseExecutionPage : ContentPage
 
         SyncTimerUi();
         SyncSessionIndex();
+
+        var exerciseName = _allExercises.Count > 0 ? _allExercises[_currentIndex].Exercise?.Name ?? "-" : "-";
+        CrashReportService.AddBreadcrumb($"Execução aberta: {exerciseName}");
 
         _ = LoadHistory();
     }
@@ -160,10 +163,13 @@ public partial class ExerciseExecutionPage : ContentPage
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            CrashReportService.AddBreadcrumb($"Erro ao carregar histórico: {ex.Message}");
+        }
     }
 
-    private void OnExerciseChanged(object sender, EventArgs e)
+    private void OnExerciseChanged(object? sender, EventArgs e)
     {
         if (ExercisePicker.SelectedIndex >= 0 && ExercisePicker.SelectedIndex != _currentIndex)
         {
@@ -171,67 +177,85 @@ public partial class ExerciseExecutionPage : ContentPage
         }
     }
 
-    private void OnPrevClicked(object sender, EventArgs e) => ChangeExercise(_currentIndex - 1);
-    private void OnNextClicked(object sender, EventArgs e) => ChangeExercise(_currentIndex + 1);
+    private void OnPrevClicked(object? sender, EventArgs e) => ChangeExercise(_currentIndex - 1);
+    private void OnNextClicked(object? sender, EventArgs e) => ChangeExercise(_currentIndex + 1);
 
-    private async void OnSaveSetClicked(object sender, EventArgs e)
+    private async void OnSaveSetClicked(object? sender, EventArgs e)
     {
         SaveBtn.IsEnabled = false;
 
-        if (!int.TryParse(SetEntry.Text, out int setNum) ||
-            !decimal.TryParse(WeightEntry.Text, out decimal weight) ||
-            !int.TryParse(RepsEntry.Text, out int reps))
+        try
         {
-            await DisplayAlertAsync("Erro", "Preencha os valores corretamente.", "OK");
+            if (!int.TryParse(SetEntry.Text, out int setNum) ||
+                !decimal.TryParse(WeightEntry.Text, out decimal weight) ||
+                !int.TryParse(RepsEntry.Text, out int reps))
+            {
+                await DisplayAlertAsync("Erro", "Preencha os valores corretamente.", "OK");
+                return;
+            }
+
+            var currentExercise = _allExercises[_currentIndex];
+            var currentExerciseId = currentExercise.ExerciseId != Guid.Empty
+                ? currentExercise.ExerciseId
+                : (currentExercise.Exercise?.Id ?? Guid.Empty);
+
+            bool success = false;
+
+            if (_editingSetId.HasValue)
+            {
+                success = await ApiService.UpdateSetAsync(_editingSetId.Value, setNum, weight, reps);
+                if (success)
+                {
+                    await DisplayAlertAsync("Sucesso", "Série atualizada!", "OK");
+                    _editingSetId = null;
+                    SaveBtn.Text = "REGISTRAR SÉRIE";
+                }
+                else
+                {
+                    CrashReportService.AddBreadcrumb($"Falha ao atualizar série: {ApiService.LastError}");
+                    await DisplayAlertAsync("Erro API", $"Não foi possível atualizar.\n{ApiService.LastError}", "OK");
+                }
+            }
+            else
+            {
+                int restTime = currentExercise.RestSeconds > 0 ? currentExercise.RestSeconds : 90;
+                StartRestTimer(restTime);
+
+                success = await ApiService.LogSetAsync(_workoutId, currentExerciseId, setNum, weight, reps);
+                if (success)
+                {
+                    SetEntry.Text = (setNum + 1).ToString();
+                }
+                else
+                {
+                    CrashReportService.AddBreadcrumb($"Falha ao registrar série: {ApiService.LastError}");
+                    await DisplayAlertAsync("Erro API", $"Não foi possível registrar.\n{ApiService.LastError}", "OK");
+                }
+            }
+
+            if (success) await LoadHistory();
+        }
+        catch (Exception ex)
+        {
+            CrashReportService.AddBreadcrumb($"Exceção ao salvar série: {ex.Message}");
+            await DisplayAlertAsync("Erro de conexão", "Não foi possível falar com o servidor. Verifique sua internet e tente novamente.", "OK");
+        }
+        finally
+        {
             SaveBtn.IsEnabled = true;
-            return;
         }
-
-        var currentExercise = _allExercises[_currentIndex];
-        var currentExerciseId = currentExercise.ExerciseId != Guid.Empty
-            ? currentExercise.ExerciseId
-            : (currentExercise.Exercise?.Id ?? Guid.Empty);
-
-        bool success = false;
-
-        if (_editingSetId.HasValue)
-        {
-            success = await ApiService.UpdateSetAsync(_editingSetId.Value, setNum, weight, reps);
-            if (success)
-            {
-                await DisplayAlertAsync("Sucesso", "Série atualizada!", "OK");
-                _editingSetId = null;
-                SaveBtn.Text = "REGISTRAR SÉRIE";
-            }
-            else { await DisplayAlertAsync("Erro API", $"Não foi possível atualizar.\n{ApiService.LastError}", "OK"); }
-        }
-        else
-        {
-            int restTime = currentExercise.RestSeconds > 0 ? currentExercise.RestSeconds : 90;
-            StartRestTimer(restTime);
-
-            success = await ApiService.LogSetAsync(_workoutId, currentExerciseId, setNum, weight, reps);
-            if (success)
-            {
-                SetEntry.Text = (setNum + 1).ToString();
-            }
-            else { await DisplayAlertAsync("Erro API", $"Não foi possível registrar.\n{ApiService.LastError}", "OK"); }
-        }
-
-        if (success) await LoadHistory();
-        SaveBtn.IsEnabled = true;
     }
 
-    private void OnExitClicked(object sender, EventArgs e)
+    private void OnExitClicked(object? sender, EventArgs e)
     {
-        Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
+        Application.Current!.Windows[0].Page = new WorkoutDetailPage(_workoutId);
     }
 
-    private void OnNextOrFinishClicked(object sender, EventArgs e)
+    private void OnNextOrFinishClicked(object? sender, EventArgs e)
     {
         if (_isSingleExercise)
         {
-            Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
+            Application.Current!.Windows[0].Page = new WorkoutDetailPage(_workoutId);
             return;
         }
 
@@ -245,7 +269,8 @@ public partial class ExerciseExecutionPage : ContentPage
                 ActiveWorkoutSession.Finish();
             }
 
-            Application.Current!.MainPage = new WorkoutSummaryPage(duration, _allExercises, _workoutId);
+            CrashReportService.AddBreadcrumb($"Treino finalizado. Duração: {duration:hh\\:mm\\:ss}");
+            Application.Current!.Windows[0].Page = new WorkoutSummaryPage(duration, _allExercises, _workoutId);
         }
         else
         {
@@ -253,7 +278,7 @@ public partial class ExerciseExecutionPage : ContentPage
         }
     }
 
-    private void OnEditSetClicked(object sender, EventArgs e)
+    private void OnEditSetClicked(object? sender, EventArgs e)
     {
         if (sender is Button button && button.BindingContext is ExerciseSetDto set)
         {
@@ -265,15 +290,23 @@ public partial class ExerciseExecutionPage : ContentPage
         }
     }
 
-    private async void OnDeleteSetClicked(object sender, EventArgs e)
+    private async void OnDeleteSetClicked(object? sender, EventArgs e)
     {
         if (sender is Button button && button.BindingContext is ExerciseSetDto set)
         {
             bool confirm = await DisplayAlertAsync("Excluir", "Excluir esta série?", "Sim", "Não");
             if (confirm)
             {
-                bool success = await ApiService.DeleteSetAsync(set.Id);
-                if (success) await LoadHistory();
+                try
+                {
+                    bool success = await ApiService.DeleteSetAsync(set.Id);
+                    if (success) await LoadHistory();
+                }
+                catch (Exception ex)
+                {
+                    CrashReportService.AddBreadcrumb($"Exceção ao excluir série: {ex.Message}");
+                    await DisplayAlertAsync("Erro de conexão", "Não foi possível excluir. Verifique sua internet.", "OK");
+                }
             }
         }
     }
@@ -292,22 +325,22 @@ public partial class ExerciseExecutionPage : ContentPage
         TimerLabel.Text = time.ToString(@"mm\:ss");
     }
 
-    private void OnMinus15Clicked(object sender, EventArgs e)
+    private void OnMinus15Clicked(object? sender, EventArgs e)
     {
         RestTimerService.AddSeconds(-15);
     }
 
-    private void OnPlus15Clicked(object sender, EventArgs e)
+    private void OnPlus15Clicked(object? sender, EventArgs e)
     {
         RestTimerService.AddSeconds(15);
     }
 
-    private void OnSkipRestClicked(object sender, EventArgs e)
+    private void OnSkipRestClicked(object? sender, EventArgs e)
     {
         RestTimerService.Skip();
     }
 
-    private void OnViewImageClicked(object sender, EventArgs e)
+    private async void OnViewImageClicked(object? sender, EventArgs e)
     {
         if (!string.IsNullOrEmpty(_currentGifUrl))
         {
@@ -316,11 +349,11 @@ public partial class ExerciseExecutionPage : ContentPage
         }
         else
         {
-            DisplayAlertAsync("Sem Imagem", "Nenhuma imagem cadastrada para este exercício.", "OK");
+            await DisplayAlertAsync("Sem Imagem", "Nenhuma imagem cadastrada para este exercício.", "OK");
         }
     }
 
-    private void OnClosePopupClicked(object sender, EventArgs e)
+    private void OnClosePopupClicked(object? sender, EventArgs e)
     {
         GifPopupOverlay.IsVisible = false;
     }

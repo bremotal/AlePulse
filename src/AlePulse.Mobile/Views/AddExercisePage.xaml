@@ -89,7 +89,7 @@
             </Grid>
 
             
-            <Button Text="🗑️ EXCLUIR DA BIBLIOTECA" BackgroundColor="Transparent" TextColor="Red" FontSize="Micro" Padding="0,10,0,0" Clicked="OnDeleteFromLibraryClicked" />
+            <Button Text="🗑️ EXCLUIR DA BIBLIOTECA" BackgroundColor="Transparent" TextColor="Red" FontSize="12" Padding="0,10,0,0" Clicked="OnDeleteFromLibraryClicked" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

@@ -9,7 +9,7 @@ public partial class RegisterPage : ContentPage
         InitializeComponent();
     }
 
-    private async void OnRegisterClicked(object sender, EventArgs e)
+    private async void OnRegisterClicked(object? sender, EventArgs e)
     {
         ErrorLabel.IsVisible = false;
         RegisterButton.IsVisible = false;
@@ -22,7 +22,7 @@ public partial class RegisterPage : ContentPage
             if (success)
             {
                 await DisplayAlertAsync("Sucesso", "Conta criada! Faça o login.", "OK");
-                Application.Current!.MainPage = new LoginPage();
+                Application.Current!.Windows[0].Page = new LoginPage();
             }
             else
             {
@@ -43,8 +43,8 @@ public partial class RegisterPage : ContentPage
         }
     }
 
-    private void OnBackToLoginClicked(object sender, EventArgs e)
+    private void OnBackToLoginClicked(object? sender, EventArgs e)
     {
-        Application.Current!.MainPage = new LoginPage();
+        Application.Current!.Windows[0].Page = new LoginPage();
     }
 }

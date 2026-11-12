@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AlePulse.Mobile.Views.ReportProblemPage"
+             BackgroundColor="{AppThemeBinding Dark=#121212, Light=#F9F9F9}"
+             Title="Reportar Problema">
+
+    <Grid RowDefinitions="Auto, Auto, *, Auto" Padding="20">
+
+        <Grid Grid.Row="0" ColumnDefinitions="Auto, *">
+            <Button Grid.Column="0" Text="‹ Voltar" BackgroundColor="Transparent" TextColor="#FF6A00" Clicked="OnBackClicked"/>
+            <Label Grid.Column="1" Text="REPORTAR PROBLEMA" FontSize="20" FontAttributes="Bold" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" VerticalOptions="Center" HorizontalOptions="Center" Margin="0,0,40,0"/>
+        </Grid>
+
+        <VerticalStackLayout Grid.Row="1" Spacing="10" Margin="0,15,0,0">
+            <Label Text="Se o app travou, fechou sozinho ou algo não funcionou, descreva abaixo (opcional):" TextColor="{AppThemeBinding Dark=#AAAAAA, Light=#555555}" FontSize="14"/>
+            <Border BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" Stroke="{AppThemeBinding Dark=#2B2B2B, Light=#EEEEEE}" Padding="10">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12"/>
+                </Border.StrokeShape>
+                <Editor x:Name="DescriptionEditor" Placeholder="Ex: quando salvo a série o app fecha..." PlaceholderColor="#888888" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" HeightRequest="90"/>
+            </Border>
+            <Label Text="REGISTROS AUTOMÁTICOS DETECTADOS NESTE CELULAR" TextColor="#FF6A00" FontAttributes="Bold" FontSize="13" Margin="0,5,0,0"/>
+        </VerticalStackLayout>
+
+        <CollectionView Grid.Row="2" x:Name="LogsList" Margin="0,8,0,0">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout VerticalOptions="Center" Margin="0,20,0,0">
+                    <Label Text="Nenhum registro automático no momento." TextColor="#888888" HorizontalOptions="Center" FontSize="14"/>
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" Stroke="{AppThemeBinding Dark=#2B2B2B, Light=#EEEEEE}" Padding="12" Margin="0,0,0,10">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnLogTapped"/>
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="*, Auto">
+                            <VerticalStackLayout Grid.Column="0">
+                                <Label Text="{Binding DateText}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" FontAttributes="Bold" FontSize="15"/>
+                                <Label Text="{Binding Preview}" TextColor="#888888" FontSize="12" LineBreakMode="TailTruncation" MaxLines="1"/>
+                            </VerticalStackLayout>
+                            <Label Grid.Column="1" Text="ver" TextColor="#FF6A00" FontSize="13" VerticalOptions="Center"/>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <VerticalStackLayout Grid.Row="3" Spacing="10" Margin="0,10,0,0">
+            <Button Text="ENVIAR POR E-MAIL" BackgroundColor="#FF6A00" TextColor="#FFFFFF" FontAttributes="Bold" CornerRadius="10" HeightRequest="50" Clicked="OnSendClicked"/>
+            <Button Text="COPIAR RELATÓRIO" BackgroundColor="{AppThemeBinding Dark=#2B2B2B, Light=#E0E0E0}" TextColor="{AppThemeBinding Dark=#FFFFFF, Light=#000000}" CornerRadius="10" HeightRequest="50" Clicked="OnCopyClicked"/>
+        </VerticalStackLayout>
+
+        <Grid Grid.RowSpan="4" x:Name="LogDetailOverlay" BackgroundColor="#F0000000" IsVisible="False" Padding="20">
+            <Border BackgroundColor="{AppThemeBinding Dark=#1E1E1E, Light=#FFFFFF}" Stroke="#FF6A00" Padding="15">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="15"/>
+                </Border.StrokeShape>
+                <Grid RowDefinitions="*, Auto" RowSpacing="10">
+                    <ScrollView Grid.Row="0">
+                        <Label x:Name="LogDetailLabel" TextColor="{AppThemeBinding Dark=#DDDDDD, Light=#333333}" FontSize="12"/>
+                    </ScrollView>
+                    <Button Grid.Row="1" Text="FECHAR" BackgroundColor="#FF6A00" TextColor="#FFFFFF" CornerRadius="10" Clicked="OnCloseDetailClicked"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+    </Grid>
+</ContentPage>

@@ -5,6 +5,8 @@ namespace AlePulse.Mobile.Views;
 
 public partial class ProgramsPage : ContentPage
 {
+    private static bool _crashPromptShown;
+
     public ProgramsPage()
     {
         InitializeComponent();
@@ -13,7 +15,9 @@ public partial class ProgramsPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        CrashReportService.AddBreadcrumb("ProgramsPage aberta");
         await LoadPrograms();
+        await PromptCrashReportAsync();
     }
 
     private async Task LoadPrograms()
@@ -23,10 +27,27 @@ public partial class ProgramsPage : ContentPage
             var programs = await ApiService.GetProgramsAsync();
             ProgramsList.ItemsSource = programs;
         }
+        catch (Exception ex)
+        {
+            CrashReportService.AddBreadcrumb($"Erro ao carregar fichas: {ex.Message}");
+        }
+    }
+
+    private async Task PromptCrashReportAsync()
+    {
+        try
+        {
+            if (_crashPromptShown || !CrashReportService.HasUnreportedCrashes) return;
+            _crashPromptShown = true;
+            bool report = await DisplayAlertAsync("Encontramos um problema",
+                "O AlePulse registrou um fechamento inesperado ou erro neste celular.\n\nDeseja reportar agora e ajudar a corrigir?",
+                "Reportar agora", "Depois");
+            if (report) Application.Current!.Windows[0].Page = new ReportProblemPage();
+        }
         catch { }
     }
 
-    private async void OnCreateProgramClicked(object sender, EventArgs e)
+    private async void OnCreateProgramClicked(object? sender, EventArgs e)
     {
         string name = await DisplayPromptAsync("Nova Ficha", "Nome da Ficha (ex: Hipertrofia ABC):", "OK", "Cancelar");
         if (string.IsNullOrWhiteSpace(name)) return;
@@ -36,7 +57,7 @@ public partial class ProgramsPage : ContentPage
         if (success) await LoadPrograms();
     }
 
-    private async void OnEditProgramClicked(object sender, EventArgs e)
+    private async void OnEditProgramClicked(object? sender, EventArgs e)
     {
         if (sender is Button btn && btn.BindingContext is WorkoutProgramDto program)
         {
@@ -49,7 +70,7 @@ public partial class ProgramsPage : ContentPage
         }
     }
 
-    private async void OnDeleteProgramClicked(object sender, EventArgs e)
+    private async void OnDeleteProgramClicked(object? sender, EventArgs e)
     {
         if (sender is Button btn && btn.BindingContext is WorkoutProgramDto program)
         {
@@ -62,22 +83,22 @@ public partial class ProgramsPage : ContentPage
         }
     }
 
-    private void OnProgramTapped(object sender, TappedEventArgs e)
+    private void OnProgramTapped(object? sender, TappedEventArgs e)
     {
         if (sender is Border border && border.BindingContext is WorkoutProgramDto program)
         {
-            Application.Current!.MainPage = new ProgramDetailPage(program.Id, program.Name);
+            Application.Current!.Windows[0].Page = new ProgramDetailPage(program.Id, program.Name);
         }
     }
 
-    private async void OnLogoutClicked(object sender, EventArgs e)
+    private async void OnLogoutClicked(object? sender, EventArgs e)
     {
         await ApiService.LogoutAsync();
-        Application.Current!.MainPage = new LoginPage();
+        Application.Current!.Windows[0].Page = new LoginPage();
     }
 
-    private void OnProfileClicked(object sender, EventArgs e)
+    private void OnProfileClicked(object? sender, EventArgs e)
     {
-        Application.Current!.MainPage = new ProfilePage();
+        Application.Current!.Windows[0].Page = new ProfilePage();
     }
 }

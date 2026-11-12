@@ -21,7 +21,7 @@ public partial class EditExercisePage : ContentPage
         RestEntry.Text = exercise.RestSeconds.ToString();
     }
 
-    private async void OnSaveClicked(object sender, EventArgs e)
+    private async void OnSaveClicked(object? sender, EventArgs e)
     {
         if (!int.TryParse(SetsEntry.Text, out int sets) ||
             !int.TryParse(RepsEntry.Text, out int reps) ||
@@ -37,7 +37,7 @@ public partial class EditExercisePage : ContentPage
         if (success)
         {
             await DisplayAlertAsync("Sucesso", "Exercício atualizado!", "OK");
-            Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
+            Application.Current!.Windows[0].Page = new WorkoutDetailPage(_workoutId);
         }
         else
         {
@@ -46,8 +46,8 @@ public partial class EditExercisePage : ContentPage
         }
     }
 
-    private void OnCancelClicked(object sender, EventArgs e)
+    private void OnCancelClicked(object? sender, EventArgs e)
     {
-        Application.Current!.MainPage = new WorkoutDetailPage(_workoutId);
+        Application.Current!.Windows[0].Page = new WorkoutDetailPage(_workoutId);
     }
 }

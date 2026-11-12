@@ -46,9 +46,9 @@ public partial class WorkoutSummaryPage : ContentPage
         VolumeLabel.Text = $"{totalVolume:F1} kg";
     }
 
-    private void OnBackHomeClicked(object sender, EventArgs e)
+    private void OnBackHomeClicked(object? sender, EventArgs e)
     {
 
-        Application.Current!.MainPage = new ProgramsPage();
+        Application.Current!.Windows[0].Page = new ProgramsPage();
     }
 }
