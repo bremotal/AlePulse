@@ -81,6 +81,7 @@ public class HistoryController : ControllerBase
         var setsToday = await _context.ExerciseSets
             .Where(es => es.WorkoutSession.WorkoutId == workoutId
                       && es.WorkoutSession.UserId == userId
+                      && es.CompletedAt.HasValue
                       && es.CompletedAt.Value.Date == today)
             .Select(es => es.ExerciseId)
             .Distinct()
