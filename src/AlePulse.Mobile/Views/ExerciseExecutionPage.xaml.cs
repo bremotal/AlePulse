@@ -35,23 +35,29 @@ public partial class ExerciseExecutionPage : ContentPage
         var exercise = _allExercises[_currentIndex];
         ExercisePicker.SelectedIndex = _currentIndex;
 
+        var name = exercise.Exercise?.Name ?? "-";
+        ExerciseNameLabel.Text = name;
+        ExerciseNameLabel.FontSize = name.Length <= 20 ? 26 : name.Length <= 34 ? 20 : 15;
+
         WeightEntry.Text = exercise.Weight.ToString();
         RepsEntry.Text = exercise.Repetitions.ToString();
 
         if (exercise.Exercise?.Medias != null && exercise.Exercise.Medias.Count > 0)
         {
             _currentGifUrl = exercise.Exercise.Medias[0].Url;
+            ExercisePreviewImage.Source = ImageSource.FromUri(new Uri(ApiService.GetAbsoluteUrl(_currentGifUrl)));
         }
         else
         {
             _currentGifUrl = null;
+            ExercisePreviewImage.Source = "photo_icon.png";
         }
 
         _editingSetId = null;
         SaveBtn.Text = "REGISTRAR SÉRIE";
 
         SyncSessionIndex();
-        _ = LoadHistory();
+        LoadHistory();
 
         if (_isSingleExercise)
         {
@@ -340,7 +346,7 @@ public partial class ExerciseExecutionPage : ContentPage
         RestTimerService.Skip();
     }
 
-    private async void OnViewImageClicked(object? sender, EventArgs e)
+    private void OnViewImageClicked(object? sender, EventArgs e)
     {
         if (!string.IsNullOrEmpty(_currentGifUrl))
         {
@@ -349,7 +355,7 @@ public partial class ExerciseExecutionPage : ContentPage
         }
         else
         {
-            await DisplayAlertAsync("Sem Imagem", "Nenhuma imagem cadastrada para este exercício.", "OK");
+            DisplayAlertAsync("Sem Imagem", "Nenhuma imagem cadastrada para este exercício.", "OK");
         }
     }
 

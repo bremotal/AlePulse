@@ -12,20 +12,32 @@ public partial class ProfilePage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        CrashReportService.AddBreadcrumb("ProfilePage aberta");
         await LoadProfile();
     }
 
     private async Task LoadProfile()
     {
-        var profile = await ApiService.GetMyProfileAsync();
-        if (profile != null)
+        try
         {
-            NameLabel.Text = profile.Name;
-            EmailLabel.Text = profile.Email;
+            var profile = await ApiService.GetMyProfileAsync();
+            if (profile != null)
+            {
+                NameLabel.Text = profile.Name;
+                EmailLabel.Text = profile.Email;
 
-            WeightLabel.Text = profile.Weight.HasValue ? profile.Weight.Value.ToString("F1") : "---";
-            HeightLabel.Text = profile.Height.HasValue ? profile.Height.Value.ToString("F0") : "---";
-            GoalLabel.Text = !string.IsNullOrEmpty(profile.TrainingGoal) ? profile.TrainingGoal : "---";
+                WeightLabel.Text = profile.Weight.HasValue ? profile.Weight.Value.ToString("F1") : "---";
+                HeightLabel.Text = profile.Height.HasValue ? profile.Height.Value.ToString("F0") : "---";
+                GoalLabel.Text = !string.IsNullOrEmpty(profile.TrainingGoal) ? profile.TrainingGoal : "---";
+            }
+            else
+            {
+                await DisplayAlertAsync("Sem conexão", "Não foi possível carregar o perfil. Verifique sua internet e volte a esta tela.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            CrashReportService.AddBreadcrumb($"Erro ao carregar perfil: {ex.Message}");
         }
     }
 
