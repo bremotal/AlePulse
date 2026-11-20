@@ -57,7 +57,7 @@ public partial class ExerciseExecutionPage : ContentPage
         SaveBtn.Text = "REGISTRAR SÉRIE";
 
         SyncSessionIndex();
-        LoadHistory();
+        _ = LoadHistory();
 
         if (_isSingleExercise)
         {
